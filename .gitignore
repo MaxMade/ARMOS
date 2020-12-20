@@ -1,3 +1,4 @@
 *.o
 tags
 boot/system
+doc/build
