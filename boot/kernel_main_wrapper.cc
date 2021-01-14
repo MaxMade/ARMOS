@@ -1,3 +1,5 @@
+extern int kernelMain(void *fdt);
+
 static void csu_init() {
 	extern void (*__init_array_start []) ();
 	extern void (*__init_array_end[]) ();
@@ -16,7 +18,8 @@ extern "C" void kernelMainWrapper(void *fdt, int cpuID) {
 		/* Call Global constructors */
 		csu_init();
 
-		/* TODO: Call kernelMain */
+		/* Call kernelMain */
+		kernelMain(fdt);
 
 	} else {
 		/* TODO: Call kernelMainApp */
