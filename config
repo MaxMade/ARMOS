@@ -1,0 +1,43 @@
+#########################################################################################################
+##                                                                                                     ##
+##   ____             __ _                       _   _               ____            _                 ##
+##  / ___|___  _ __  / _(_) __ _ _   _ _ __ __ _| |_(_) ___  _ __   / ___| _   _ ___| |_ ___ _ __ ___  ##
+## | |   / _ \| '_ \| |_| |/ _` | | | | '__/ _` | __| |/ _ \| '_ \  \___ \| | | / __| __/ _ \ '_ ` _ \ ##
+## | |__| (_) | | | |  _| | (_| | |_| | | | (_| | |_| | (_) | | | |  ___) | |_| \__ \ ||  __/ | | | | |##
+##  \____\___/|_| |_|_| |_|\__, |\__,_|_|  \__,_|\__|_|\___/|_| |_| |____/ \__, |___/\__\___|_| |_| |_|##
+##                         |___/                                           |___/                       ##
+##                                                                                                     ##
+#########################################################################################################
+#########################################################################################################
+##                                                                                                     ##
+## Syntax:                                                                                             ##
+##                                                                                                     ##
+## - COMMENT: Comments starts with '#'                                                                 ##
+##                                                                                                     ##
+## - CONFIG OPTIONS: CONFIG_<NAME> = <VALUE>                                                           ##
+##   - Description of CONFIG OPTIONS (non-mandatory, but really useful):                               ##
+##     # <CONFIG OPTION>                                                                               ##
+##     # Description:                                                                                  ##
+##     # <Description>                                                                                 ##
+##     # Possible Values:                                                                              ##
+##     # <Value 0>: <One line description for Value 0>                                                 ##
+##     # <Value 1>: <One line description for Value 1>                                                 ##
+##   - Generated define: CONFIG_<NAME>_<VALUE>                                                         ##
+##                                                                                                     ##
+## - INDENTATION: Use 2 spaces for indentation (no taps!)                                              ##
+##   All spaces are ignored while parsing!                                                             ##
+##                                                                                                     ## 
+#########################################################################################################
+
+
+############
+## Driver ##
+############
+
+# CONFIG_CONSOLE
+# Description:
+# The CONFIG_CONSOLE option sets the default console driver and controls
+# therefore default text input or output.
+# Possible Values:
+# ARM_PL011: Serial console
+CONFIG_CONSOLE = ARM_PL011

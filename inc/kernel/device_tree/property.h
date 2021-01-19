@@ -4,6 +4,11 @@
 #include <cstdint.h>
 #include <utility.h>
 
+/**
+ * @file kernel/device_tree/property.h
+ * @brief Property within a device tree node
+ */
+
 namespace DeviceTree {
 
 /**
