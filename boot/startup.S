@@ -1,4 +1,5 @@
 .global _start
+
 .global _endless_loop
 .global __CPU_ID
 .global __CPU_STACK
@@ -68,7 +69,12 @@ and x1, x1, 0xFF
 
 // Setup stack for EL1
 .setup_stack:
-	mrs x1, CUrrentEL
+// Use SP_ELx for Exception level ELx
+// See C5.2.15 SPSel, Stack Pointer Select of Arm Architecture Reference Manual
+// Armv8, for Armv8-A architecture profile
+	mov x1, 1
+	msr SPSel, x1
+
 	ldr x1, __CPU_STACK
 	mov sp, x1
 

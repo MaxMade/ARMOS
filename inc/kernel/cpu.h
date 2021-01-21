@@ -20,6 +20,12 @@ namespace CPU {
 	 */
 	bool isLittleEndian();
 
+	/**
+	 * @fn void loadExeptionVector(void* addr)
+	 * @brief Load exception vector at addr
+	 */
+	void loadExeptionVector(void* addr);
+
 } /* namespace CPU */
 
 #endif /* ifndef _INC_KERNEL_CPU_H_ */
