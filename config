@@ -40,4 +40,5 @@
 # therefore default text input or output.
 # Possible Values:
 # ARM_PL011: Serial console
-CONFIG_CONSOLE = ARM_PL011
+# BCM_MINI_UART: Serial console
+CONFIG_CONSOLE = BCM_MINI_UART
