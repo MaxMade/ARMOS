@@ -6,6 +6,8 @@
  * @brief Generic base driver
  */
 
+#include <utility.h>
+
 namespace driver {
 
 	/**
@@ -26,6 +28,12 @@ namespace driver {
 			 * @brief Get name of driver
 			 */
 			const char* getName() const;
+
+			/**
+			 * @fn lib::pair<void*, size_t> getConfigSpace() const
+			 * @brief Get used address range
+			 */
+			lib::pair<void*, size_t> getConfigSpace() const;
 	};
 
 } /* namespace driver */

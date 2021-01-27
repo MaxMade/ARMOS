@@ -1,15 +1,19 @@
-#include "driver/config.h"
 #include <utility.h>
 #include <cstring.h>
+#include <kernel/math.h>
+#include <kernel/error.h>
 #include <kernel/utility.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/device_tree/definition.h>
+#include <kernel/mm/paging.h>
+#include <driver/config.h>
 
 using namespace DeviceTree;
 
 Parser::Parser(void* rawData) {
 	ptr = rawData;
 	auto hdr = reinterpret_cast<FDTHeader*>(rawData);
+	size = util::bigEndianToHost(hdr->totalsize);
 	valid = util::bigEndianToHost(hdr->magic) == FDT_MAGIC;
 }
 
@@ -99,4 +103,50 @@ driver::config Parser::findConfig(const driver::generic_driver& driver) const {
 	}
 
 	return driver::config(false);
+}
+
+lib::pair<void*, size_t> Parser::getConfigSpace() const {
+	auto hdr = reinterpret_cast<FDTHeader*>(ptr);
+
+	void* start = ptr;
+	size_t size = util::bigEndianToHost(hdr->totalsize);
+
+	return lib::pair(start, size);
+}
+
+int Parser::createMapping() const {
+	mm::Paging paging;
+
+	auto mapStart = math::roundDown(reinterpret_cast<uintptr_t>(ptr), PAGESIZE);
+	auto mapSize = math::roundUp(size, PAGESIZE);
+
+	for (auto addr = mapStart; addr < mapStart + mapSize; addr += PAGESIZE) {
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr),
+				mm::Paging::KERNEL_MAPPING, mm::Paging::WRITABLE, mm::Paging::DEVICE_ATTR);
+
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
+	for (auto node : *this) {
+		if (!node.isValid())
+			continue;
+
+		auto rangeProp = node.findRangeProperty("ranges");
+		for (auto rangeIt = rangeProp.first; rangeIt != rangeProp.second; ++rangeIt) {
+			auto range = *rangeIt;
+			auto mapAddr = math::roundDown(reinterpret_cast<uintptr_t>(lib::get<1>(range)), PAGESIZE);
+			auto mapSize = math::roundUp(lib::get<2>(range), PAGESIZE);
+
+			for (uintptr_t addr = mapAddr; addr < mapAddr + mapSize; addr += PAGESIZE) {
+				auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr),
+						mm::Paging::KERNEL_MAPPING, mm::Paging::WRITABLE, mm::Paging::DEVICE_ATTR);
+
+				if (isError(ret))
+					return castError<int, decltype(ret)>(ret);
+			}
+		}
+	}
+
+	return 0;
 }
