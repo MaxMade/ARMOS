@@ -11,7 +11,11 @@
 #include <hw/register/mair.h>
 #include <hw/register/sctlr.h>
 
-driver::console console;
+/* Global driver objects */
+namespace driver {
+	Console console;
+	Intc intc;
+}
 
 namespace mm {
 	TTAllocator ttAlloc;
@@ -60,12 +64,15 @@ int kernelMain(void *fdt) {
 		return -1;
 
 	/* Prepare console */
-	auto consoleConfig = dtp.findConfig(console);
+	auto consoleConfig = dtp.findConfig(driver::console);
 	if (!consoleConfig.isValid())
 		return -1;
-	if (!console.init(consoleConfig))
+	if (isError(driver::console.init(consoleConfig)))
 		return -1;
-	console.write("Console: Setup finished\n\r", 25);
+	driver::console.write("Console: Setup finished\n\r", 25);
+
+	CPU::enableInterrupts();
+	while (1);
 
 	return 0;
 }

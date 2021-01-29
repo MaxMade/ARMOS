@@ -66,6 +66,10 @@ driver::config Parser::findConfig(const driver::generic_driver& driver) const {
 		if (strcmp(name, compatible.first) != 0)
 			continue;
 
+		/******************************
+		 * Step 1: Check reg property *
+		 ******************************/
+
 		/* Check if node has valid reg property */
 		auto regIt = node.findRegisterProperty("reg");
 		if (regIt.first == regIt.second)
@@ -73,8 +77,8 @@ driver::config Parser::findConfig(const driver::generic_driver& driver) const {
 
 		/* Save range */
 		auto reg = *regIt.first;
-		void *addr = reg.first;
-		size_t size = reg.second;
+		void *configAddr = reg.first;
+		size_t configSize = reg.second;
 
 		/* Range fixup */
 		auto parent = node.getParent();
@@ -86,18 +90,37 @@ driver::config Parser::findConfig(const driver::generic_driver& driver) const {
 				auto parentAddr = lib::get<1>(parentRange);
 				auto childSize = lib::get<2>(parentRange);
 
-				if (reinterpret_cast<uintptr_t>(addr) >= reinterpret_cast<uintptr_t>(childAddr) &&
-				   reinterpret_cast<uintptr_t>(addr) < reinterpret_cast<uintptr_t>(childAddr) + childSize){
+				if (reinterpret_cast<uintptr_t>(configAddr) >= reinterpret_cast<uintptr_t>(childAddr) &&
+				   reinterpret_cast<uintptr_t>(configAddr) < reinterpret_cast<uintptr_t>(childAddr) + childSize){
 
-					auto offset = reinterpret_cast<uintptr_t>(addr) - reinterpret_cast<uintptr_t>(childAddr);
-					addr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(parentAddr) + offset);
+					auto offset = reinterpret_cast<uintptr_t>(configAddr) - reinterpret_cast<uintptr_t>(childAddr);
+					configAddr = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(parentAddr) + offset);
 				}
 			}
 		}
 
+		/*************************************
+		 * Step 2: Check interrupts property *
+		 *************************************/
+
+		/* Check for interrupt config */
+		void *intAddr = nullptr;
+		size_t intSize = 0;
+		auto interrupts = node.findProperty("interrupts");
+		if (interrupts.isValid()) {
+			auto data = interrupts.getData();
+			intAddr = data.first;
+			intSize = data.second;
+		}
+
+		/****************************
+		 * Finally: Generate config *
+		 ****************************/
+
 		/* Prepare config */
 		driver::config ret;
-		ret.setRange(addr, size);
+		ret.setRange(configAddr, configSize);
+		ret.setInterruptRange(intAddr, intSize);
 
 		return ret;
 	}

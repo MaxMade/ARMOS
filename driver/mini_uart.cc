@@ -1,3 +1,4 @@
+#include <driver/drivers.h>
 #include <driver/mini_uart.h>
 
 using namespace driver;
@@ -6,9 +7,27 @@ mini_uart::mini_uart() {
 	name = ("brcm,bcm2835-aux-uart");
 }
 
-bool mini_uart::init(const config& conf) {
+int mini_uart::init(const config& conf) {
 	/* Set base */
 	base = conf.getRange().first;
+
+	/* Prepare interrupt configuration */
+	intConfig.first = conf.getInterruptRange().first;
+	intConfig.second = conf.getInterruptRange().second;
+
+	/* Prepare handler */
+	auto handler = [this] () mutable {
+		/* Read character */
+		this->character = this->read();
+
+		/* Clear pending interrupt */
+		writeRegister<AUX_MU_IC_REG>(0);
+		return 0;
+	};
+
+	/* Register interrupt controller */
+	if (int err = intc.registerHandler(intConfig.first, intConfig.second, lib::function<int()>(handler)); !err)
+		return err;
 
 	/* Enable Mini UART */
 	writeRegister<AUX_ENABLES>(1);
@@ -39,7 +58,7 @@ bool mini_uart::init(const config& conf) {
 	/* Enable recieve interrupt */
 	writeRegister<AUX_MU_IIR_REG>(0b01);
 
-	return true;
+	return 0;
 }
 
 void mini_uart::write(const char* buf, size_t len) {
