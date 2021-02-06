@@ -3,6 +3,8 @@
 #include <kernel/cpu.h>
 #include <kernel/math.h>
 #include <kernel/error.h>
+#include <kernel/linker.h>
+#include <kernel/symbols.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/exception_handler.h>
 #include <kernel/mm/translation_table.h>
@@ -11,7 +13,7 @@
 #include <hw/register/mair.h>
 #include <hw/register/sctlr.h>
 
-/* Global driver objects */
+/* Global objects */
 namespace driver {
 	Console console;
 	Intc intc;
@@ -21,12 +23,18 @@ namespace mm {
 	TTAllocator ttAlloc;
 }
 
+Symbols symbols;
+
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */
 	CPU::disableInterrupts();
 
 	/* Prepare exeption vector */
 	CPU::loadExeptionVector(irq::getExceptionVector());
+
+	/* Prepare symbol map */
+	if (!symbols.init(linker::getSymbolMapStart()))
+		return -1;
 
 	/* Start parsing device tree */
 	DeviceTree::Parser dtp(fdt);
