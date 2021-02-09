@@ -1,4 +1,4 @@
-#include <kernel/mm/paging.h>
+#include <ostream.h>
 #include <driver/drivers.h>
 #include <kernel/cpu.h>
 #include <kernel/math.h>
@@ -7,6 +7,7 @@
 #include <kernel/symbols.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/exception_handler.h>
+#include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/translation_table_allocator.h>
 #include <hw/register/tcr.h>
@@ -17,6 +18,7 @@
 namespace driver {
 	Console console;
 	Intc intc;
+	Timer timer;
 }
 
 namespace mm {
@@ -78,6 +80,21 @@ int kernelMain(void *fdt) {
 	if (isError(driver::console.init(consoleConfig)))
 		return -1;
 	driver::console.write("Console: Setup finished\n\r", 25);
+	lib::ostream cout;
+
+	auto timerConfig = dtp.findConfig(driver::timer);
+	if (!timerConfig.isValid()) {
+		cout << "Timer: Construction failed!\n\r";
+		return -1;
+	}
+
+	if (isError(driver::timer.init(timerConfig))) {
+		cout << "Timer: Initialization failed!\n\r";
+		return -1;
+	}
+	driver::timer.windup(200);
+	cout << "Timer: Setup finished\n\r";
+	cout.flush();
 
 	CPU::enableInterrupts();
 	while (1);

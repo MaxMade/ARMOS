@@ -3,10 +3,12 @@
 
 #include <driver/generic_console.h>
 #include <driver/generic_intc.h>
+#include <driver/generic_timer.h>
 
 #include <driver/arm_pl011.h>
 #include <driver/mini_uart.h>
 #include <driver/bcm_intc.h>
+#include <driver/system_timer.h>
 
 /**
  * @file driver/drivers.h
@@ -56,6 +58,22 @@ namespace driver {
 	using Intc = generic_intc;
 #endif
 
+/************************
+ * Setting of the timer *
+ ************************/
+
+/* Use broadcom system timer
+ * Defiend in driver/system_timer.h
+ */
+#if defined(CONFIG_INTC_BCM_SYS_TIMER)
+	using Timer = system_timer;
+
+/* No valid choice for timer
+ * Use (invalid) generic driver
+ */
+#else
+	using Timer = generic_timer;
+#endif
 
 /***************************
  * Global driver instances *
@@ -72,6 +90,12 @@ extern driver::Console console;
  * @brief Interrupt controller driver
  */
 extern driver::Intc intc;
+
+/**
+ * @var intc
+ * @brief Interrupt controller driver
+ */
+extern driver::Timer timer;
 
 } /* namespace driver */
 
