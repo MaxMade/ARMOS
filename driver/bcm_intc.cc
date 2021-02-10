@@ -30,7 +30,7 @@ int bcm_intc::registerHandler(void* data, size_t size, lib::function<int()> hand
 	if ((size / sizeof(uint32_t)) % 2 != 0)
 		return -EINVAL;
 
-	for (size_t i = 0; i < size; i += 2 * sizeof(uint32_t)) {
+	for (size_t i = 0; i < size / sizeof(uint32_t); i += 2) {
 		uint32_t set = util::bigEndianToHost(static_cast<uint32_t*>(data)[i]);
 		uint32_t entry = util::bigEndianToHost(static_cast<uint32_t*>(data)[i + 1]);
 		if (set >=  NUM_SETS || entry >= NUM_ENTRIES)
@@ -56,8 +56,8 @@ int bcm_intc::registerHandler(void* data, size_t size, lib::function<int()> hand
 
 		}
 
-		handlers[set * NUM_ENTRIES + entry] = lib::move(handler);
-		if (!handlers[set * NUM_SETS + entry].isValid())
+		handlers[set * NUM_ENTRIES + entry] = handler;
+		if (!handlers[set * NUM_ENTRIES + entry].isValid())
 			return -ENOMEM;
 	}
 
