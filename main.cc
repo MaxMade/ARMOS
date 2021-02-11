@@ -1,4 +1,5 @@
 #include <ostream.h>
+#include <driver/cpu.h>
 #include <driver/drivers.h>
 #include <kernel/cpu.h>
 #include <kernel/math.h>
@@ -19,6 +20,7 @@ namespace driver {
 	Console console;
 	Intc intc;
 	Timer timer;
+	CPU cpu;
 }
 
 namespace mm {
@@ -82,6 +84,7 @@ int kernelMain(void *fdt) {
 	driver::console.write("Console: Setup finished\n\r", 25);
 	lib::ostream cout;
 
+	/* Prepare timer */
 	auto timerConfig = dtp.findConfig(driver::timer);
 	if (!timerConfig.isValid()) {
 		cout << "Timer: Construction failed!\n\r";
@@ -95,6 +98,28 @@ int kernelMain(void *fdt) {
 	driver::timer.windup(200);
 	cout << "Timer: Setup finished\n\r";
 	cout.flush();
+
+	/* Prepare CPU information */
+	const char* cpuName = nullptr;
+	size_t cpuNumber = 0;
+	for (auto node : dtp) {
+		if (!node.isValid())
+			continue;
+
+		if (strncmp("cpu@", node.getName(), 4) == 0) {
+			if (cpuName == nullptr) {
+				auto comp = node.findStringlistProperty("compatible");
+				if (comp.first != nullptr)
+					cpuName = comp.first;
+			}
+			cpuNumber++;
+		}
+	}
+	if (cpuNumber == 0) {
+		cout << "CPU: Information gathering failed!\n\r";
+		return -1;
+	}
+	driver::cpu.init(cpuName, cpuNumber);
 
 	CPU::enableInterrupts();
 	while (1);
