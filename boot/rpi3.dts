@@ -19,7 +19,7 @@
 		intc = "/soc/interrupt-controller@7e00b200";
 		watchdog = "/soc/watchdog@7e100000";
 		random = "/soc/rng@7e104000";
-		mailbox = "/soc/mailbox@7e00b880";
+		mailbox = "/soc/mailbox@0x40000000";
 		gpio = "/soc/gpio@7e200000";
 		uart0 = "/soc/serial@7e201000";
 		uart1 = "/soc/serial@7e215040";
@@ -108,9 +108,9 @@
 			phandle = <0x2d>;
 		};
 
-		mailbox@7e00b880 {
+		mailbox@0x40000000 {
 			compatible = "brcm,bcm2835-mbox";
-			reg = <0x7e00b880 0x40>;
+			reg = <0x40000000 0x100>;
 			interrupts = <0x00 0x01>;
 			#mbox-cells = <0x00>;
 			phandle = <0x1f>;
@@ -1224,7 +1224,7 @@
 		txp = "/soc/txp@7e004000";
 		clocks = "/soc/cprman@7e101000";
 		random = "/soc/rng@7e104000";
-		mailbox = "/soc/mailbox@7e00b880";
+		mailbox = "/soc/mailbox@0x40000000";
 		gpio = "/soc/gpio@7e200000";
 		dpi_gpio0 = "/soc/gpio@7e200000/dpi_gpio0";
 		emmc_gpio22 = "/soc/gpio@7e200000/emmc_gpio22";

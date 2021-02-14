@@ -4,11 +4,13 @@
 #include <driver/generic_console.h>
 #include <driver/generic_intc.h>
 #include <driver/generic_timer.h>
+#include <driver/generic_ipi.h>
 
 #include <driver/arm_pl011.h>
 #include <driver/mini_uart.h>
 #include <driver/bcm_intc.h>
 #include <driver/system_timer.h>
+#include <driver/mailbox.h>
 
 /**
  * @file driver/drivers.h
@@ -73,6 +75,23 @@ namespace driver {
  */
 #else
 	using Timer = generic_timer;
+#endif
+
+/**********************
+ * Setting of the IPI *
+ **********************/
+
+/* Use broadcom mailbox
+ * Defiend in driver/mailbox.h
+ */
+#if defined(CONFIG_IPI_BCM_MAILBOX)
+	using IPI = mailbox;
+
+/* No valid choice for IPI device
+ * Use (invalid) generic driver
+ */
+#else
+	using IPI = generic_ipi;
 #endif
 
 /***************************
