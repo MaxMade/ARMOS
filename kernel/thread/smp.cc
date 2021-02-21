@@ -1,0 +1,77 @@
+#include <cerrno.h>
+#include <cerrno.h>
+#include <cstdlib.h>
+#include <cstdint.h>
+#include <kernel/cpu.h>
+#include <kernel/math.h>
+#include <kernel/utility.h>
+#include <kernel/thread/smp.h>
+#include <driver/cpu.h>
+#include <driver/drivers.h>
+
+using namespace thread;
+
+#define STACKSIZE (2 * 1024 * 1024)
+#define STACKALIGN 16
+
+extern uintptr_t _start;
+extern uintptr_t __CPU_ID;
+extern uintptr_t __CPU_STACK;
+
+SMP::SMP() {
+	apps = 0;
+}
+
+int SMP::start() {
+	/* Get number of CPUs */
+	auto numCPUS = driver::cpu.getCoreCount();
+	char* stacks = reinterpret_cast<char*>(lib::malloc(numCPUS * STACKSIZE));
+	if (stacks == nullptr)
+		return -ENOMEM;
+
+	/* Roundup to stack alignment */
+	stacks = reinterpret_cast<char*>(math::roundDown(reinterpret_cast<uintptr_t>(stacks), STACKALIGN));
+
+
+	/* Trampoline values */
+	uint64_t* id = reinterpret_cast<uint64_t*>(&__CPU_ID);
+	uint64_t* stack = reinterpret_cast<uint64_t*>(&__CPU_STACK);
+
+	/* Address of counter */
+	volatile size_t* counter = &apps;
+
+	/* According to qemu/hw/arm/raspi.c:
+	 * Spintable entires for the Paspberry Pi 3B
+	 */
+	uint64_t* spin_table[] = {
+		reinterpret_cast<uint64_t*>(0xd8),
+		reinterpret_cast<uint64_t*>(0xe0),
+		reinterpret_cast<uint64_t*>(0xe8),
+		reinterpret_cast<uint64_t*>(0xf0)
+	};
+
+	/* Save startup address */
+	uint64_t startAddr = reinterpret_cast<uint64_t>(&_start);
+
+	for (size_t i = 1; i < numCPUS; i++) {
+		/* Prepare trampoline */
+		*stack = reinterpret_cast<uint64_t>(&stacks[i * STACKSIZE - STACKALIGN]);
+		*id = i;
+
+		/* Prepare start address for application processors */
+		util::mmioWrite(spin_table[i], startAddr);
+		CPU::dataBarrier();
+
+		/* Wake up CPUs */
+		CPU::wakeup();
+
+		/* Wait till update via registerCPU */
+		while(*counter != i);
+	}
+
+	return 0;
+}
+
+void SMP::registerCPU() {
+	apps++;
+}

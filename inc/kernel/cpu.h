@@ -84,9 +84,21 @@ namespace CPU {
 
 	/**
 	 * @fn void halt()
-	 * @brief Enter power-saving halt mode
+	 * @brief Enter power-saving halt mode (WFE instruction)
 	 */
 	void halt();
+
+	/**
+	 * @fn void wakeup()
+	 * @brief Signal wakeup (SEV instruction)
+	 */
+	void wakeup();
+
+	/**
+	 * @fn void dataBarrier()
+	 * @brief Data barrier (DSB instruction)
+	 */
+	void dataBarrier();
 
 } /* namespace CPU */
 
