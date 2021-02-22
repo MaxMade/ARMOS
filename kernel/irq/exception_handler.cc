@@ -2,55 +2,51 @@
 #include <driver/drivers.h>
 #include <hw/register/esr.h>
 #include <kernel/irq/exception_handler.h>
+#include <kernel/debug/panic.h>
 
 extern "C" {
 
-	void current_el_sp_el0_sync(void* saved_state) {
+	void current_el_sp_el0_sync(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_el0_sync must never be used!");
 	}
 
-	void current_el_sp_el0_irq(void* saved_state) {
+	void current_el_sp_el0_irq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_el0_irq must never be used!");
 	}
 
-	void current_el_sp_el0_fiq(void* saved_state) {
+	void current_el_sp_el0_fiq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_el0_fiq must never be used!");
 	}
 
-	void current_el_sp_el0_serror(void* saved_state) {
+	void current_el_sp_el0_serror(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_el0_serror must never be used!");
 	}
 
-	void current_el_sp_elx_sync(void* saved_state) {
+	void current_el_sp_elx_sync(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
@@ -58,9 +54,10 @@ extern "C" {
 		(void) description;
 
 		/* TODO: Implement me */
+		debug::panic::generate("TODO: current_el_sp_elx_sync currently unimplemented!");
 	}
 
-	void current_el_sp_elx_irq(void* saved_state) {
+	void current_el_sp_elx_irq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
@@ -72,29 +69,27 @@ extern "C" {
 		(void) ret;
 	}
 
-	void current_el_sp_elx_fiq(void* saved_state) {
+	void current_el_sp_elx_fiq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_elx_fiq must never be used!");
 	}
 
-	void current_el_sp_elx_serror(void* saved_state) {
+	void current_el_sp_elx_serror(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("current_el_sp_elx_serror must never be used!");
 	}
 
-	void lower_el_aarch64_sync(void* saved_state) {
+	void lower_el_aarch64_sync(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
@@ -102,9 +97,10 @@ extern "C" {
 		(void) description;
 
 		/* TODO: Implement me */
+		debug::panic::generate("TODO: lower_el_aarch64_sync currently unimplemented!");
 	}
 
-	void lower_el_aarch64_irq(void* saved_state) {
+	void lower_el_aarch64_irq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
@@ -116,70 +112,64 @@ extern "C" {
 		(void) ret;
 	}
 
-	void lower_el_aarch64_fiq(void* saved_state) {
+	void lower_el_aarch64_fiq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch64_fiq must never be used!");
 	}
 
-	void lower_el_aarch64_serror(void* saved_state) {
+	void lower_el_aarch64_serror(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch64_serror must never be used!");
 	}
 
-	void lower_el_aarch32_sync(void* saved_state) {
+	void lower_el_aarch32_sync(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch32_sync must never be used!");
 	}
 
-	void lower_el_aarch32_irq(void* saved_state) {
+	void lower_el_aarch32_irq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch32_irq must never be used!");
 	}
 
-	void lower_el_aarch32_fiq(void* saved_state) {
+	void lower_el_aarch32_fiq(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch32_fiq must never be used!");
 	}
 
-	void lower_el_aarch32_serror(void* saved_state) {
+	void lower_el_aarch32_serror(irq::ExceptionContext* saved_state) {
 		(void) saved_state;
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Should never entered (Add assertion) */
-		while (1);
+		debug::panic::generate("lower_el_aarch32_serror must never be used!");
 	}
 }
 
