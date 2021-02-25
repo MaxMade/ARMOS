@@ -148,7 +148,9 @@ namespace lib {
 				int activeCPU = cpu_lock.load();
 				if (activeCPU != cpuID) {
 					int unlocked = -1;
-					while (!cpu_lock.compare_exchange_strong(unlocked, cpuID));
+					while (!cpu_lock.compare_exchange_strong(unlocked, cpuID)) {
+						unlocked = -1;
+					}
 				}
 
 			}

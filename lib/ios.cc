@@ -60,6 +60,12 @@ lib::ostream& lib::bin(lib::ostream& str) {
 	return str;
 }
 
+lib::ostream& lib::endl(lib::ostream& str) {
+	str << "\n\r";
+	str.flush();
+	return str;
+}
+
 lib::ostreamFill lib::setfill(char c) {
 	return ostreamFill(c);
 }
