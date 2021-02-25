@@ -159,11 +159,34 @@ int kernelMain(void *fdt) {
 }
 
 int kernelMainApp() {
-	/* Local output stream */
-	lib::ostream cout;
+	/* Disable all interrupts */
+	CPU::disableInterrupts();
+
+	/* Prepare exeption vector */
+	CPU::loadExeptionVector(irq::getExceptionVector());
 
 	/* Register CPU */
 	thread::smp.registerCPU();
+
+	/* Use default MAIR layout */
+	hw::reg::MAIR mair;
+	mair.useDefaultLayout();
+
+	/* Use default TCR layout */
+	hw::reg::TCR tcr;
+	tcr.useDefaultSetting();
+
+	/* Load kernel mapping */
+	mm::Paging::loadKernelMapping();
+
+	/* Enable MMU */
+	hw::reg::SCTLR sctrl;
+	sctrl.setMMUEnabled(true);
+
+	/* Local output stream */
+	lib::ostream cout;
+
+	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization\n\r";
 
 	CPU::enableInterrupts();
 	while (1);

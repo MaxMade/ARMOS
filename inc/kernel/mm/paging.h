@@ -25,6 +25,12 @@ namespace mm {
 			void* level0TT;
 
 			/**
+			 * @var kernelLevel0TT
+			 * @brief Poiner to translation table 0 created by createEarlyKernelMapping
+			 */
+			static void* kernelLevel0TT;
+
+			/**
 			 * @var lock
 			 * @brief Synchronization lock
 			 */
@@ -122,6 +128,12 @@ namespace mm {
 			 * Create mapping for text, data, rodata, bss and symbol map
 			 */
 			static int createEarlyKernelMapping();
+
+			/**
+			 * @fn static int loadKernelMapping()
+			 * @brief Load kernel mapping
+			 */
+			static int loadKernelMapping();
 
 			/**
 			 * @fn void* earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr)
