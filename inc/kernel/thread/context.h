@@ -20,6 +20,7 @@ namespace thread {
 		RUNNING,    /**< Running thread */
 		TERMINATED, /**< Terminated thread */
 		WAITING,    /**< Waiting thread */
+		INVALID,    /**< INVALID state */
 	};
 
 	/**
@@ -86,10 +87,16 @@ namespace thread {
 
 		public:
 			/**
-			 * @fn Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr)
+			 * @fn Context()
 			 * @brief Constructor
 			 */
-			Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr);
+			Context();
+
+			/**
+			 * @fn void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr)
+			 * @brief Initialize context
+			 */
+			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr);
 
 			Context(const Context& other) = delete;
 

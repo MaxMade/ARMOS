@@ -33,6 +33,34 @@ SECTIONS
 	}
 	__BSS_END = .;
 
+	. = ALIGN(4096);
+	__APP_TEXT_START = .;
+	.app.text : {
+		*(app.text*)
+	}
+	__APP_TEXT_END = .;
+
+	. = ALIGN(4096);
+	__APP_RODATA_START = .;
+	.app.rodata ALIGN(4K) : {
+		*(app.rodata*)
+	}
+	__APP_RODATA_END = .;
+
+	. = ALIGN(4096);
+	__APP_DATA_START = .;
+	.app.data ALIGN(4K) : {
+		*(app.data*)
+	}
+	__APP_DATA_END = .;
+
+	. = ALIGN(4096);
+	__APP_BSS_START = .;
+	.app.bss (NOLOAD) : {
+		*(app.bss*)
+	}
+	__APP_BSS_END = .;
+
 	.init_array :
 	{
 		PROVIDE_HIDDEN (__init_array_start = .);

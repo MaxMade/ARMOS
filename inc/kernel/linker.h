@@ -35,6 +35,30 @@ namespace linker {
 	lib::pair<void*, size_t> getBSSSegment();
 
 	/**
+	 * @fn lib::pair<void*, size_t> getAppTextSegment()
+	 * @brief Get (page-aligned) start address and size of Text app segment
+	 */
+	lib::pair<void*, size_t> getAppTextSegment();
+
+	/**
+	 * @fn lib::pair<void*, size_t> getAppRODataSegment()
+	 * @brief Get (page-aligned) start address and size of ROData app segment
+	 */
+	lib::pair<void*, size_t> getAppRODataSegment();
+
+	/**
+	 * @fn lib::pair<void*, size_t> getAppDataSegment()
+	 * @brief Get (page-aligned) start address and size of Data app segment
+	 */
+	lib::pair<void*, size_t> getAppDataSegment();
+
+	/**
+	 * @fn lib::pair<void*, size_t> getAppBSSSegment()
+	 * @brief Get (page-aligned) start address and size of BSS app segment
+	 */
+	lib::pair<void*, size_t> getAppBSSSegment();
+
+	/**
 	 * @fn void* getSymbolMapStart()
 	 * @brief Get (page-aligned) start address of the symbol map
 	 */
