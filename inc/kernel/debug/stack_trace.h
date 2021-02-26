@@ -44,22 +44,23 @@ namespace debug {
 
 
 	/**
-	 * @fn void stack_trace(size_t maxFrames)
+	 * @fn void stack_trace(size_t maxFrames, void* fp = nullptr)
 	 * @brief Generate stack trace
 	 * @tparam ostream Used ostream (lib::ostream or lib::panic)
 	 * @tparam flush   Flag to flush stream
+	 * @param maxFrames Max. number of observed frames
+	 * @param fp        Use fp instead of current frame pointer (if non nullptr)
 	 */
 	template<typename ostream = lib::panic, bool flush = false>
-	void stack_trace(size_t maxFrames) {
+	void stack_trace(size_t maxFrames, void* fp = nullptr) {
 		/* Get current stack pointer */
-		void* fp = 0;
-		x29(fp);
+		if (fp == nullptr)
+			x29(fp);
 
 		/* Get output stream */
 		ostream stream;
 		stream.setf(lib::ostream::showbase);
 		stream.setf(lib::ostream::hex, lib::ostream::basefield);
-
 
 		func_prolog* frame = reinterpret_cast<func_prolog*>(fp);
 		for (size_t i = 0; i < maxFrames; i++) {
