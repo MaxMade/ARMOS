@@ -1,5 +1,6 @@
 #include <cerrno.h>
 #include <kernel/math.h>
+#include <driver/cpu.h>
 #include <driver/drivers.h>
 #include <driver/system_timer.h>
 
@@ -36,6 +37,12 @@ int system_timer::init(const config& conf) {
 			if (ticks % callback.first == 0) {
 				callback.second();
 			}
+		}
+
+		/* Send IPIs to remaining cores */
+		auto numCPUs = driver::cpus.numCPUs();
+		for (size_t i = 1; i < numCPUs; i++) {
+			driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::RESCHEDULE);
 		}
 
 		/* Windup timer (again) */

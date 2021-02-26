@@ -25,7 +25,8 @@ namespace driver {
 			 * @brief IPI Message
 			 */
 			enum class IPI_MSG : uint32_t {
-				PANIC, /**< Panic Broadcast */
+				PANIC = 1,      /**< Panic Broadcast */
+				RESCHEDULE = 2, /**< Panic Broadcast */
 			};
 
 			/**
