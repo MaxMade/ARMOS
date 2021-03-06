@@ -1,4 +1,5 @@
 #include <cerrno.h>
+#include <kernel/error.h>
 #include <kernel/utility.h>
 #include <driver/bcm_intc.h>
 
@@ -8,7 +9,7 @@ using namespace driver;
 #define NUM_ENTRIES 32
 #define FIXUP_RANGE 0x1000000
 
-lib::function<int()> bcm_intc::handlers[NUM_SETS * NUM_ENTRIES];
+generic_driver* bcm_intc::handlers[NUM_SETS * NUM_ENTRIES] = {nullptr};
 
 bcm_intc::bcm_intc() {
 	name = "brcm,bcm2836-l1-intc";
@@ -22,7 +23,7 @@ int bcm_intc::init(const config& conf) {
 	return 0;
 }
 
-int bcm_intc::registerHandler(void* data, size_t size, lib::function<int()> handler) {
+int bcm_intc::registerHandler(void* data, size_t size, generic_driver* driver) {
 	/* The bcm2837 accepts a configuration array of uint32_t values with a even
 	 * length. Each pair consists of a set identifier (Basic, IRQ 1, IRQ 2) and
 	 * an entry (0 - 31) with the set.
@@ -56,18 +57,16 @@ int bcm_intc::registerHandler(void* data, size_t size, lib::function<int()> hand
 
 		}
 
-		handlers[set * NUM_ENTRIES + entry] = handler;
-		if (!handlers[set * NUM_ENTRIES + entry].isValid())
-			return -ENOMEM;
+		handlers[set * NUM_ENTRIES + entry] = driver;
 	}
 
 	return 0;
 }
 
-int bcm_intc::handleIRQ() {
+generic_driver* bcm_intc::getHandler() {
 	for (size_t i = 0; i < NUM_SETS * NUM_ENTRIES; i++) {
 		/* Skip unused handlers */
-		if (!handlers[i].isValid())
+		if (handlers[i] == nullptr)
 			continue;
 
 		/* Calculate set and entry */
@@ -82,7 +81,7 @@ int bcm_intc::handleIRQ() {
 				/* Clear pending bit and branch to handler */
 				pending &= ~(1 << entry);
 				writeRegister<irq_basic_pending>(pending);
-				return handlers[i]();
+				return handlers[i];
 			}
 
 		/* Check pending 1 */
@@ -93,7 +92,7 @@ int bcm_intc::handleIRQ() {
 				/* Clear pending bit and branch to handler */
 				pending &= ~(1 << entry);
 				writeRegister<irq_pending_1>(pending);
-				return handlers[i]();
+				return handlers[i];
 			}
 
 		/* Check pending 2 */
@@ -104,11 +103,19 @@ int bcm_intc::handleIRQ() {
 				/* Clear pending bit and branch to handler */
 				pending &= ~(1 << entry);
 				writeRegister<irq_pending_2>(pending);
-				return handlers[i]();
+				return handlers[i];
 			}
 
 		}
 	}
 
-	return -1;
+	return makeError<generic_driver*>(-EINVAL);
+}
+
+int bcm_intc::prologue() {
+	return -EINVAL;
+}
+
+int bcm_intc::epilogue() {
+	return -EINVAL;
 }
