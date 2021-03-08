@@ -251,14 +251,14 @@ void* Paging::earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, m
 	} else if (priv == KERNEL_MAPPING && prot == EXECUTABLE) {
 		access = TranslationTable::ELX_RO_EL0_NONE;
 
-	} else if (priv == KERNEL_MAPPING && prot == READONLY) {
-		access = TranslationTable::ELX_RO_EL0_NONE;
+	} else if (priv == USER_MAPPING && prot == READONLY) {
+		access = TranslationTable::ELX_RO_EL0_RO;
 
 	} else if (priv == USER_MAPPING && prot == WRITABLE) {
 		access = TranslationTable::ELX_RW_EL0_RW;
 
 	} else if (priv == USER_MAPPING && prot == EXECUTABLE) {
-		access = TranslationTable::ELX_RW_EL0_NONE;
+		access = TranslationTable::ELX_RO_EL0_RO;
 
 	} else {
 		return makeError<void*>(-EINVAL);

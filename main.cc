@@ -182,7 +182,7 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
 	char* userStack = new char[STACK_SIZE];
 	if (userStack == nullptr)
-		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
+		debug::panic::generate("Thread: Unable to allocate user stack for main thread");
 	mainThread.init(0, kernelStack, userStack, false, (void*) main);
 	cout << "Thread: Setup of main thread finished" << lib::endl;
 
