@@ -163,7 +163,6 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Softirq: Unable to initialize");
 	cout << "Softirq: Setup finished" << lib::endl;
 
-
 	/* Prepare Idle Threads */
 	if (thread::idleThreads.init() != 0)
 		debug::panic::generate("Thread: Unable to initialize idle thread");
@@ -173,6 +172,11 @@ int kernelMain(void *fdt) {
 	if (thread::smp.start() != 0)
 		debug::panic::generate("SMP: Unable to initialize");
 	cout << "SMP: Setup finished" << lib::endl;
+
+	/* Unmap page 0x0 */
+	mm::Paging paging;
+	paging.unmap(nullptr);
+	CPU::invalidatePage(nullptr);
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 

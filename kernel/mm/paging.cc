@@ -11,13 +11,13 @@ using namespace mm;
 
 lock::spinlock Paging::lock;
 
-void* Paging::kernelLevel0TT = nullptr;
+void* Paging::kernel_tt0 = nullptr;
 
 Paging::Paging() {
-	level0TT = CPU::getTranslationTable();
+	tt0 = CPU::getTranslationTable();
 }
 
-Paging::Paging(void* level0TT) : level0TT(level0TT) {}
+Paging::Paging(void* tt0) : tt0(tt0) {}
 
 template<size_t level>
 size_t Paging::getOffset(void* addr) {
@@ -36,74 +36,152 @@ size_t Paging::getOffset(void* addr) {
 	return (reinterpret_cast<uintptr_t>(addr) >> 39) % TranslationTable::NUM_ENTRIES;
 }
 
-template<bool earlyBoot>
-int Paging::genTTEntries(void* vaddr) {
-	size_t offsets[NUM_TABLES];
-	offsets[0] = getOffset<0>(vaddr);
-	offsets[1] = getOffset<1>(vaddr);
-	offsets[2] = getOffset<2>(vaddr);
-	offsets[3] = getOffset<3>(vaddr);
+void Paging::getOffsets(void* addr, size_t offsets[4]) {
+	offsets[0] = getOffset<0>(addr);
+	offsets[1] = getOffset<1>(addr);
+	offsets[2] = getOffset<2>(addr);
+	offsets[3] = getOffset<3>(addr);
+}
 
-	void* drag = level0TT;
+template<bool earlyBoot>
+int Paging::genTTs(void* vaddr) {
+	size_t offsets[NUM_TABLES];
+	getOffsets(vaddr, offsets);
+
+	void* drag = tt0;
 	for (size_t i = 0; i < NUM_TABLES - 1; i++) {
-	TranslationTable tt(drag);
-	/* Check if next level is accessable */
-	if (!tt.getPresentBit(offsets[i])) {
-		void* page = nullptr;
-		/* Allocate new page */
-		if constexpr (earlyBoot) {
-			page = ttAlloc.earlyAlloc();
-		} else {
-			page = ttAlloc.alloc();
+		TranslationTable tt(drag);
+
+		/* Check if next level is accessable */
+		if (!tt.getPresentBit(offsets[i])) {
+			void* page = nullptr;
+			/* Allocate new page */
+			if constexpr (earlyBoot) {
+				page = ttAlloc.earlyAlloc();
+			} else {
+				page = ttAlloc.alloc();
+			}
+
+			if (page == nullptr)
+				return -ENOMEM;
+
+			/* Prepare next level */
+			TranslationTable ttNext(page);
+			ttNext.setDefault();
+
+			/* Link next level */
+			tt.setAddress(offsets[i], page);
+			tt.setPresentBit(offsets[i], true);
 		}
 
-		if (page == nullptr)
-			return -ENOMEM;
-
-		/* Prepare next level */
-		TranslationTable ttNext(page);
-		ttNext.setDefault();
-
-		/* Link next level */
-		tt.setAddress(offsets[i], page);
-		tt.setPresentBit(offsets[i], true);
-	}
-
-	drag = tt.getAddress(offsets[i]);
+		drag = tt.getAddress(offsets[i]);
 	}
 
 	return 0;
 }
 
-lib::tuple<bool, void*, void*, void*, void*> Paging::getTTEntries(void *vaddr) const {
+int Paging::getTTs(void *vaddr, TranslationTable tt[4]) const {
 	size_t offsets[NUM_TABLES];
-	offsets[0] = getOffset<0>(vaddr);
-	offsets[1] = getOffset<1>(vaddr);
-	offsets[2] = getOffset<2>(vaddr);
-	offsets[3] = getOffset<3>(vaddr);
+	getOffsets(vaddr, offsets);
 
-	bool valid = true;
-	void* tts[NUM_TABLES] = {nullptr};
-
-
-	void* drag = level0TT;
-	tts[0] = drag;
+	void* drag = tt0;
+	void* tts[NUM_TABLES] = {drag, nullptr, nullptr, nullptr};
 	for (size_t i = 0; i < NUM_TABLES - 1; i++) {
 		TranslationTable tt(drag);
 
 		/* Check if next level is accessable */
-		if (tt.getPresentBit(offsets[i]) == 1) {
-			drag = tt.getAddress(offsets[i]);
+		if (tt.getPresentBit(offsets[i]) == 0)
+			return -EINVAL;
 
-		} else {
-			valid = false;
-			break;
-		}
-
+		drag = tt.getAddress(offsets[i]);
 		tts[i + 1] = tt.getAddress(offsets[i]);
 	}
 
-	return lib::tuple(valid, tts[0], tts[1], tts[2], tts[3]);
+	tt[0] = TranslationTable(tts[0]);
+	tt[1] = TranslationTable(tts[1]);
+	tt[2] = TranslationTable(tts[2]);
+	tt[3] = TranslationTable(tts[3]);
+
+	return 0;
+}
+
+int Paging::internalProtect(void *vaddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
+	/* Get translation tables */
+	TranslationTable tts[NUM_TABLES];
+	if (getTTs(vaddr, tts))
+		return -EINVAL;
+
+	/* Prepare offsets */
+	size_t offs[NUM_TABLES];
+	getOffsets(vaddr, offs);
+
+	if (tts[3].getPresentBit(offs[3]) == 0)
+		return -ENXIO;
+
+	/* Update protection */
+	TranslationTable::access_t access;
+	if (priv == KERNEL_MAPPING && prot == READONLY) {
+		access = TranslationTable::ELX_RO_EL0_NONE;
+
+	} else if (priv == KERNEL_MAPPING && prot == WRITABLE) {
+		access = TranslationTable::ELX_RW_EL0_NONE;
+
+	} else if (priv == KERNEL_MAPPING && prot == EXECUTABLE) {
+		access = TranslationTable::ELX_RO_EL0_NONE;
+
+	} else if (priv == USER_MAPPING && prot == READONLY) {
+		access = TranslationTable::ELX_RO_EL0_RO;
+
+	} else if (priv == USER_MAPPING && prot == WRITABLE) {
+		access = TranslationTable::ELX_RW_EL0_RW;
+
+	} else if (priv == USER_MAPPING && prot == EXECUTABLE) {
+		access = TranslationTable::ELX_RO_EL0_RO;
+
+	} else {
+		lock.unlock();
+		return -EINVAL;
+	}
+	tts[3].setAccessControl(offs[3], access);
+
+	/* Set nx bit */
+	tts[3].setExecuteNeverBit(offs[3], prot != EXECUTABLE);
+
+	/* Set memory attribute */
+	tts[3].setAttrIndex(offs[3], attr);
+
+	return 0;
+}
+
+template<bool earlyBoot>
+int Paging::internalMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
+	/* Generate translation tables */
+	int err = genTTs<earlyBoot>(vaddr);
+	if (err < 0)
+		return err;
+
+	/* Get translation tables */
+	TranslationTable tts[NUM_TABLES];
+	err = getTTs(vaddr, tts);
+	if (err)
+		return -EINVAL;
+
+	/* Prepare offsets */
+	size_t offs[NUM_TABLES];
+	getOffsets(vaddr, offs);
+
+	/* Set address */
+	tts[3].setAddress(offs[3], paddr);
+	tts[3].setPresentBit(offs[3], true);
+
+	/* Update protection */
+	err = internalProtect(vaddr, priv, prot, attr);
+
+	return err;
+}
+
+int Paging::earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
+	return internalMap<true>(vaddr, paddr, priv, prot, attr);
 }
 
 int Paging::createEarlyKernelMapping() {
@@ -205,7 +283,7 @@ int Paging::createEarlyKernelMapping() {
 	}
 
 	/* Save translation tabel 0 */
-	kernelLevel0TT = frame;
+	kernel_tt0 = frame;
 
 	/* Update TTBR0 */
 	tt.updateTTBR0();
@@ -213,66 +291,72 @@ int Paging::createEarlyKernelMapping() {
 }
 
 int Paging::loadKernelMapping() {
-	if (!kernelLevel0TT)
+	if (!kernel_tt0)
 		return -EINVAL;
 
-	TranslationTable tt(kernelLevel0TT);
+	TranslationTable tt(kernel_tt0);
 	tt.updateTTBR0();
 
 	return 0;
 }
 
-void* Paging::earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
-	/* Generate translation tables */
-	int err = genTTEntries(vaddr);
-	if (err < 0)
-		return makeError<void*>(err);
+int Paging::map(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
+	lock.lock();
+	auto ret = internalMap<false>(vaddr, paddr, priv, prot, attr);
+	lock.unlock();
+	return ret;
+}
 
-	/* Get pointer to translation tables */
-	auto tts = getTTEntries(vaddr);
-	if (!lib::get<0>(tts))
-		return makeError<void*>(-EINVAL);
+void* Paging::unmap(void* vaddr) {
+	lock.lock();
 
-	/* Prepare translation table level 3 */
-	size_t tt3Entry = getOffset<3>(vaddr);
-	TranslationTable tt3(lib::get<4>(tts));
-
-	/* Set address */
-	tt3.setAddress(tt3Entry, paddr);
-
-	/* Set address control */
-	TranslationTable::access_t access;
-	if (priv == KERNEL_MAPPING && prot == READONLY) {
-		access = TranslationTable::ELX_RO_EL0_NONE;
-
-	} else if (priv == KERNEL_MAPPING && prot == WRITABLE) {
-		access = TranslationTable::ELX_RW_EL0_NONE;
-
-	} else if (priv == KERNEL_MAPPING && prot == EXECUTABLE) {
-		access = TranslationTable::ELX_RO_EL0_NONE;
-
-	} else if (priv == USER_MAPPING && prot == READONLY) {
-		access = TranslationTable::ELX_RO_EL0_RO;
-
-	} else if (priv == USER_MAPPING && prot == WRITABLE) {
-		access = TranslationTable::ELX_RW_EL0_RW;
-
-	} else if (priv == USER_MAPPING && prot == EXECUTABLE) {
-		access = TranslationTable::ELX_RO_EL0_RO;
-
-	} else {
-		return makeError<void*>(-EINVAL);
+	/* Get translation table wrapper */
+	TranslationTable tts[NUM_TABLES];
+	if (getTTs(vaddr, tts)) {
+		lock.unlock();
+		return makeError<void*>(EINVAL);
 	}
-	tt3.setAccessControl(tt3Entry, access);
 
-	/* Set nx bit */
-	tt3.setExecuteNeverBit(tt3Entry, prot != EXECUTABLE);
+	/* Get offsets in translation tables */
+	size_t offs[NUM_TABLES];
+	getOffsets(vaddr, offs);
 
-	/* Set memory attribute */
-	tt3.setAttrIndex(tt3Entry, attr);
+	/* Save address of page frame */
+	void* ret = makeError<void*>(ENXIO);
+	if (tts[3].getPresentBit(offs[3])) {
+		ret = tts[3].getAddress(offs[3]);
+	}
 
-	/* Set present */
-	tt3.setPresentBit(tt3Entry, true);
+	for (size_t i = 3; i >= 1; i--) {
+		/* Set corrosponding entry as non-present */
+		tts[i].setPresentBit(offs[i], false);
 
-	return vaddr;
+		/* Check if translation table is empty */
+		for (size_t entry = 0; entry < TranslationTable::NUM_ENTRIES; entry++) {
+			/* Translation Table contains other entries -> Exit */
+			if (tts[i].getPresentBit(entry) == 1) {
+				lock.unlock();
+				return ret;
+			}
+		}
+
+		/* Mark entry in translation table above as non present */
+		tts[i - 1].setPresentBit(offs[i - 1], false);
+
+		/* Free frame */
+		ttAlloc.free(tts[i].getFrame());
+	}
+
+	lock.unlock();
+	return ret;
+}
+
+int Paging::protect(void* vaddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
+	lock.lock();
+
+	/* Get translation table wrapper */
+	int err = internalProtect(vaddr, priv, prot, attr);
+
+	lock.unlock();
+	return err;
 }

@@ -52,6 +52,16 @@ namespace mm {
 			static const size_t NUM_ENTRIES = 512;
 
 			/**
+			 * @fn TranslationTable()
+			 * @brief Create invalid translation table using TranslationTable(nullptr)
+			 */
+			TranslationTable();
+
+			TranslationTable& operator=(const TranslationTable& other) = default;
+
+			TranslationTable& operator=(TranslationTable&& other) = default;
+
+			/**
 			 * @fn TranslationTable(void* addr)
 			 * @brief Create translation table from page-aligned address
 			 */
@@ -59,9 +69,15 @@ namespace mm {
 
 			/**
 			 * @fn bool isValid() const
-			 * @brief Check if underlying address is page-aligned
+			 * @brief Check if underlying address is page-aligned and non null
 			 */
 			bool isValid() const;
+
+			/**
+			 * @fn void* getFrame() const
+			 * @breif Return pointer to underlying pointer
+			 */
+			void* getFrame() const;
 
 			/**
 			 * @fn int updateTTBR0() const
