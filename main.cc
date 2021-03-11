@@ -11,6 +11,8 @@
 #include <kernel/thread/smp.h>
 #include <kernel/debug/panic.h>
 #include <kernel/device_tree/parser.h>
+#include <kernel/irq/sync_handler.h>
+#include <kernel/irq/pagefault.h>
 #include <kernel/irq/exception_handler.h>
 #include <kernel/thread/idle.h>
 #include <kernel/thread/context.h>
@@ -42,6 +44,11 @@ namespace thread {
 
 namespace lock {
 	Softirq softirq;
+}
+
+namespace irq {
+	SyncHandler syncHandler;
+	PagefaultHandler pagefaultHandler;
 }
 
 Symbols symbols;
@@ -165,6 +172,12 @@ int kernelMain(void *fdt) {
 	if (isError(lock::softirq.init()))
 		debug::panic::generate("Softirq: Unable to initialize");
 	cout << "Softirq: Setup finished" << lib::endl;
+
+	/* Prepare synchronous exception handlers */
+	if (isError(irq::syncHandler.registerHandler(&irq::pagefaultHandler)))
+		debug::panic::generate("Synchronous Exceptions: Unable to register pagefault handler");
+
+	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
 	/* Prepare Idle Threads */
 	if (thread::idleThreads.init() != 0)
