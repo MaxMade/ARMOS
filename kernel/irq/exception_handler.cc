@@ -71,7 +71,7 @@ extern "C" {
 		if (isError(driver))
 			debug::panic::generateFromIRQ("current_el_sp_elx_irq: No suitable driver found!", saved_state);
 
-		auto err = lock::softirq.execute(driver);
+		auto err = lock::softirq.execute(driver, saved_state);
 		if (isError(err))
 			debug::panic::generateFromIRQ("current_el_sp_elx_irq: Error during softirq!", saved_state);
 	}
@@ -118,7 +118,7 @@ extern "C" {
 		if (isError(driver))
 			debug::panic::generateFromIRQ("current_el_sp_elx_irq: No suitable driver found!", saved_state);
 
-		auto err = lock::softirq.execute(driver);
+		auto err = lock::softirq.execute(driver, saved_state);
 		if (isError(err))
 			debug::panic::generateFromIRQ("current_el_sp_elx_irq: Error during softirq!", saved_state);
 	}

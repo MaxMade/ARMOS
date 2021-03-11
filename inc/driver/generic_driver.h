@@ -7,6 +7,7 @@
  */
 
 #include <utility.h>
+#include <kernel/irq/exception_handler.h>
 
 namespace driver {
 
@@ -64,7 +65,7 @@ namespace driver {
 			size_t getIndexDriver() const;
 
 			/**
-			 * @fn virtual int prologue()
+			 * @fn virtual int prologue(irq::ExceptionContext* context) = 0
 			 * @brief Exception prologue
 			 * @return
 			 *
@@ -72,7 +73,7 @@ namespace driver {
 			 *	-  0 - Epilogue isn't needed
 			 *	- <0 - Error (errno)
 			 */
-			virtual int prologue() = 0;
+			virtual int prologue(irq::ExceptionContext* context) = 0;
 
 			/**
 			 * @fn virtual int epilogue()
