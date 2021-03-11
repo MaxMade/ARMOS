@@ -176,7 +176,7 @@ void debug::panic::generateFromIRQ(const char msg[], irq::ExceptionContext* exce
 
 
 	/* Generate stack trace */
-	debug::stack_trace(15, reinterpret_cast<void*>(exceptionContext->x29));
+	debug::stack_trace(15, exceptionContext);
 
 	/* Endless loop */
 	while (1)
