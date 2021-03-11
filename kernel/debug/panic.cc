@@ -1,12 +1,12 @@
-#include "kernel/irq/exception_handler.h"
 #include <ios.h>
 #include <ostream.h>
 #include <functional.h>
 #include <driver/cpu.h>
 #include <driver/drivers.h>
-#include <kernel/cpu.h>
+#include <kernel/thread/smp.h>
 #include <kernel/debug/panic.h>
 #include <kernel/debug/stack_trace.h>
+#include <kernel/irq/exception_handler.h>
 #include <hw/register/general_purpose_reg.h>
 
 int debug::panic::init() {
@@ -27,9 +27,15 @@ void debug::panic::generate(const char msg[]) {
 	/* Disable interrupts */
 	CPU::disableInterrupts();
 
+	/* Save CPUID */
+	auto cpuID = CPU::getProcessorID();
+
 	/* Send IPIs */
-	auto numCPUS = driver::cpus.numCPUs();
+	auto numCPUS = thread::smp.getRegisteredCPUS();
 	for (size_t i = 0; i < numCPUS; i++) {
+		if (i == cpuID)
+			continue;
+
 		driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::PANIC);
 	}
 
@@ -102,9 +108,15 @@ void debug::panic::generateFromIRQ(const char msg[], irq::ExceptionContext* exce
 	/* Disable interrupts */
 	CPU::disableInterrupts();
 
+	/* Save CPUID */
+	auto cpuID = CPU::getProcessorID();
+
 	/* Send IPIs */
-	auto numCPUS = driver::cpus.numCPUs();
+	auto numCPUS = thread::smp.getRegisteredCPUS();
 	for (size_t i = 0; i < numCPUS; i++) {
+		if (i == cpuID)
+			continue;
+
 		driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::PANIC);
 	}
 

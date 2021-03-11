@@ -15,7 +15,7 @@ int Softirq::init() {
 	numCPUs = driver::cpus.numCPUs();
 	numDrivers = driver::generic_driver::getNumDrivers();
 
-	drivers = new driver::generic_driver**[numCPUs * numDrivers];
+	drivers = new driver::generic_driver*[numCPUs * numDrivers];
 	if (drivers == nullptr)
 		return -ENOMEM;
 	memset(drivers, 0, sizeof(void*) * numCPUs * numDrivers);
@@ -24,32 +24,31 @@ int Softirq::init() {
 }
 
 int Softirq::execute(driver::generic_driver* driver) {
-	/* Assert driver index is less than number of total drivers */
-	assert(driver->getIndexDriver() < numDrivers);
+	/* Assert that interrupts are currently disabled */
+	assert(CPU::areInterruptsEnabled() == false);
 
 	/* Execute Prologue */
 	auto retPrologue = driver->prologue();
 	if (isError(retPrologue))
 		return retPrologue;
 
-	/* Assert that interrupts are currently disabled */
-	assert(CPU::areInterruptsEnabled() == false);
-
 	/* Save current CPU ID */
 	auto cpuID = CPU::getProcessorID();
+	assert(cpuID < numCPUs);
 
 	/* Save current driver ID */
 	auto driverID = driver->getIndexDriver();
+	assert(driverID < numDrivers);
 
 	/* Mark softirq layer as used (if possible) */
 	auto currentlyUsed = used.get().test_and_set();
 
-	/* If currently an epilogue is executed postpone driver */
+	/* If currently an epilogue is executed postpone driver (if necessary) */
 	if (currentlyUsed && retPrologue == 1) {
 		/* Check if driver is already pending */
-		auto alreadyPending = (drivers[cpuID][driverID] != nullptr);
+		auto alreadyPending = (drivers[cpuID * numDrivers + driverID] != nullptr);
 		/* Update driver */
-		drivers[cpuID][driverID] = driver;
+		drivers[cpuID * numDrivers + driverID] = driver;
 		/* Update number of pending drivers (if necessary) */
 		pendingDrivers.get() += alreadyPending ? 0 : 1;
 		return 0;
@@ -69,10 +68,11 @@ int Softirq::execute(driver::generic_driver* driver) {
 
 	/* Execute postponed drivers */
 	while (pendingDrivers.get() > 0) {
-		driver::generic_driver* postponedDriver = nullptr;
 		for (size_t i = 0; i < numDrivers; i++) {
-			if (drivers[cpuID][i] != nullptr) {
-				lib::swap(postponedDriver, drivers[cpuID][i]);
+			driver::generic_driver* postponedDriver = nullptr;
+
+			if (drivers[cpuID * numDrivers + i] != nullptr) {
+				lib::swap(postponedDriver, drivers[cpuID * numDrivers + i]);
 				pendingDrivers.get()--;
 
 				/* Excute postponed driver */

@@ -35,7 +35,7 @@ namespace lock {
 			 * @var drivers
 			 * @brief Array of postponed drivers
 			 */
-			driver::generic_driver*** drivers;
+			driver::generic_driver** drivers;
 
 			/**
 			 * @var pendingDrivers
