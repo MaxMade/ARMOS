@@ -619,6 +619,27 @@ namespace lib {
 	template <typename T>
 	struct add_rvalue_reference : decltype(add_rvalue_reference_Helper<T>(0)) {};
 
+	/**
+	 * @struct add_cs
+	 * @brief Add const volatile modifier
+	 */
+	template <typename T>
+	struct add_cv { typedef const volatile T type; };
+
+	/**
+	 * @struct add_const
+	 * @brief Add const modifier
+	 */
+	template <typename T>
+	struct add_const { typedef const T type; };
+
+	/**
+	 * @struct add_volatile
+	 * @brief Add volatile modifier
+	 */
+	template <typename T>
+	struct add_volatile { typedef volatile T type; };
+
 } /* namespace lib */
 
 #endif /* ifndef _INC_TYPE_TRAITS_H_ */
