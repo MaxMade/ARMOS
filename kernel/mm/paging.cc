@@ -122,30 +122,39 @@ int Paging::internalProtect(void *vaddr, priv_lvl_t priv, prot_t prot, mem_attr_
 	TranslationTable::access_t access;
 	if (priv == KERNEL_MAPPING && prot == READONLY) {
 		access = TranslationTable::ELX_RO_EL0_NONE;
+		tts[3].setExecuteNeverBitUser(offs[3], true);
+		tts[3].setExecuteNeverBitKernel(offs[3], prot != EXECUTABLE);
 
 	} else if (priv == KERNEL_MAPPING && prot == WRITABLE) {
 		access = TranslationTable::ELX_RW_EL0_NONE;
+		tts[3].setExecuteNeverBitUser(offs[3], true);
+		tts[3].setExecuteNeverBitKernel(offs[3], prot != EXECUTABLE);
 
 	} else if (priv == KERNEL_MAPPING && prot == EXECUTABLE) {
 		access = TranslationTable::ELX_RO_EL0_NONE;
+		tts[3].setExecuteNeverBitUser(offs[3], true);
+		tts[3].setExecuteNeverBitKernel(offs[3], prot != EXECUTABLE);
 
 	} else if (priv == USER_MAPPING && prot == READONLY) {
 		access = TranslationTable::ELX_RO_EL0_RO;
+		tts[3].setExecuteNeverBitUser(offs[3], prot != EXECUTABLE);
+		tts[3].setExecuteNeverBitKernel(offs[3], true);
 
 	} else if (priv == USER_MAPPING && prot == WRITABLE) {
 		access = TranslationTable::ELX_RW_EL0_RW;
+		tts[3].setExecuteNeverBitUser(offs[3], prot != EXECUTABLE);
+		tts[3].setExecuteNeverBitKernel(offs[3], true);
 
 	} else if (priv == USER_MAPPING && prot == EXECUTABLE) {
 		access = TranslationTable::ELX_RO_EL0_RO;
+		tts[3].setExecuteNeverBitUser(offs[3], prot != EXECUTABLE);
+		tts[3].setExecuteNeverBitKernel(offs[3], true);
 
 	} else {
 		lock.unlock();
 		return -EINVAL;
 	}
 	tts[3].setAccessControl(offs[3], access);
-
-	/* Set nx bit */
-	tts[3].setExecuteNeverBit(offs[3], prot != EXECUTABLE);
 
 	/* Set memory attribute */
 	tts[3].setAttrIndex(offs[3], attr);

@@ -34,7 +34,7 @@ namespace mm {
 					uint64_t dbm:1;        /**< Bit 51: Dirty Bit Modifier */
 					uint64_t contiguous:1; /**< Bit 52: Hint for contiguous set of entries */
 					uint64_t pxn:1;        /**< Bit 53: Privileged Execute-Never */
-					uint64_t xn:1;         /**< Bit 54: Execute-Never*/
+					uint64_t uxn:1;        /**< Bit 54: User Execute-Never*/
 					uint64_t ignored:9;    /**< Bit 55: Ignored */
 				};
 
@@ -345,8 +345,8 @@ namespace mm {
 			int setPrivilegedExecuteNeverBit(size_t entry, bool pxn);
 
 			/**
-			 * @brief int getExecuteNeverBit(size_t entry) const
-			 * @brief Check if entry is execute-never
+			 * @brief int getExecuteNeverBitKernel(size_t entry) const
+			 * @brief Check if entry is execute-never (for user)
 			 * @warning entry must be less than NUM_ENTRIES
 			 * @return
 			 *
@@ -354,18 +354,41 @@ namespace mm {
 			 *	-  0 - Entry is not execute-never
 			 *	- <1 - Failure (-errno)
 			 */
-			int getExecuteNeverBit(size_t entry) const;
+			int getExecuteNeverBitKernel(size_t entry) const;
 
 			/**
-			 * @int setExecuteNeverBit(size_t entry, bool execute_never)
-			 * @brief Set entry as execute-never or not
+			 * @int setExecuteNeverBitKernel(size_t entry, bool execute_never)
+			 * @brief Set entry as execute-never or not (for user)
 			 * @warning entry must be less than NUM_ENTRIES
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <1 - Failure (-errno)
 			 */
-			int setExecuteNeverBit(size_t entry, bool execute_never);
+			int setExecuteNeverBitKernel(size_t entry, bool execute_never);
+
+			/**
+			 * @brief int getExecuteNeverBitUser(size_t entry) const
+			 * @brief Check if entry is execute-never (for user)
+			 * @warning entry must be less than NUM_ENTRIES
+			 * @return
+			 *
+			 *	-  1 - Entry is execute-never
+			 *	-  0 - Entry is not execute-never
+			 *	- <1 - Failure (-errno)
+			 */
+			int getExecuteNeverBitUser(size_t entry) const;
+
+			/**
+			 * @int setExecuteNeverBitUser(size_t entry, bool execute_never)
+			 * @brief Set entry as execute-never or not (for user)
+			 * @warning entry must be less than NUM_ENTRIES
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <1 - Failure (-errno)
+			 */
+			int setExecuteNeverBitUser(size_t entry, bool execute_never);
 
 			/**
 			 * @fn void* getAddress(size_t entry) const
