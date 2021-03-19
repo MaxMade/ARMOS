@@ -38,7 +38,7 @@ STANDALONEFLAGS = -ffreestanding -fno-builtin -nostartfiles -nodefaultlibs \
 				  -fno-stack-protector -mno-omit-leaf-frame-pointer \
 				  -mno-outline-atomics -fno-use-cxa-atexit
 
-OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -I inc/ -std=c++17
+OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -std=c++17
 
 CCFLAGS = $(WARNFLAGS) $(OPTFLAGS) $(STANDALONEFLAGS) $(FLOATINGPOINT) $(DEFINEFLAGS)
 
@@ -79,15 +79,20 @@ DOXYGENTARGET = $(DOXYGENBUILD)/index.html
 ########
 
 include apps/$(APP)/Makefile
-APP_OBJECTS = $(addprefix apps/$(APP)/, $(OBJS))
+APP_LIBS = $(shell find ./apps/lib -name "*.cc")
+APP_OBJECTS = $(APP_LIBS:.cc=.o) $(addprefix apps/$(APP)/, $(OBJS))
 
 #################
 # Generic Rules #
 #################
 
+apps/%.o: apps/%.cc
+	@echo "CC		$@"
+	$(VERBOSE) $(CC) $(CCFLAGS) -I apps/lib/ -c $^ -o $@
+
 %.o: %.cc
 	@echo "CC		$@"
-	$(VERBOSE) $(CC) $(CCFLAGS) -c $^ -o $@
+	$(VERBOSE) $(CC) $(CCFLAGS) -I inc/ -I ./ -c $^ -o $@
 
 %.o: %.S
 	@echo "ASM		$@"
