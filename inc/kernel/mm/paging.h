@@ -206,6 +206,40 @@ namespace mm {
 			 *	- -1 - Failure (-errno)
 			 */
 			int protect(void* vaddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr);
+
+			/**
+			 * @fn static bool isWritableUser(void* vaddr)
+			 * @brief Check if page is writable for user
+			 */
+			static bool isWritableUser(void* vaddr);
+
+			/**
+			 * @fn static bool isWritableKernel(void* vaddr)
+			 * @brief Check if page is writable for kernel
+			 */
+			static bool isWritableKernel(void* vaddr);
+
+			/**
+			 * @fn static bool isReadableUser(void* vaddr)
+			 * @brief Check if page is readable for user
+			 */
+			static bool isReadableUser(void* vaddr);
+
+			/**
+			 * @fn static bool isReadableKernel(void* vaddr)
+			 * @brief Check if page is readable for kernel
+			 */
+			static bool isReadableKernel(void* vaddr);
+
+			/**
+			 * @fn static void* getFrame(void* vaddr)
+			 * @brief Get address of frame
+			 * @return
+			 *
+			 *	- Pointer to frame - Success
+			 *	- makeError<void*>(-errno) - Failure
+			 */
+			static void* getFrame(void* vaddr);
 	};
 };
 
