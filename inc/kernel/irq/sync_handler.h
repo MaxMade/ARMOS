@@ -3,6 +3,11 @@
 
 #include <kernel/irq/generic_sync_handler.h>
 
+/**
+ * @file kernel/irq/sync_handler.h
+ * @brief Synchronous Exception Handler
+ */
+
 namespace irq {
 
 	/**

@@ -8,6 +8,11 @@
 #include <iterator.h>
 #include <algorithm.h>
 
+/**
+ * @file list.h
+ * @brief Double Linked List
+ */
+
 namespace lib {
 
 	/**
