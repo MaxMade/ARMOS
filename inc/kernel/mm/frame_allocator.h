@@ -1,49 +1,49 @@
-#ifndef _INC_KERNEL_MM_TRANSLATION_TABLE_ALLOCATOR_H_
-#define _INC_KERNEL_MM_TRANSLATION_TABLE_ALLOCATOR_H_
+#ifndef _INC_KERNEL_MM_FRAME_ALLOCATOR_H_
+#define _INC_KERNEL_MM_FRAME_ALLOCATOR_H_
 
 #include <cstddef.h>
 #include <climits.h>
 #include <kernel/lock/spinlock.h>
 
 /**
- * @file kernel/mm/translation_table_allocator.h
- * @brief Allocate pages for translation tables
+ * @file kernel/mm/frame_allocator.h
+ * @brief Allocate page frames
  */
 
 namespace mm {
 
 	/**
-	 * @class TTAllocator
-	 * @brief Translation Table Allocator
+	 * @class FrameAllocator
+	 * @brief Frame Allocator
 	 */
-	class TTAllocator {
+	class FrameAllocator {
 		private:
 			/**
-			 * @var NUM_PAGES
+			 * @var NUM_FRAMES
 			 * @brief Number of pages within allocator
 			 */
-			static const size_t NUM_PAGES = 4096;
+			static const size_t NUM_FRAMES = 4096;
 
 			/**
 			 * @var SIZE
 			 * @brief Size of allocator in bytes
 			 */
-			static const size_t SIZE = NUM_PAGES * PAGESIZE;
-			char pages[SIZE] __attribute__((aligned(PAGESIZE)));
+			static const size_t SIZE = NUM_FRAMES * PAGESIZE;
+			char frames[SIZE] __attribute__((aligned(PAGESIZE)));
 
 			/**
-			 * @struct TTPageLink
-			 * @brief Link used for linking available pages
+			 * @struct FrameLink
+			 * @brief Link between available page frames
 			 */
-			struct TTPageLink {
-				TTPageLink* next;
+			struct FrameLink {
+				FrameLink* next;
 			};
 
 			/**
 			 * @var head
 			 * @brief Pointer to top of stack
 			 */
-			TTPageLink* head = nullptr;
+			FrameLink* head = nullptr;
 
 			/**
 			 * @var lock
@@ -53,18 +53,18 @@ namespace mm {
 
 		public:
 			/**
-			 * @fn TTAllocator
+			 * @fn FrameAllocator
 			 * @brief Initialize allocator
 			 */
-			TTAllocator();
+			FrameAllocator();
 
-			TTAllocator(const TTAllocator& other) = delete;
+			FrameAllocator(const FrameAllocator& other) = delete;
 
-			TTAllocator(TTAllocator&& other) = delete;
+			FrameAllocator(FrameAllocator&& other) = delete;
 
-			TTAllocator& operator=(const TTAllocator& other) = delete;
+			FrameAllocator& operator=(const FrameAllocator& other) = delete;
 
-			TTAllocator& operator=(TTAllocator&& other) = delete;
+			FrameAllocator& operator=(FrameAllocator&& other) = delete;
 
 			/**
 			 * @fn void init()
@@ -74,7 +74,7 @@ namespace mm {
 
 			/**
 			 * @fn void* earlyAlloc()
-			 * @brief Allocate translation table without locking
+			 * @brief Allocate page frame without locking
 			 * @warning This function should be only used for the early boot process
 			 * @return
 			 *
@@ -85,7 +85,7 @@ namespace mm {
 
 			/**
 			 * @fn int earlyFree(void *page)
-			 * @brief Free translation table without locking
+			 * @brief Free page frame without locking
 			 * @warning This function should be only used for the early boot process
 			 * @return
 			 *
@@ -96,7 +96,7 @@ namespace mm {
 
 			/**
 			 * @fn void* alloc()
-			 * @brief Allocate translation table
+			 * @brief Allocate page frame
 			 * @return
 			 *
 			 *	- Pointer to pages - Success
@@ -106,7 +106,7 @@ namespace mm {
 
 			/**
 			 * @fn int free(void *page)
-			 * @brief Free translation table
+			 * @brief Free page frame
 			 * @return
 			 *
 			 *	- 0  - Success
@@ -116,8 +116,8 @@ namespace mm {
 
 	};
 
-	extern TTAllocator ttAlloc;
+	extern FrameAllocator frameAlloc;
 
 } /* namespace mm */
 
-#endif /* ifndef _INC_KERNEL_MM_TRANSLATION_TABLE_ALLOCATOR_H_ */
+#endif /* ifndef _INC_KERNEL_MM_FRAME_ALLOCATOR_H_ */

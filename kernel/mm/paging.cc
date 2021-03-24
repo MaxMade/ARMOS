@@ -5,8 +5,8 @@
 #include <kernel/linker.h>
 #include <kernel/symbols.h>
 #include <kernel/mm/paging.h>
+#include <kernel/mm/frame_allocator.h>
 #include <kernel/mm/translation_table.h>
-#include <kernel/mm/translation_table_allocator.h>
 
 using namespace mm;
 
@@ -56,9 +56,9 @@ int Paging::genTTs(void* vaddr) {
 			void* page = nullptr;
 			/* Allocate new page */
 			if constexpr (earlyBoot) {
-				page = ttAlloc.earlyAlloc();
+				page = frameAlloc.earlyAlloc();
 			} else {
-				page = ttAlloc.alloc();
+				page = frameAlloc.alloc();
 			}
 
 			if (page == nullptr)
@@ -194,7 +194,7 @@ int Paging::earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem
 
 int Paging::createEarlyKernelMapping() {
 	/* Create translation table level 0 */
-	void* frame = ttAlloc.earlyAlloc();
+	void* frame = frameAlloc.earlyAlloc();
 	TranslationTable tt(frame);
 	tt.setDefault();
 
@@ -350,7 +350,7 @@ void* Paging::unmap(void* vaddr) {
 		tts[i - 1].setPresentBit(offs[i - 1], false);
 
 		/* Free frame */
-		ttAlloc.free(tts[i].getFrame());
+		frameAlloc.free(tts[i].getFrame());
 	}
 
 	lock.unlock();
