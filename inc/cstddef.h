@@ -45,7 +45,7 @@
  * @param member structure member
  */
 #ifndef offsetof
-	#define offsetof(type, member) ((size_t) &((type *) 0)->member)
+	#define offsetof(type, member) __builtin_offsetof(type, member)
 #endif
 
 #endif /* _INC_CSTDDEF_H_ */
