@@ -107,7 +107,7 @@ namespace lib {
 			 * @fn pair()
 			 * @brief Default constructor
 			 */
-			pair() {}
+			pair() : first(), second() { }
 
 			/**
 			 * @fn pair(const T1& x, const T2& y)
