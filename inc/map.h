@@ -3,6 +3,7 @@
 
 #include <new.h>
 #include <cerrno.h>
+#include <cassert.h>
 #include <utility.h>
 #include <functional.h>
 #include <kernel/adt/rbtree.h>
@@ -165,19 +166,35 @@ namespace lib {
 					}
 
 					/**
-					 * @fn value_type & operator*()
+					 * @fn value_type& operator*()
 					 * @brief Accesss underlying Key
 					 */
-					value_type & operator*() {
+					value_type& operator*() {
 						return node->t;
 					}
 
 					/**
-					 * @fn const value_type & operator*() const
+					 * @fn const value_type& operator*() const
 					 * @brief Accesss underlying Key
 					 */
-					const value_type & operator*() const {
+					const value_type& operator*() const {
 						return node->t;
+					}
+
+					/**
+					 * @fn value_type* operator->()
+					 * @brief Accesss underlying Key
+					 */
+					value_type* operator->() {
+						return &node->t;
+					}
+
+					/**
+					 * @fn const value_type* operator->() const
+					 * @brief Accesss underlying Key
+					 */
+					const value_type* operator->() const {
+						return &node->t;
 					}
 
 			};
@@ -330,7 +347,7 @@ namespace lib {
 			 * @brief Find entry for given key
 			 */
 			iterator find(const Key& key) {
-				Entry tmp(key, T());
+				Entry tmp(lib::pair<const Key, T>(key, T()));
 				auto entry = rbtree.search(tmp);
 				return iterator(entry);
 			}

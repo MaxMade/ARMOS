@@ -12,6 +12,8 @@ using namespace mm;
 
 lock::spinlock Paging::lock;
 
+lib::map<void*, size_t> Paging::frameRefCount;
+
 void* Paging::tables = nullptr;
 
 Paging::Paging() {
@@ -188,6 +190,30 @@ int Paging::internalMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, 
 	return err;
 }
 
+int Paging::decRefCount(void* paddr) {
+	paddr = reinterpret_cast<void*>(math::roundDown(reinterpret_cast<uintptr_t>(paddr), PAGESIZE));
+	auto entry = frameRefCount.find(paddr);
+	if (entry == frameRefCount.end())
+		return -EINVAL;
+
+	auto ret = --entry->second;
+	if (ret == 0)
+		frameRefCount.erase(entry);
+
+	return ret;
+}
+
+int Paging::incRefCount(void* paddr) {
+	paddr = reinterpret_cast<void*>(math::roundDown(reinterpret_cast<uintptr_t>(paddr), PAGESIZE));
+	auto entry = frameRefCount.find(paddr);
+	if (entry == frameRefCount.end()) {
+		int ret = frameRefCount.emplace(paddr, 1);
+		return (ret == 0) ? 1 : ret;	
+	}
+
+	return ++entry->second;
+}
+
 int Paging::earlyMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
 	return internalMap<true>(vaddr, paddr, priv, prot, attr);
 }
@@ -308,7 +334,17 @@ int Paging::loadKernelMapping() {
 
 int Paging::map(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) {
 	lock.lock();
+	/* Increment reference count */
+	if (int ret = 0; (ret = incRefCount(paddr)) < 0)
+		return ret;
+
+	/* Map page */
 	auto ret = internalMap<false>(vaddr, paddr, priv, prot, attr);
+
+	/* In case of error, decrement counter again */
+	if (ret != 0)
+		decRefCount(paddr);
+
 	lock.unlock();
 	return ret;
 }
@@ -350,7 +386,15 @@ void* Paging::unmap(void* vaddr) {
 		tts[i - 1].setPresentBit(offs[i - 1], false);
 
 		/* Free frame */
-		frameAlloc.free(tts[i].getFrame());
+		if (i == 3) {
+			auto frame = tts[i].getFrame();
+			auto ref = decRefCount(frame);
+			if (ref == 0)
+				frameAlloc.free(tts[i].getFrame());
+
+		} else {
+			frameAlloc.free(tts[i].getFrame());
+		}
 	}
 
 	lock.unlock();
