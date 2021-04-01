@@ -30,6 +30,7 @@
 struct buddy_node_used {
 	size_t size;
 	bool used;
+	void* addr;
 	char *mem[0];
 } __attribute__((packed));
 
@@ -71,7 +72,7 @@ static size_t __size_to_index(size_t size) {
 
 /* Find associated buddy */
 static void *__find_buddy(void *ptr) {
-	struct buddy_node_used *buddy = (struct buddy_node_used *) ptr;
+	struct buddy_node_free *buddy = (struct buddy_node_free *) ptr;
 	uintptr_t offset = ((uintptr_t) ptr) - ((uintptr_t) __mem);
 	uintptr_t offset_buddy = offset ^ buddy->size;
 
@@ -229,15 +230,38 @@ static void *buddy_malloc(size_t size) {
 
 	struct buddy_node_used *ret = (struct buddy_node_used *) buddy;
 	ret->size = actual_size;
+	ret->addr = buddy;
 	ret->used = true;
 
 	return ret->mem;
 }
 
+static void *buddy_memalign(size_t alignment, size_t size) {
+	void* ret = buddy_malloc(alignment + size);
+	if (ret == nullptr)
+		return nullptr;
+
+	/* Get old header */
+	struct buddy_node_used* oldEntry = container_of(ret, struct buddy_node_used, mem);
+	assert(oldEntry->used == true);
+
+	/* Save old header */
+	struct buddy_node_used saved_header;
+	memcpy(&saved_header, oldEntry, sizeof(saved_header));
+
+	/* Get new header */
+	ret = reinterpret_cast<void*>(math::roundUp(reinterpret_cast<uintptr_t>(ret), alignment));
+	struct buddy_node_used* newEntry = container_of(ret, struct buddy_node_used, mem);
+
+	/* Write old header */
+	memcpy(newEntry, &saved_header, sizeof(*newEntry));
+
+	return ret;
+}
+
 static void buddy_free(void *ptr) {
 	if (ptr == nullptr)
 		return;
-
 
 	/* Get buddy */
 	struct buddy_node_used *used_buddy = container_of(ptr, struct buddy_node_used, mem);
@@ -249,7 +273,7 @@ static void buddy_free(void *ptr) {
 	assert(used_buddy->used == true);
 
 	/* Prepare free buddy */
-	struct buddy_node_free *free_buddy = (struct buddy_node_free *) used_buddy;
+	struct buddy_node_free *free_buddy = (struct buddy_node_free *) used_buddy->addr;
 	free_buddy->size = size;
 	free_buddy->used = false;
 	free_buddy->next = nullptr;
@@ -328,6 +352,13 @@ void *lib::calloc(size_t nmemb, size_t size) {
 void *lib::realloc(void *ptr, size_t size) {
 	allocLock.lock();
 	void *ret = buddy_realloc(ptr, size);
+	allocLock.unlock();
+	return ret;
+}
+
+void* lib::memalign(size_t alignment, size_t size) {
+	allocLock.lock();
+	void *ret = buddy_memalign(alignment, size);
 	allocLock.unlock();
 	return ret;
 }
