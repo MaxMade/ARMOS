@@ -9,10 +9,11 @@ using namespace thread;
 
 extern "C" void __context_switch(SavedContext* old, SavedContext* next);
 extern "C" void restore_current_el_sp_el0_sync_entry();
+extern "C" void __exit(int exit_value);
 
 Context::Context() : id(0), kernelStack(nullptr), userStack(nullptr), state(State::INVALID) { }
 
-void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr) {
+void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr) {
 	this->id = id;
 	this->kernelStack = kernelStack;
 	this->userStack = userStack;
@@ -25,6 +26,9 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	auto* kickoff = reinterpret_cast<irq::ExceptionContext*>(ptr);
 	memset(kickoff, 0, sizeof(*kickoff));
 
+	/* Set exit address */
+	kickoff->x30 = reinterpret_cast<uint64_t>(__exit);
+
 	/* Set kernel stack */
 	this->savedContext.sp = reinterpret_cast<uintptr_t>(ptr);
 
@@ -36,10 +40,11 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	userPtr += STACK_SIZE;
 	userPtr -= 8;
 	userPtr = math::roundDown(userPtr, 8);
+
 	kickoff->sp_el0 = userPtr;
 
 	/* Set ELR */
-	kickoff->elr_el1 = reinterpret_cast<uintptr_t>(retAddr);
+	kickoff->elr_el1 = reinterpret_cast<uintptr_t>(startAddr);
 
 	/* Set SPSR
 	 * [3:1] Exception Level
