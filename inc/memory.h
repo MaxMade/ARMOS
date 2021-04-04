@@ -137,6 +137,54 @@ namespace lib {
 			typename lib::add_lvalue_reference<T>::type operator*() const {
 				return *ptr;
 			}
+
+			/**
+			 * @fn bool operator==(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator==(const unique_ptr& o) const {
+				return *ptr == *o.ptr;
+			}
+
+			/**
+			 * @fn bool operator!=(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator!=(const unique_ptr& o) const {
+				return *ptr != *o.ptr;
+			}
+
+			/**
+			 * @fn bool operator<(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator<(const unique_ptr& o) const {
+				return *ptr < *o.ptr;
+			}
+
+			/**
+			 * @fn bool operator>(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator>(const unique_ptr& o) const {
+				return *ptr > *o.ptr;
+			}
+
+			/**
+			 * @fn bool operator<=(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator<=(const unique_ptr& o) const {
+				return *ptr <= *o.ptr;
+			}
+
+			/**
+			 * @fn bool operator>=(const unique_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator>=(const unique_ptr& o) const {
+				return *ptr >= *o.ptr;
+			}
 	};
 
 	template<typename T, typename... Args>
@@ -189,6 +237,28 @@ namespace lib {
 					delete val;
 					delete ref;
 				}
+			}
+
+			/**
+			 * @fn shared_ptr(const shared_ptr& r)
+			 * @brief Copy constructor
+			 */
+			shared_ptr(const shared_ptr& r) {
+				val = r.val;
+				ref = r.ref;
+				ref->fetch_add(1);
+			}
+
+			/**
+			 * @fn shared_ptr(shared_ptr&& r)
+			 * @brief Move constructor
+			 */
+			shared_ptr(shared_ptr&& r) {
+				val = r.val;
+				ref = r.ref;
+
+				r.val = nullptr;
+				r.ref = 0;
 			}
 
 			/**
@@ -259,8 +329,8 @@ namespace lib {
 			 * @brief Swap two shared_pointers
 			 */
 			void swap(shared_ptr& r) {
-				swap(this->val, r.val);
-				swap(this->ref, r.ref);
+				lib::swap(this->val, r.val);
+				lib::swap(this->ref, r.ref);
 			}
 
 			/**
@@ -268,6 +338,7 @@ namespace lib {
 			 * @brief Get underlying pointer
 			 */
 			T* get() const {
+				assert(use_count() >= 1);
 				return val;
 			}
 
@@ -276,6 +347,7 @@ namespace lib {
 			 * @brief Get underlying pointer
 			 */
 			T& operator*() const {
+				assert(use_count() >= 1);
 				return *val;
 			}
 
@@ -284,6 +356,7 @@ namespace lib {
 			 * @brief Get underlying pointer
 			 */
 			T* operator->() const {
+				assert(use_count() >= 1);
 				return val;
 			}
 
@@ -294,6 +367,72 @@ namespace lib {
 			size_t use_count() const {
 				auto ret = ref->load();
 				return ret;
+			}
+
+			/**
+			 * @fn bool operator==(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator==(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val == *o.val;
+			}
+
+			/**
+			 * @fn bool operator!=(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator!=(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val != *o.val;
+			}
+
+			/**
+			 * @fn bool operator<(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator<(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val < *o.val;
+			}
+
+			/**
+			 * @fn bool operator>(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator>(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val > *o.val;
+			}
+
+			/**
+			 * @fn bool operator<=(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator<=(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val <= *o.val;
+			}
+
+			/**
+			 * @fn bool operator>=(const shared_ptr& o) const
+			 * @brief Comparision operator
+			 */
+			bool operator>=(const shared_ptr& o) const {
+				assert(use_count() >= 1);
+				assert(o.use_count() >= 1);
+
+				return *val >= *o.val;
 			}
 	};
 

@@ -36,13 +36,27 @@ namespace driver {
 			lib::pair<void*, size_t> intConfig;
 
 			/**
+			 * @var NUM_MAILBOXES
+			 * @brief Number of mailboxes
+			 */
+			static const size_t NUM_MAILBOXES = 4;
+
+			/**
 			 * @var messages
 			 * @brief Buffered messages
 			 */
-			lib::atomic<uint32_t> messages[4];
+			lib::atomic<uint32_t> messages[NUM_MAILBOXES];
 
-			lib::atomic<size_t> msgCounter;
+			/**
+			 * @var replyFlags
+			 * @brief Reply flag
+			 */
+			lib::atomic_flag replyFlags[NUM_MAILBOXES];
 
+			/**
+			 * @var lock
+			 * @brief Synchronazation lock
+			 */
 			lock::spinlock lock;
 
 			/**

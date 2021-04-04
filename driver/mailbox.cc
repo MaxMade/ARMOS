@@ -32,13 +32,13 @@ int mailbox::init(const config& conf) {
 
 
 int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
-	(void) cpuID;
-	(void) msg;
+	if (cpuID == CPU::getProcessorID())
+		return -EINVAL;
 
 	lock.lock();
 
-	/* Save massage count (will be incremented by progolue) */
-	auto savedMsgCount = msgCounter.load();
+	/* Prepare reply flag */
+	replyFlags[cpuID].test_and_set();
 
 	int ret = 0;
 	if (cpuID == 0) {
@@ -47,53 +47,56 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	} else if (cpuID == 1) {
 		writeRegister<MAILBOX_WRITE_CORE_1>(static_cast<uint32_t>(msg));
 
-	} if (cpuID == 2) {
+	} else if (cpuID == 2) {
 		writeRegister<MAILBOX_WRITE_CORE_2>(static_cast<uint32_t>(msg));
 
-	} if (cpuID == 3) {
+	} else if (cpuID == 3) {
 		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
-
-	} else {
-		ret = -EINVAL;
 	}
 
 	/* Wait for update */
-	while(savedMsgCount == msgCounter.load());
+	while(replyFlags[cpuID].test_and_set());
 
 	lock.unlock();
 
-	return ret;;
+	return ret;
 }
 
 int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
+	lock.lock();
 	for (size_t i = 0; i < numHandlers; i++) {
 		/* Find valid entry */
 		if (!handlers[i].second.isValid()) {
 			/* Register handler */
 			handlers[i] = lib::pair(msg, lib::move(handler));
-			if (handlers[i].second.isValid())
+			if (handlers[i].second.isValid()) {
+				lock.unlock();
 				return 0;
+			}
 
 			/* Abort if registration failed */
+			lock.unlock();
 			return -ENOMEM;
 		}
 	}
 
+	lock.unlock();
 	return -ENOMEM;
 }
 
 void mailbox::enableIRQ(size_t core) {
-	if (core == 0)
+	if (core == 0) {
 		writeRegister<MAILBOX_IRQ_CORE_0>(1);
 
-	if (core == 1)
+	} else if (core == 1) {
 		writeRegister<MAILBOX_IRQ_CORE_1>(1);
 
-	if (core == 2)
+	} else if (core == 2) {
 		writeRegister<MAILBOX_IRQ_CORE_2>(1);
 
-	if (core == 3)
+	} else if (core == 3) {
 		writeRegister<MAILBOX_IRQ_CORE_3>(1);
+	}
 }
 
 int mailbox::prologue(irq::ExceptionContext* context) {
@@ -108,28 +111,26 @@ int mailbox::prologue(irq::ExceptionContext* context) {
 	if (cpuID == 0) {
 		msg = readRegister<MAILBOX_READ_CORE_0>();
 		writeRegister<MAILBOX_READ_CORE_0>(msg);
-	}
 
-	if (cpuID == 1) {
+	} else if (cpuID == 1) {
 		msg = readRegister<MAILBOX_READ_CORE_1>();
 		writeRegister<MAILBOX_READ_CORE_1>(msg);
-	}
 
-	if (cpuID == 2) {
+	} else if (cpuID == 2) {
 		msg = readRegister<MAILBOX_READ_CORE_2>();
 		writeRegister<MAILBOX_READ_CORE_2>(msg);
-	}
 
-	if (cpuID == 3) {
+	} else if (cpuID == 3) {
 		msg = readRegister<MAILBOX_READ_CORE_3>();
 		writeRegister<MAILBOX_READ_CORE_3>(msg);
 	}
 
-	/* Signal update */
-	msgCounter.fetch_add(1);
-
 	/* Buffer message for epilogue */
 	messages[cpuID].fetch_or(msg);
+
+	/* Signal update */
+	replyFlags[cpuID].clear();
+
 	return 1;
 }
 
@@ -138,23 +139,28 @@ int mailbox::epilogue() {
 	if (cpuID >= 4)
 		return -EINVAL;
 
-	uint32_t savedMsg = 0;
-	savedMsg = messages[cpuID].exchange(savedMsg);
+	lock.lock();
+	while(messages[cpuID].load()) {
+		for (size_t i = 0; i < numHandlers; i++) {
+			/* Check if valid handler */
+			auto isValid = handlers[i].second.isValid();
+			if (!isValid)
+				continue;
 
-	for (size_t i = 0; i < numHandlers; i++) {
-		lock.lock();
-		auto isValid = handlers[i].second.isValid();
-		lock.unlock();
-		if (!isValid)
-			continue;
+			/* Check if handler is pending */
+			if ((static_cast<uint32_t>(handlers[i].first) & messages[cpuID].load()) == 0)
+				continue;
 
-		if ((static_cast<uint32_t>(handlers[i].first) & savedMsg) == 0)
-			continue;
+			/* Execute handler */
+			lock.unlock();
+			auto ret = handlers[i].second();
+			if (ret != 0)
+				return ret;
 
-		auto ret = handlers[i].second();
-		if (ret != 0)
-			return ret;
+			lock.lock();
+		}
 	}
+	lock.unlock();
 
 	return 0;
 }

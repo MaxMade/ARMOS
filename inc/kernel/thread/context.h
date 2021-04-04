@@ -88,15 +88,15 @@ namespace thread {
 		public:
 			/**
 			 * @fn Context()
-			 * @brief Constructor
+			 * @brief Constructor for (invalid) context
 			 */
 			Context();
 
 			/**
-			 * @fn void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr)
-			 * @brief Initialize context
+			 * @fn Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg)
+			 * @brief Constructor
 			 */
-			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr);
+			Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
 
 			Context(const Context& other) = delete;
 
@@ -104,9 +104,15 @@ namespace thread {
 
 			/**
 			 * @fn ~Context()
-			 * @brief Destructor
+			 * @brief Delete Context und free user/kernel stack (while updating protection)
 			 */
 			~Context();
+
+			/**
+			 * @fn Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
+			 * @brief Initialize (invalid) context
+			 */
+			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
 
 			/**
 			 * @fn size_t getID() const
@@ -137,6 +143,42 @@ namespace thread {
 			 * @brief Get entry exception context
 			 */
 			irq::ExceptionContext* getExceptionContext() const;
+
+			/**
+			 * @fn bool operator==(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator==(const Context& o) const;
+
+			/**
+			 * @fn bool operator!=(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator!=(const Context& o) const;
+
+			/**
+			 * @fn bool operator<=(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator<=(const Context& o) const;
+
+			/**
+			 * @fn bool operator>=(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator>=(const Context& o) const;
+
+			/**
+			 * @fn bool operator<(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator<(const Context& o) const;
+
+			/**
+			 * @fn bool operator>(const Context& o) const
+			 * @brief Comparision based on ID
+			 */
+			bool operator>(const Context& o) const;
 
 			/**
 			 * @fn static void switching(Context* old, Context* next)
