@@ -187,12 +187,22 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Scheduler: Unable to create main thread");
 
 	/* Register RESCHEDULE IPI */
-	auto ipiHandler = []() -> int {
+	auto rescheduleHandler = []() -> int {
 		thread::scheduler.schedule();
 		return 0;
 	};
-	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::RESCHEDULE, lib::function<int()>(ipiHandler))))
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::RESCHEDULE, lib::function<int()>(rescheduleHandler))))
 		debug::panic::generate("Scheduler: Unable to register RESCHEDULE IPI");
+
+	/* Register HALT IPI */
+	auto haltHandler = []() -> int {
+		CPU::disableInterrupts();
+		while(1)
+			CPU::halt();
+		return 0;
+	};
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::HALT, lib::function<int()>(haltHandler))))
+		debug::panic::generate("Scheduler: Unable to register HALT IPI");
 
 	/* Prepare SMP */
 	if (thread::smp.start() != 0)
