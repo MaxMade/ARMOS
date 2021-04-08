@@ -38,6 +38,9 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	/* Prepare argument */
 	kickoff->x0 = reinterpret_cast<uint64_t>(arg);
 
+	/* Prepare thread ID */
+	kickoff->tpidr_el0 = id;
+
 	/* Set kernel stack */
 	this->savedContext.sp = reinterpret_cast<uintptr_t>(ptr);
 
