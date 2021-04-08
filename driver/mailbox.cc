@@ -35,12 +35,7 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	if (cpuID == CPU::getProcessorID())
 		return -EINVAL;
 
-	lock.lock();
 
-	/* Prepare reply flag */
-	replyFlags[cpuID].test_and_set();
-
-	int ret = 0;
 	if (cpuID == 0) {
 		writeRegister<MAILBOX_WRITE_CORE_0>(static_cast<uint32_t>(msg));
 
@@ -54,33 +49,22 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
 	}
 
-	/* Wait for update */
-	while(replyFlags[cpuID].test_and_set());
-
-	lock.unlock();
-
-	return ret;
+	return 0;
 }
 
 int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
-	lock.lock();
 	for (size_t i = 0; i < numHandlers; i++) {
 		/* Find valid entry */
 		if (!handlers[i].second.isValid()) {
 			/* Register handler */
 			handlers[i] = lib::pair(msg, lib::move(handler));
-			if (handlers[i].second.isValid()) {
-				lock.unlock();
+			if (handlers[i].second.isValid())
 				return 0;
-			}
 
 			/* Abort if registration failed */
-			lock.unlock();
 			return -ENOMEM;
 		}
 	}
-
-	lock.unlock();
 	return -ENOMEM;
 }
 
@@ -106,7 +90,7 @@ int mailbox::prologue(irq::ExceptionContext* context) {
 	if (cpuID >= 4)
 		return -EINVAL;
 
-	/* Read message and aknowledge interrupt */
+	/* Read message and acknowledge interrupt */
 	uint32_t msg = 0;
 	if (cpuID == 0) {
 		msg = readRegister<MAILBOX_READ_CORE_0>();
@@ -128,9 +112,6 @@ int mailbox::prologue(irq::ExceptionContext* context) {
 	/* Buffer message for epilogue */
 	messages[cpuID].fetch_or(msg);
 
-	/* Signal update */
-	replyFlags[cpuID].clear();
-
 	return 1;
 }
 
@@ -139,28 +120,33 @@ int mailbox::epilogue() {
 	if (cpuID >= 4)
 		return -EINVAL;
 
-	lock.lock();
-	while(messages[cpuID].load()) {
+	while (messages[cpuID].load()) {
+		int performedHandlers = 0;
+
 		for (size_t i = 0; i < numHandlers; i++) {
 			/* Check if valid handler */
 			auto isValid = handlers[i].second.isValid();
 			if (!isValid)
 				continue;
 
-			/* Check if handler is pending */
-			if ((static_cast<uint32_t>(handlers[i].first) & messages[cpuID].load()) == 0)
+			/* Check if handler is pending otherwise continue */
+			auto handleredMsg = static_cast<uint32_t>(handlers[i].first);
+			if ((messages[cpuID].fetch_and(~handleredMsg) & handleredMsg) == 0)
 				continue;
 
+			/* Mark progress */
+			performedHandlers++;
+
 			/* Execute handler */
-			lock.unlock();
 			auto ret = handlers[i].second();
 			if (ret != 0)
 				return ret;
-
-			lock.lock();
 		}
+
+		/* Check if a suitable handler was found */
+		if (performedHandlers == 0)
+			return -EINVAL;
 	}
-	lock.unlock();
 
 	return 0;
 }
