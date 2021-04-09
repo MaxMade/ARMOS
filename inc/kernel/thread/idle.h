@@ -30,11 +30,6 @@ namespace thread {
 			 */
 			Context threads[MAX_NUM_CPUS];
 
-			/**
-			 * @var stacks
-			 * @brief Stack of the idle threads
-			 */
-			char stacks[MAX_NUM_CPUS][STACK_SIZE];
 
 		public:
 			/**

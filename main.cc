@@ -58,6 +58,7 @@ namespace irq {
 Symbols symbols;
 
 thread::Context mainThread;
+static char mainThreadUserStack[STACK_SIZE] __attribute__((section(".app.data"), aligned(PAGESIZE)));
 
 extern "C" int main();
 
@@ -183,7 +184,7 @@ int kernelMain(void *fdt) {
 	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
 	/* Prepare Schedulder */
-	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) main, nullptr)))
+	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) main, nullptr, mainThreadUserStack)))
 		debug::panic::generate("Scheduler: Unable to create main thread");
 
 	/* Register RESCHEDULE IPI */

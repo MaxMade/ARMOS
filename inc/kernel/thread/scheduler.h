@@ -51,14 +51,14 @@ namespace thread {
 			Scheduler(Scheduler&& o) = delete;
 
 			/**
-			 * @fn int create(void* (*start_routine)(void*), void* arg)
-			 * @brief Create new thread with given \c start_routine and \c arg
+			 * @fn int create(void* (*start_routine)(void*), void* arg, void *user_stack)
+			 * @brief Create new thread with given \c start_routine and \c arg using \c user_stack
 			 * @return
 			 *
-			 *	-  0 - Success
-			 *	- <0 - Failure (-errno)
+			 *	-  >=0 - Success (Thread ID)
+			 *	-   <0 - Failure (-errno)
 			 */
-			int create(void* (*start_routine)(void*), void* arg);
+			int create(void* (*start_routine)(void*), void* arg, void *user_stack);
 
 			/**
 			 * @fn lib::shared_ptr<Context> getActive()

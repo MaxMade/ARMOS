@@ -18,15 +18,14 @@ extern "C" void __context_kickoff();
 
 Context::Context() : id(0), kernelStack(nullptr), userStack(nullptr), state(State::INVALID) { }
 
-Context::Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg) {
-	init(id, kernelStack, userStack, kernel, startAddr, arg);
-}
+int Context::init(size_t id, bool kernel, void* startAddr, void* arg, void* userStack) {
+	this->kernelStack = reinterpret_cast<void*>(lib::malloc(STACK_SIZE));
+	if (this->kernelStack == nullptr)
+		return -ENOMEM;
 
-void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg) {
-	/* Update properties of the context */
 	this->id = id;
-	this->kernelStack = kernelStack;
 	this->userStack = userStack;
+	this->state = State::CREATED;
 
 	/* Prepare kickoff pointer */
 	auto ptr =  reinterpret_cast<uintptr_t>(kernelStack);
@@ -96,19 +95,11 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 		kickoff->spsr_el1 = 0x0000;
 	}
 
-	state = State::CREATED;
+	return 0;
 }
 
 Context::~Context() {
-	mm::Paging paging;
-	auto pages = reinterpret_cast<char*>(userStack);
-	for (size_t i = 0; i < STACK_SIZE / PAGESIZE; i++) {
-		auto ret = paging.protect(&pages[i * PAGESIZE], mm::Paging::KERNEL_MAPPING, mm::Paging::WRITABLE, mm::Paging::NORMAL_ATTR);
-		assert(!isError(ret));
-		CPU::invalidatePage(&pages[i * PAGESIZE]);
-	}
 	lib::free(kernelStack);
-	lib::free(userStack);
 }
 
 
