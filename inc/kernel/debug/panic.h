@@ -16,18 +16,18 @@ namespace debug::panic {
 	int init();
 
 	/**
-	 * @fn void generate(const char msg[])
+	 * @fn void generate(const char msg[], int error = 0)
 	 * @brief Generate panic
 	 * @warning This will stop the whole system
 	 */
-	void generate(const char msg[]);
+	[[noreturn]] void generate(const char msg[], int error = 0);
 
 	/**
-	 * @fn void generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext)
+	 * @fn void generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext, int error = 0)
 	 * @brief Generate panic (as viewed in exceptionContext)
 	 * @warning This will stop the whole system
 	 */
-	void generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext);
+	[[noreturn]] void generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext, int error = 0);
 }
 
 #endif /* ifndef _INC_KERNEL_DEBUG_PANIC_H_ */
