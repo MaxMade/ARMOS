@@ -13,6 +13,7 @@
  */
 
 /* Outermost frames */
+extern "C" int main();
 extern int kernelMain(void *fdt);
 extern int kernelMainApp();
 extern "C" void current_el_sp_el0_sync(void* saved_state);
@@ -87,7 +88,9 @@ namespace debug {
 
 			/* Check if outermost frame is reached */
 			uintptr_t funcAddress = reinterpret_cast<uintptr_t>(addr) - sym.second;
-			if (funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+			if (funcAddress == reinterpret_cast<uintptr_t>(main) ||
+				funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+				funcAddress == reinterpret_cast<uintptr_t>(kernelMainApp) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_sync) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_irq) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_fiq) ||
@@ -156,6 +159,8 @@ namespace debug {
 		/* Print newline */
 		stream << "\n\r";
 
+		if (fp == 0)
+			return;
 		func_prolog* frame = reinterpret_cast<func_prolog*>(fp);
 		for (size_t i = 1; i < maxFrames; i++) {
 			addr = frame->lr;
@@ -180,7 +185,9 @@ namespace debug {
 
 			/* Check if outermost frame is reached */
 			uintptr_t funcAddress = reinterpret_cast<uintptr_t>(addr) - sym.second;
-			if (funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+			if (funcAddress == reinterpret_cast<uintptr_t>(main) ||
+				funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+				funcAddress == reinterpret_cast<uintptr_t>(kernelMainApp) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_sync) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_irq) ||
 				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_fiq) ||
