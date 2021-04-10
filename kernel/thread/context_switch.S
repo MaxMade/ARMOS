@@ -1,4 +1,8 @@
 .global __context_switch
+.global __context_kickoff
+
+.extern __unlock_global_scheduler
+.extern restore_current_el_sp_el0_sync_entry
 
 /**
  * @file kernel/thread/context_switch.S
@@ -47,3 +51,11 @@ __context_switch:
 	ldp x19, x20, [x1, 0x00]
 
 	ret
+
+/* void __context_kickoff
+ * Perform __unlock_global_scheduler and update stack pointer according to x19.
+ */
+__context_kickoff:
+	bl __unlock_global_scheduler
+	mov sp, x19
+	b restore_current_el_sp_el0_sync_entry

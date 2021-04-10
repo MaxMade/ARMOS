@@ -108,19 +108,32 @@ void Scheduler::schedule() {
 	auto ret = queue.pop_front();
 	assert(ret);
 
+	/* Update state */
+	thread->setState(State::RUNNING);
+
 	/* Get current thread */
 	if (static_cast<bool>(activeThreads.get())) {
+		activeThreads.get()->setState(State::WAITING);
 		thread.swap(activeThreads.get());
-		assert(queue.push_back(thread));
-		lock.unlock();
+		if (auto ret = queue.push_back(thread); isError(ret))
+			debug::panic::generate("Unable to enqueue thread into ready queue", ret);
+
 
 		Context::switching(thread.get(), activeThreads.get().get());
 
 	} else {
 		thread.swap(activeThreads.get());
-		lock.unlock();
-
 		Context tmpContext;
 		Context::switching(&tmpContext, activeThreads.get().get());
 	}
+
+	lock.unlock();
+}
+
+void Scheduler::__unlock() {
+	lock.unlock();
+}
+
+extern "C" void __unlock_global_scheduler() {
+	scheduler.__unlock();
 }

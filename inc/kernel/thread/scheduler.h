@@ -79,6 +79,13 @@ namespace thread {
 			 * @brief Imitate context switch
 			 */
 			void schedule();
+
+			/**
+			 * @fn void __unlock()
+			 * @brief Manually unlock scheduler
+			 * @warning This function mustn't be called directly
+			 */
+			void __unlock();
 	};
 
 	/**
@@ -86,6 +93,14 @@ namespace thread {
 	 * @brief Global Scheduler Object
 	 */
 	extern Scheduler scheduler;
+
 } /* namespace thread */
+
+/**
+* @fn extern "C" void __unlock_global_scheduler()
+* @brief Manually unlock global scheduler
+* @warning This function mustn't be called directly
+*/
+extern "C" void __unlock_global_scheduler();
 
 #endif /* ifndef _INC_KERNEL_THREAD_SCHEDULER_H_ */
