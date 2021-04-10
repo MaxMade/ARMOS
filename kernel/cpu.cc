@@ -88,3 +88,7 @@ void CPU::wakeup() {
 void CPU::dataBarrier() {
 	asm("dsb sy");
 }
+
+size_t CPU::getStackAlignment() {
+	return 16;
+}

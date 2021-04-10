@@ -100,6 +100,12 @@ namespace CPU {
 	 */
 	void dataBarrier();
 
+	/**
+	 * @fn size_t getStackAlignment()
+	 * @brief Get required stack alignment
+	 */
+	size_t getStackAlignment();
+
 } /* namespace CPU */
 
 #endif /* ifndef _INC_KERNEL_CPU_H_ */
