@@ -18,7 +18,7 @@ int Softirq::init() {
 	drivers = new driver::generic_driver*[numCPUs * numDrivers];
 	if (drivers == nullptr)
 		return -ENOMEM;
-	memset(drivers, 0, sizeof(void*) * numCPUs * numDrivers);
+	lib::memset(drivers, 0, sizeof(void*) * numCPUs * numDrivers);
 
 	return 0;
 }

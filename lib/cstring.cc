@@ -1,6 +1,6 @@
 #include <cstring.h>
 
-void* memchr(const void* s, int c, size_t n) {
+void* lib::memchr(const void* s, int c, size_t n) {
 	for (size_t i = 0; i < n; i++) {
 		if (reinterpret_cast<const unsigned char*>(s)[i] == static_cast<unsigned char>(c))
 			return (void*) &((char*) s)[i];
@@ -9,7 +9,7 @@ void* memchr(const void* s, int c, size_t n) {
 	return NULL;
 }
 
-int memcmp(const void* s1, const void* s2, size_t n) {
+int lib::memcmp(const void* s1, const void* s2, size_t n) {
 	for (size_t i = 0; i < n; i++) {
 		char c1 = reinterpret_cast<const char*>(s1)[i];
 		char c2 = reinterpret_cast<const char*>(s2)[i];
@@ -24,13 +24,13 @@ int memcmp(const void* s1, const void* s2, size_t n) {
 	return 0;
 }
 
-void* memcpy(void* dest, const void* src, size_t n) {
+void* lib::memcpy(void* dest, const void* src, size_t n) {
 	for (size_t i = 0; i < n; i++)
 		reinterpret_cast<char*>(dest)[i] = reinterpret_cast<const char*>(src)[i];
 	return dest;
 }
 
-void* memmove(void* dest, const void* src, size_t n) {
+void* lib::memmove(void* dest, const void* src, size_t n) {
 	char* d = reinterpret_cast<char*>(dest);
 	const char* s = reinterpret_cast<char const*>(src);
 
@@ -47,14 +47,14 @@ void* memmove(void* dest, const void* src, size_t n) {
 	return dest;
 }
 
-void* memset(void* dest, int c, size_t n) {
+void* lib::memset(void* dest, int c, size_t n) {
 	for (size_t i = 0; i < n; i++)
 		reinterpret_cast<char*>(dest)[i] = (char) c;
 
 	return dest;
 }
 
-char* strcat(char* dest, const char* src) {
+char* lib::strcat(char* dest, const char* src) {
 	size_t i = 0;
 	size_t j = 0;
 	char* d = reinterpret_cast<char*>(dest);
@@ -70,7 +70,7 @@ char* strcat(char* dest, const char* src) {
 	return dest;
 }
 
-char* strncat(char* dest, const char* src, size_t n) {
+char* lib::strncat(char* dest, const char* src, size_t n) {
 	size_t i = 0;
 	size_t j = 0;
 	char* d = reinterpret_cast<char*>(dest);
@@ -86,7 +86,7 @@ char* strncat(char* dest, const char* src, size_t n) {
 	return dest;
 }
 
-int strcmp(const char* s1, const char* s2) {
+int lib::strcmp(const char* s1, const char* s2) {
 	while(*s1 && (*s1 ==* s2)) {
 		s1++;
 		s2++;
@@ -95,7 +95,7 @@ int strcmp(const char* s1, const char* s2) {
 	return* reinterpret_cast<const unsigned char*>(s1) -* reinterpret_cast<const unsigned char*>(s2);
 }
 
-int strncmp(const char* s1, const char* s2, size_t n) {
+int lib::strncmp(const char* s1, const char* s2, size_t n) {
 	while (n &&* s1 && (*s1 ==* s2)) {
 		++s1;
 		++s2;
@@ -108,7 +108,7 @@ int strncmp(const char* s1, const char* s2, size_t n) {
 	return* reinterpret_cast<const unsigned char*>(s1) -* reinterpret_cast<const unsigned char*>(s2);
 }
 
-char* strcpy(char* dest, const char* src) {
+char* lib::strcpy(char* dest, const char* src) {
 	char* ret = dest;
 
 	while ((*dest++ =* src++));
@@ -116,7 +116,7 @@ char* strcpy(char* dest, const char* src) {
 	return ret;
 }
 
-char* strncpy(char* dest, const char* src, size_t n) {
+char* lib::strncpy(char* dest, const char* src, size_t n) {
 	char* ret = dest;
 
 	while (n-- && (*dest++ =* src++));
@@ -124,7 +124,7 @@ char* strncpy(char* dest, const char* src, size_t n) {
 	return ret;
 }
 
-size_t strlen(const char* s) {
+size_t lib::strlen(const char* s) {
 	size_t ret = 0;
 
 	while (s[ret] != '\0')
@@ -133,7 +133,7 @@ size_t strlen(const char* s) {
 	return ret;
 }
 
-size_t strnlen(const char* s, size_t n) {
+size_t lib::strnlen(const char* s, size_t n) {
 	size_t ret = 0;
 
 	while (n-- && s[ret] != '\0')
@@ -142,7 +142,7 @@ size_t strnlen(const char* s, size_t n) {
 	return ret;
 }
 
-char* strchr(const char* s, int c) {
+char* lib::strchr(const char* s, int c) {
 	for (size_t i = 0; s[i] != '\0'; i++) {
 		if (s[i] == c)
 			return const_cast<char*>(&s[i]);
@@ -287,7 +287,7 @@ static const char* error_strings[] = {
 	"Memory page has hardware error",
 };
 
-char* strerror(int errnum) {
+char* lib::strerror(int errnum) {
 	if (errnum <= 0 || errnum > 133 || errnum == 41 || errnum == 58)
 		return nullptr;
 

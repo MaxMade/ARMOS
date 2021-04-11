@@ -7,7 +7,7 @@ using namespace driver;
 
 
 CPU::CPU(const char* name, void* spintable) {
-	strncpy(this->name, name, nameLen);
+	lib::strncpy(this->name, name, nameLen);
 	this->spintable = spintable;
 }
 

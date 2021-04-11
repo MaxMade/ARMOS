@@ -63,7 +63,7 @@ driver::config Parser::findConfig(const driver::generic_driver& driver) const {
 			continue;
 
 		/* Check if node is compatible with driver */
-		if (strcmp(name, compatible.first) != 0)
+		if (lib::strcmp(name, compatible.first) != 0)
 			continue;
 
 		/******************************

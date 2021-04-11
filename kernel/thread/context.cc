@@ -33,7 +33,7 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	ptr -= sizeof(irq::ExceptionContext);
 	ptr = math::roundDown(ptr, CPU::getStackAlignment());
 	auto* kickoff = reinterpret_cast<irq::ExceptionContext*>(ptr);
-	memset(kickoff, 0, sizeof(*kickoff));
+	lib::memset(kickoff, 0, sizeof(*kickoff));
 
 	/* Set exit address */
 	kickoff->x30 = reinterpret_cast<uint64_t>(__exit);
