@@ -30,6 +30,13 @@ int Scheduler::create(void* (*start_routine)(void*), void* arg) {
 	if (auto it = threads.begin(); it != threads.end()) {
 		id = it->first;
 	}
+	id++;
+
+	if (id >= MAX_TID) {
+		lib::free(kernelStack);
+		lock.unlock();
+		return -ENOSPC;
+	}
 
 
 	/* Allocate new Context */

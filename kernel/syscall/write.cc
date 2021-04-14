@@ -1,13 +1,15 @@
 #include <unistd.h>
 #include <cerrno.h>
 #include <ostream.h>
+#include <kernel/errno.h>
 #include <kernel/syscall/write.h>
 #include <kernel/syscall/syscall.h>
+#include <kernel/thread/scheduler.h>
 
 ssize_t syscall::write(int fd, const void* buf, size_t count) {
 	/* Currently only stdout is supported */
 	if (fd != STDOUT_FILENO)
-		return EBADF;
+		return -EBADF;
 
 	lib::ostream cout;
 
@@ -28,9 +30,16 @@ void syscall::__write(irq::ExceptionContext* irq) {
 	auto readable = syscall::isReadable(buf, count);
 
 	/* Perform actual write */
-	ssize_t ret = EFAULT;
+	ssize_t ret = -EFAULT;
 	if (readable)
 		ret = write(fd, buf, count);
+
+	/* Update errno if necessary */
+	if (ret < 0) {
+		auto curThread = thread::scheduler.getActive();
+		__errnos[curThread->getID()] = -ret;
+		ret = -1;
+	}
 
 	/* Save return value */
 	syscall::setSyscallRetValue(irq, ret);
