@@ -35,6 +35,10 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	if (cpuID == CPU::getProcessorID())
 		return -EINVAL;
 
+	if (static_cast<int>(msg) == 0)
+		return -EINVAL;
+
+	lock.lock();
 
 	if (cpuID == 0) {
 		writeRegister<MAILBOX_WRITE_CORE_0>(static_cast<uint32_t>(msg));
@@ -48,6 +52,10 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	} else if (cpuID == 3) {
 		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
 	}
+
+	while (messages[cpuID].load() == 0);
+
+	lock.unlock();
 
 	return 0;
 }
