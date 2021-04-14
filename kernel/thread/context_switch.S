@@ -1,7 +1,7 @@
 .global __context_switch
 .global __context_kickoff
 
-.extern __unlock_global_scheduler
+.extern __unlock_for_kickoff
 .extern restore_current_el_sp_el0_sync_entry
 
 /**
@@ -53,9 +53,9 @@ __context_switch:
 	ret
 
 /* void __context_kickoff
- * Perform __unlock_global_scheduler and update stack pointer according to x19.
+ * Perform __unlock_for_kickoff and update stack pointer according to x19.
  */
 __context_kickoff:
-	bl __unlock_global_scheduler
+	bl __unlock_for_kickoff
 	mov sp, x19
 	b restore_current_el_sp_el0_sync_entry

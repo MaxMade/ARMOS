@@ -189,4 +189,11 @@ namespace thread {
 
 } /* namespace thread */
 
+/**
+* @fn extern "C" void __unlock_for_kickoff()
+* @brief Unlock scheduler and sofirq for initial kickoff
+* @warning This function should be never called directly!
+*/
+extern "C" void __unlock_for_kickoff();
+
 #endif /* ifndef _INC_KERNEL_THREAD_CONTEXT_H_ */
