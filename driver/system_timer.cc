@@ -4,6 +4,7 @@
 #include <driver/cpu.h>
 #include <driver/drivers.h>
 #include <driver/system_timer.h>
+#include <kernel/thread/smp.h>
 #include <kernel/thread/scheduler.h>
 
 using namespace driver;
@@ -103,7 +104,7 @@ int system_timer::epilogue() {
 	lock.unlock();
 
 	/* Send IPIs to remaining cores */
-	auto numCPUs = driver::cpus.numCPUs();
+	auto numCPUs = thread::smp.getRegisteredCPUS();
 	for (size_t i = 1; i < numCPUs; i++) {
 		driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::RESCHEDULE);
 	}
