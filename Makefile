@@ -11,6 +11,7 @@ IMAGE        = boot/kernel8.img
 LINKER       = boot/sections.ld
 DTB          = boot/rpi3.dtb
 APP          = busy_loop
+LOGS         = serial0.log serial1.log
 
 #########################
 # List of Prerequisites #
@@ -57,7 +58,10 @@ LDFLAGS = -nostartfiles -T $(LINKER)
 ########
 
 QEMU = qemu-system-aarch64
-QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -serial vc -kernel $(IMAGE) -dtb $(DTB)
+QEMUFLAGS = -machine raspi3 -m 1G -smp 4 \
+			-chardev vc,id=char0,logfile=serial0.log -chardev vc,id=char1,logfile=serial1.log \
+			-serial chardev:char0 -serial chardev:char1 \
+			-kernel $(IMAGE) -dtb $(DTB)
 
 #######
 # GDB #
@@ -135,7 +139,7 @@ debug:
 
 clean:
 	@echo "RM"
-	$(VERBOSE) rm -rf $(shell find -name "*.o") $(KERNEL) $(IMAGE) $(SYM_MAP)
+	$(VERBOSE) rm -rf $(shell find -name "*.o") $(KERNEL) $(IMAGE) $(SYM_MAP) $(LOGS)
 
 tags:
 	@echo "TAGS"
