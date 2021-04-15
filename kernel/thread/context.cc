@@ -76,10 +76,6 @@ int Context::init(size_t id, bool kernel, void* startAddr, void* arg, void* user
 
 	/* Set user stack */
 	auto userPtr = reinterpret_cast<uintptr_t>(userStack);
-	userPtr += STACK_SIZE;
-	userPtr -= CPU::getStackAlignment();
-	userPtr = math::roundDown(userPtr, CPU::getStackAlignment());
-
 	kickoff->sp_el0 = userPtr;
 
 	/* Set ELR */
