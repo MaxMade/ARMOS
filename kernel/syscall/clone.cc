@@ -58,7 +58,7 @@ int syscall::clone(int (*fn)(void *), void *stack, int flags, void* arg) {
 	if ((flags & lib::CLONE_IO) != 0)
 		return -EINVAL;
 
-	return thread::scheduler.create((void* (*)(void*)) (void*) fn, stack, arg);
+	return thread::scheduler.create((void* (*)(void*)) (void*) fn, arg, stack);
 }
 
 void syscall::__clone(irq::ExceptionContext* irq) {
