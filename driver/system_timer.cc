@@ -101,8 +101,8 @@ int system_timer::epilogue() {
 
 	/* Send IPIs to remaining cores */
 	auto numCPUs = thread::smp.getRegisteredCPUS();
-	for (size_t i = 1; i < numCPUs; i++) {
-		driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::RESCHEDULE);
+	for (size_t i = 0; i < numCPUs; i++) {
+		driver::ipi.sendIPI(1 + i, driver::IPI::IPI_MSG::RESCHEDULE);
 	}
 
 	/* Schedule */
