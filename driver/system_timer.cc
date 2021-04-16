@@ -47,7 +47,7 @@ int system_timer::windup(size_t ms) {
 	return 0;
 }
 
-int system_timer::registerFunction(size_t ms, lib::function<int(void)> callback) {
+int system_timer::registerFunction(size_t ms, int (*callback)()) {
 	lock.lock();
 	if (idxCallback == MAX_CALLBACKS) {
 		lock.unlock();
@@ -55,13 +55,9 @@ int system_timer::registerFunction(size_t ms, lib::function<int(void)> callback)
 	}
 
 	size_t numTicks = math::roundUp(ms, intv) / intv;
-	callbacks[idxCallback] = lib::pair(numTicks, lib::move(callback));
-	if (!callbacks[idxCallback].second.isValid()) {
-		lock.unlock();
-		return -ENOMEM;
-	}
-
+	callbacks[idxCallback] = lib::pair(numTicks, callback);
 	idxCallback++;
+
 	lock.unlock();
 	return 0;
 }
@@ -94,14 +90,14 @@ int system_timer::prologue(irq::ExceptionContext* context) {
 
 int system_timer::epilogue() {
 	/* Call handlers */
-	lock.lock();
 	for (size_t i = 0; i < MAX_CALLBACKS; i++) {
-		auto& callback = callbacks[i];
-		if (ticks.load() % callback.first == 0) {
-			callback.second();
+		if (callbacks[i].second == nullptr)
+			continue;
+
+		if (ticks.load() % callbacks[i].first == 0) {
+			callbacks[i].second();
 		}
 	}
-	lock.unlock();
 
 	/* Send IPIs to remaining cores */
 	auto numCPUs = thread::smp.getRegisteredCPUS();

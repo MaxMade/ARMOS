@@ -97,7 +97,7 @@ namespace driver {
 			 * @var callbacks
 			 * @brief Pair of number of (needed) ticks and the actual callback
 			 */
-			lib::pair<size_t, lib::function<int(void)>> callbacks[MAX_CALLBACKS];
+			lib::pair<size_t, int (*)()> callbacks[MAX_CALLBACKS];
 
 			/**
 			 * @var idxCallback
@@ -146,7 +146,7 @@ namespace driver {
 			size_t getTicks() const;
 
 			/**
-			 * @fn int registerFunction(size_t ms, lib::function<int(void)> callback)
+			 * @fn int registerFunction(size_t ms, int (*callback)())
 			 * @brief Register callback which is executed in a regular interval
 			 * @warning ms must be multiple of interval
 			 * @return
@@ -154,7 +154,7 @@ namespace driver {
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int registerFunction(size_t ms, lib::function<int(void)> callback);
+			int registerFunction(size_t ms, int (*callback)());
 
 			/**
 			 * @fn int prologue(irq::ExceptionContext* context) override

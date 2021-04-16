@@ -22,7 +22,7 @@ size_t generic_timer::getTicks() const {
 	return -ENXIO;
 }
 
-int generic_timer::registerFunction(size_t ms, lib::function<int(void)> callback) {
+int generic_timer::registerFunction(size_t ms, int (*callback)()) {
 	(void) ms;
 	(void) callback;
 
