@@ -67,6 +67,16 @@ namespace thread {
 			int create(void* (*start_routine)(void*), void* arg, void *user_stack);
 
 			/**
+			 * @fn int enqueue(lib::shared_ptr<Context> thread)
+			 * @brief Enqueue blocked thread
+			 * @return
+			 *
+			 *	-   0 - Success
+			 *	-  <0 - Failure (-errno)
+			 */
+			int enqueue(lib::shared_ptr<Context> thread);
+
+			/**
 			 * @fn lib::shared_ptr<Context> getActive()
 			 * @brief Get currently active thread
 			 * @warning In case of idlethreads, static_cast<bool>(getActive) will evaluate to false
