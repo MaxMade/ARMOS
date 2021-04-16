@@ -100,9 +100,17 @@ namespace driver {
 			 */
 			void enableIRQ(size_t core);
 
-			static const size_t numHandlers = 4;
+			/**
+			 * @var NUM_HANDLER
+			 * @brief Number of supported handlers
+			 */
+			static const size_t NUM_HANDLERS = 4;
 
-			lib::pair<IPI_MSG, lib::function<int()>> handlers[numHandlers];
+			/**
+			 * @var handlers
+			 * @brief List of registered handlers
+			 */
+			lib::pair<IPI_MSG, int (*)()> handlers[NUM_HANDLERS];
 
 		public:
 			/**
@@ -132,11 +140,11 @@ namespace driver {
 			int sendIPI(size_t cpuID, IPI_MSG msg);
 
 			/**
-			 * @fn int registerHandler(IPI_MSG msg, lib::function<int()> handler)
+			 * @fn int registerHandler(IPI_MSG msg, int (*handler)())
 			 * @brief Register Handler for specific value
 			 * @warning This function should be only used in early boot (before SMP startup)
 			 */
-			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
+			int registerHandler(IPI_MSG msg, int (*handler)());
 
 			/**
 			 * @fn int prologue(irq::ExceptionContext* context) override
