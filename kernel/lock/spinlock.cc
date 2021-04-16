@@ -17,3 +17,7 @@ bool spinlock::tryLock() {
 void spinlock::unlock() {
 	lock_flag.clear();
 }
+
+extern "C" void __unlock_spinlock(lock::spinlock* lock) {
+	lock->unlock();
+}

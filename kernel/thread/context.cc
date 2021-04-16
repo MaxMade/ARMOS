@@ -13,7 +13,7 @@ using namespace thread;
 
 extern "C" void restore_current_el_sp_el0_sync_entry();
 extern "C" void __exit(int exit_value);
-extern "C" void __context_switch(SavedContext* old, SavedContext* next);
+extern "C" void __context_switch(SavedContext* old, SavedContext* next, lock::spinlock* lock);
 extern "C" void __context_kickoff();
 
 Context::Context() : id(0), kernelStack(nullptr), userStack(nullptr), state(State::INVALID) { }
@@ -143,8 +143,8 @@ bool Context::operator>(const Context& o) const {
 	return id > o.id;
 }
 
-void Context::switching(Context* old, Context* next) {
-	__context_switch(&old->savedContext, &next->savedContext);
+void Context::switching(Context* old, Context* next, lock::spinlock* lock) {
+	__context_switch(&old->savedContext, &next->savedContext, lock);
 }
 
 extern "C" void __unlock_for_kickoff() {

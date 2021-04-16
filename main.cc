@@ -257,7 +257,7 @@ int kernelMainApp() {
 	/* Preform initial context switch */
 	thread::Context tmpContext;
 	auto& idleThread = thread::idleThreads.get();
-	thread::Context::switching(&tmpContext, &idleThread);
+	thread::Context::switching(&tmpContext, &idleThread, nullptr);
 
 	debug::panic::generate("End of kernelMain must never be reached!");
 	return -1;

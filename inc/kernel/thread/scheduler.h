@@ -39,6 +39,12 @@ namespace thread {
 			 */
 			lock::spinlock lock;
 
+			/**
+			 * @fn void __schedule(lock::spinlock* lock)
+			 * @brief Internal schedule call
+			 */
+			void __schedule(lock::spinlock* lock);
+
 		public:
 			/**
 			 * @fn Scheduler()
@@ -76,9 +82,15 @@ namespace thread {
 
 			/**
 			 * @fn void schedule()
-			 * @brief Imitate context switch
+			 * @brief Initiate context switch
 			 */
 			void schedule();
+
+			/**
+			 * @fn void schedule(lock::spinlock& lock)
+			 * @brief Initiate context switch and unlock spinlock
+			 */
+			void schedule(lock::spinlock& lock);
 
 			/**
 			 * @fn void __unlock()
