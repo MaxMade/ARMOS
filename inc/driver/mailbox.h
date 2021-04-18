@@ -101,7 +101,7 @@ namespace driver {
 			void enableIRQ(size_t core);
 
 			/**
-			 * @var NUM_HANDLER
+			 * @var NUM_HANDLERS
 			 * @brief Number of supported handlers
 			 */
 			static const size_t NUM_HANDLERS = 4;
