@@ -1,19 +1,18 @@
-PROJECT_NAME            = "ARMOS"
+PROJECT_NAME            = "ARMOS Kernel Space"
 
-INPUT                   = ./
+INPUT                   = ./inc/
 RECURSIVE               = yes
 FILE_PATTERNS           = *.h *.md
 OUTPUT_DIRECTORY        = doc/build/
 OPTIMIZE_OUTPUT_FOR_C   = yes
 LOOKUP_CACHE_SIZE       = 9
 QUIET                   = yes
-WARNINGS                = no
 
 CITE_BIB_FILES          = doc/refernces.bib
 GENERATE_LATEX          = no
 
 GENERATE_HTML           = yes
-HTML_OUTPUT             = ./
+HTML_OUTPUT             = kernel/
 
 SORT_MEMBER_DOCS        = no
 INLINE_SIMPLE_STRUCTS   = yes
