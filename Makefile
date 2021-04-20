@@ -1,4 +1,4 @@
-.PHONY: clean all debug qemu qemu-gdb tags user-doc kernel-doc doc app_objects_prefixed
+.PHONY: clean all debug qemu qemu-gdb tags user-doc kernel-doc doc app_objects_prefixed style-*
 
 #####################
 # List of Variables #
@@ -62,6 +62,16 @@ QEMUFLAGS = -machine raspi3 -m 1G -smp 4 \
 			-chardev vc,id=char0,logfile=serial0.log -chardev vc,id=char1,logfile=serial1.log \
 			-serial chardev:char0 -serial chardev:char1 \
 			-kernel $(IMAGE) -dtb $(DTB)
+
+###########
+# CPPLINT #
+###########
+
+CPPLINTFLAGS =  --linelength=120 \
+				--recursive \
+				--extensions=h,cc \
+				--quiet \
+				--filter=-whitespace/tab,-legal/copyright,-build/include_order,-build/header_guard,-build/namespaces,-runtime/int
 
 #######
 # GDB #
@@ -156,3 +166,7 @@ kernel-doc:
 	$(VERBOSE) doxygen $(DOXYGEN_CONFG_BASE)_Kernel
 
 doc: user-doc kernel-doc
+
+style-%: %
+	@echo "STYLE		$^"
+	$(VERBOSE) cpplint $(CPPLINTFLAGS) $^
