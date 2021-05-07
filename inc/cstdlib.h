@@ -43,6 +43,7 @@ namespace lib {
 	 * @brief Change size of allocation
 	 * @param ptr  Pointer to memory
 	 * @param size New size
+	 * @todo Implement me
 	 * @return
 	 *
 	 *	- Pointer to memory - Success
@@ -55,6 +56,7 @@ namespace lib {
 	 * @brief Allocate aligned memory
 	 * @param alignment Alignment
 	 * @param size Allocation size
+	 * @todo Implement me
 	 * @return
 	 *
 	 *	- Pointer to memory - Success
