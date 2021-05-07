@@ -33,10 +33,14 @@ namespace thread {
 
 		public:
 			/**
-			 * @fn IdleThreads()
+			 * @fn int init()
 			 * @brief Initialize contexts of idle threads
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Failure
 			 */
-			IdleThreads();
+			int init();
 
 			/**
 			 * @fn Context& get()
