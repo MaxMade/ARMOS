@@ -60,7 +60,7 @@ Symbols symbols;
 thread::Context mainThread;
 static char mainThreadUserStack[STACK_SIZE] __attribute__((section(".app.data"), aligned(PAGESIZE)));
 
-extern "C" int main();
+extern int main();
 
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */

@@ -1,4 +1,4 @@
-extern "C" int main(void) {
+int main(void) {
 	char* t = nullptr;
 	*t = 0x42;
 
