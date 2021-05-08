@@ -37,6 +37,11 @@ SECTIONS
 	__APP_TEXT_START = .;
 	.app.text : {
 		*(app.text*)
+
+		PROVIDE_HIDDEN (__app_init_array_start = .);
+		KEEP (*(SORT(app.init_array.*)))
+		KEEP (*(app.init_array*))
+		PROVIDE_HIDDEN (__app_init_array_end = .);
 	}
 	__APP_TEXT_END = .;
 

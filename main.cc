@@ -22,6 +22,7 @@
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/frame_allocator.h>
 #include <kernel/lock/softirq.h>
+#include <kernel/apps/constructor.h>
 #include <hw/register/tcr.h>
 #include <hw/register/mair.h>
 #include <hw/register/sctlr.h>
@@ -59,8 +60,6 @@ Symbols symbols;
 
 thread::Context mainThread;
 static char mainThreadUserStack[STACK_SIZE] __attribute__((section(".app.data"), aligned(PAGESIZE)));
-
-extern int main();
 
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */
@@ -180,7 +179,7 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Scheduler: Unable to create idlethreads");
 
 	/* Prepare Schedulder */
-	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) main, nullptr, mainThreadUserStack)))
+	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) apps::callConstructorAndMain, nullptr, mainThreadUserStack)))
 		debug::panic::generate("Scheduler: Unable to create main thread");
 
 	/* Register RESCHEDULE IPI */
