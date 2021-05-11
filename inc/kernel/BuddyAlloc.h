@@ -15,16 +15,6 @@
 /* XXX: Comment in for debug assertions */
 //#define BUDDY_ALLOC_ASSERT 1
 
-/* XXX: The constructor might have an implicit call to memset in order to zero
- * object. As the memset function is only defined in user space, this function
- * must be defiend.
-*
- * TODO: Pass flag to g++ in order to prevent the generation of such functions
- */
-extern "C" void* memset(void *s, int c, size_t n) {
-	return lib::memset(s, c, n);
-}
-
 /* Setting for assertions */
 #ifdef BUDDY_ALLOC_ASSERT
 #include <cassert> /* assert */
@@ -140,7 +130,7 @@ class BuddyAllocator {
 		 * @var buddies
 		 * @brief Array of buddy lists
 		 */
-		FreeMemory* buddies[NUM_BUDDIES] = {nullptr};
+		FreeMemory* buddies[NUM_BUDDIES];
 
 		/**
 		 * @fn bool checkBuddy(FreeMemory* buddy)
@@ -313,12 +303,12 @@ class BuddyAllocator {
 		 * @var __mem
 		 * @brief Underlying memory
 		 */
-		void* __mem = nullptr;
+		void* __mem;
 		/**
 		 * @var __size
 		 * @brief Size of mem
 		 */
-		size_t __size = 0;
+		size_t __size;
 
 		static_assert(offsetof(UsedMemory, used) == offsetof(FreeMemory, used),
 				"Member 'used' must be at the same offset within UsedMemory and FreeMemory!");
@@ -342,6 +332,10 @@ class BuddyAllocator {
 		 * @warning size must be at lesast MIN_SIZE and must not be larger than MAX_SIZE!
 		 */
 		constexpr BuddyAllocator(void* mem = nullptr, size_t size = 0) {
+			__mem = mem;
+			__size = size;
+			lib::memset(buddies, 0, sizeof(buddies));
+
 			/* Checks of size */
 			if (size < MIN_SIZE) {
 				return;
