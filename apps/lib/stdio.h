@@ -79,4 +79,11 @@ int vsprintf(char *str, const char *format, va_list ap);
  */
 int vsnprintf(char *str, const size_t size, const char *format, va_list ap);
 
+/**
+ * @fn void perror(const char* s)
+ * @brief Print a system error message
+ * @param s Massage
+ */
+void perror(const char* s);
+
 #endif /* _INCLUDE_STDIO_H_ */

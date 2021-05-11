@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <errno.h>
 
 /* DEFINES ----------------------------------------------------------------- */
 
@@ -487,4 +488,10 @@ int printf(const char *format, ...) {
 	ret = vprintf(format, va);
 	va_end(va);
 	return ret;
+}
+
+void perror(const char* s) {
+	char buf[512];
+	snprintf(buf, 512, "%s: %s\n", s, strerror(errno));
+	printf("%s", buf);
 }
