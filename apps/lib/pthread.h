@@ -20,6 +20,14 @@ pthread_t pthread_self(void);
 typedef  bool pthread_spinlock_t;
 
 /**
+ * @typedef pthread_attr_t
+ * @brief Pthread Attributes
+ * @todo Implement me
+ */
+struct pthread_attr {};
+typedef struct pthread_attr pthread_attr_t;
+
+/**
  * @fn int pthread_spin_init(pthread_spinlock_t *lock, int pshared)
  * @brief Initialize lock
  * @warning \c pshared will be ignored!
@@ -67,5 +75,21 @@ int pthread_spin_trylock(pthread_spinlock_t *lock);
  *	- 0 - Success
  */
 int pthread_spin_unlock(pthread_spinlock_t *lock);
+
+/**
+ * @fn int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg)
+ * @brief Create new thead
+ * @param thread        Reference of created thread
+ * @param attr          Attributes for created thread (currently ignored!)
+ * @param start_routine Executed routine
+ * @param arg           Arguments passed to start_routine
+ * @warning attr will be ignored!
+ * @return
+ *
+ *	- 0      - Success
+ *	- EAGAIN - The system lacked the necessary resources to create another thread, or the system-imposed limit on the total number of threads in a process {PTHREAD_THREADS_MAX} would be exceeded.
+ *	- EPERM  - The caller does not have appropriate privileges to set the required scheduling parameters or scheduling policy.
+ */
+int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg);
 
 #endif /* ifndef _APP_LIB_PTHREAD_H_ */
