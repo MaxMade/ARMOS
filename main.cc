@@ -1,4 +1,4 @@
-#include "kernel/debug/panic.h"
+#include <cassert.h>
 #include <ostream.h>
 #include <driver/cpu.h>
 #include <driver/drivers.h>
@@ -7,6 +7,7 @@
 #include <kernel/error.h>
 #include <kernel/linker.h>
 #include <kernel/symbols.h>
+#include <kernel/debug/panic.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/exception_handler.h>
 #include <kernel/mm/paging.h>
