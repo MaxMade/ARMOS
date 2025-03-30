@@ -32,7 +32,8 @@ DEFINEFLAGS = $(shell ./scripts/config)
 STANDALONEFLAGS = -ffreestanding -fno-builtin -nostartfiles -nodefaultlibs \
 				  -nostdlib -nostdinc -fno-pie -no-pie -fno-omit-frame-pointer \
 				  -mgeneral-regs-only -fno-exceptions -fno-rtti \
-				  -fno-stack-protector -mno-omit-leaf-frame-pointer
+				  -fno-stack-protector -mno-omit-leaf-frame-pointer \
+				  -mno-outline-atomics
 
 OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -I inc/ -std=c++17
 
@@ -45,7 +46,7 @@ ASMFLAGS = -c
 # Linker #
 ##########
 
-LD = aarch64-linux-gnu-ld
+LD = aarch64-linux-gnu-g++
 LDFLAGS = -nostartfiles -T $(LINKER)
 
 ########
@@ -91,7 +92,7 @@ DOXYGENTARGET = $(DOXYGENBUILD)/index.html
 
 $(KERNEL): $(CC_OBJECTS) $(S_OBJECTS)
 	@echo "LD		$(KERNEL)"
-	$(VERBOSE) $(LD) $(LDFLAGS) -o $(KERNEL) $^
+	$(VERBOSE) $(LD) $(LDFLAGS) -o $(KERNEL) $^ -lgcc
 
 all: $(KERNEL)
 
