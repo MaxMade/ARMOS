@@ -164,6 +164,46 @@ int Paging::createEarlyKernelMapping() {
 			return castError<int, decltype(ret)>(ret);
 	}
 
+	auto textApp = linker::getAppTextSegment();
+	for (uintptr_t addr = reinterpret_cast<uintptr_t>(textApp.first);
+			addr < math::roundUp(reinterpret_cast<uintptr_t>(textApp.first) + textApp.second, PAGESIZE);
+			addr += PAGESIZE) {
+
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), USER_MAPPING, EXECUTABLE, NORMAL_ATTR);
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
+	auto dataApp = linker::getAppDataSegment();
+	for (uintptr_t addr = reinterpret_cast<uintptr_t>(dataApp.first);
+			addr < math::roundUp(reinterpret_cast<uintptr_t>(dataApp.first) + dataApp.second, PAGESIZE);
+			addr += PAGESIZE) {
+
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), USER_MAPPING, WRITABLE, NORMAL_ATTR);
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
+	auto rodataApp = linker::getAppRODataSegment();
+	for (uintptr_t addr = reinterpret_cast<uintptr_t>(rodataApp.first);
+			addr < math::roundUp(reinterpret_cast<uintptr_t>(rodataApp.first) + rodataApp.second, PAGESIZE);
+			addr += PAGESIZE) {
+
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), USER_MAPPING, READONLY, NORMAL_ATTR);
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
+	auto bssApp = linker::getAppBSSSegment();
+	for (uintptr_t addr = reinterpret_cast<uintptr_t>(bssApp.first);
+			addr < math::roundUp(reinterpret_cast<uintptr_t>(bssApp.first) + bssApp.second, PAGESIZE);
+			addr += PAGESIZE) {
+
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), USER_MAPPING, WRITABLE, NORMAL_ATTR);
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
 	/* Save translation tabel 0 */
 	kernelLevel0TT = frame;
 

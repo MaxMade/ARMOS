@@ -10,7 +10,9 @@ using namespace thread;
 extern "C" void __context_switch(SavedContext* old, SavedContext* next);
 extern "C" void restore_current_el_sp_el0_sync_entry();
 
-Context::Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr) {
+Context::Context() : id(0), kernelStack(nullptr), userStack(nullptr), state(State::INVALID) { }
+
+void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr) {
 	this->id = id;
 	this->kernelStack = kernelStack;
 	this->userStack = userStack;
@@ -48,6 +50,8 @@ Context::Context(size_t id, void* kernelStack, void* userStack, bool kernel, voi
 	} else {
 		kickoff->spsr_el1 = 0x0001;
 	}
+
+	state = State::CREATED;
 }
 
 Context::~Context() {

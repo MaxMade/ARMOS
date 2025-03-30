@@ -1,4 +1,4 @@
-.PHONY: clean all debug qemu qemu-gdb tags doc
+.PHONY: clean all debug qemu qemu-gdb tags doc app_objects_prefixed
 
 #####################
 # List of Variables #
@@ -10,13 +10,14 @@ SYM_MAP      = boot/symbol_map
 IMAGE        = boot/kernel8.img
 LINKER       = boot/sections.ld
 DTB          = boot/rpi3.dtb
+APP          = busy_loop
 
 #########################
 # List of Prerequisites #
 #########################
 
-CC_SOURCES = $(shell find . -name "*.cc")
-S_SOURCES = $(shell find . -name "*.S")
+CC_SOURCES = $(shell find . -name "*.cc" -not -path "./apps/*")
+S_SOURCES = $(shell find . -name "*.S" -not -path "./apps/*")
 CC_OBJECTS = $(CC_SOURCES:.cc=.o)
 S_OBJECTS = $(S_SOURCES:.S=.o)
 O_OBJECTS = $(shell find . -name "*.o")
@@ -61,6 +62,7 @@ QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -serial vc -kernel $(IMAGE) 
 #######
 # GDB #
 #######
+
 GDB = aarch64-linux-gnu-gdb
 GDBFLAGS = -ex "target remote :1234"
 
@@ -72,6 +74,12 @@ DOXYGENCONFG = doc/Doxyfile
 DOXYGENBUILD = doc/build
 DOXYGENTARGET = $(DOXYGENBUILD)/index.html
 
+########
+# Apps #
+########
+
+include apps/$(APP)/Makefile
+APP_OBJECTS = $(addprefix apps/$(APP)/, $(OBJS))
 
 #################
 # Generic Rules #
@@ -92,7 +100,9 @@ DOXYGENTARGET = $(DOXYGENBUILD)/index.html
 %-verbose:
 	@$(MAKE) --no-print-directory $* VERBOSE=""
 
-$(KERNEL): $(CC_OBJECTS) $(S_OBJECTS)
+all: app_objects_prefixed $(IMAGE)
+
+$(KERNEL): $(CC_OBJECTS) $(S_OBJECTS) $(APP_OBJECTS)
 	@echo "LD		$(KERNEL)"
 	$(VERBOSE) $(LD) $(LDFLAGS) -o $(KERNEL) $^ -lgcc
 
@@ -101,7 +111,9 @@ $(IMAGE): $(KERNEL) $(SYM_MAP)
 	$(VERBOSE)  aarch64-linux-gnu-objcopy --update-section map=$(SYM_MAP) $(KERNEL)
 	$(VERBOSE)  aarch64-linux-gnu-objcopy $(KERNEL) -O binary $(IMAGE)
 
-all: $(IMAGE)
+app_objects_prefixed: $(APP_OBJECTS)
+	@echo "OBJCOPY"
+	$(VERBOSE) for i in $^; do aarch64-linux-gnu-objcopy --prefix-sections=app $${i} $${i}; done
 
 qemu: debug
 	@echo "QEMU"
@@ -118,7 +130,7 @@ debug:
 
 clean:
 	@echo "RM"
-	$(VERBOSE) rm -rf $(O_OBJECTS) $(KERNEL)
+	$(VERBOSE) rm -rf $(shell find -name "*.o") $(KERNEL) $(IMAGE) $(SYM_MAP)
 
 tags:
 	@echo "TAGS"
