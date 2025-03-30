@@ -21,7 +21,7 @@ int debug::panic::init() {
 	return driver::ipi.registerHandler(driver::IPI::IPI_MSG::PANIC, lib::function<int()>(handler));
 }
 
-void debug::panic::generate(const char msg[]) {
+void debug::panic::generate(const char msg[], int error) {
 	lib::panic panic;
 
 	/* Disable interrupts */
@@ -40,7 +40,11 @@ void debug::panic::generate(const char msg[]) {
 	}
 
 	/* Print panic message */
-	panic << "PANIC: " << msg << "\n\n\r";
+	panic << "PANIC: " << msg;
+	if (error != 0) {
+		panic << " (Error Code: " << error << ")";
+	}
+	panic << "\n\n\r";
 
 	/* Generate register dump */
 	void* regs[31];
@@ -102,7 +106,7 @@ void debug::panic::generate(const char msg[]) {
 		CPU::halt();
 }
 
-void debug::panic::generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext) {
+void debug::panic::generateFromIRQ(const char msg[], irq::ExceptionContext* exceptionContext, int error) {
 	lib::panic panic;
 
 	/* Disable interrupts */
@@ -121,7 +125,11 @@ void debug::panic::generateFromIRQ(const char msg[], irq::ExceptionContext* exce
 	}
 
 	/* Print panic message */
-	panic << "PANIC: " << msg << "\n\n\r";
+	panic << "PANIC: " << msg;
+	if (error != 0) {
+		panic << " (Error Code: " << error << ")";
+	}
+	panic << "\n\n\r";
 
 	/* Generate register dump */
 	void* regs[31];
