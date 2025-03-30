@@ -29,16 +29,16 @@ namespace driver {
 			 * @brief Offsets for registers
 			 */
 			typedef enum : uint16_t {
-				irq_basic_pending  = 0xB200,
-				irq_pending_1      = 0xB204,
-				irq_pending_2      = 0xB208,
-				fiq_control        = 0xB20c,
-				enable_irqs_1      = 0xB210,
-				enable_irqs_2      = 0xB214,
-				enable_basic_irqs  = 0xB218,
-				disable_irqs_1     = 0xB21c,
-				disable_irqs_2     = 0xB220,
-				disable_basic_irqs = 0xB224,
+				irq_basic_pending  = 0x00,
+				irq_pending_1      = 0x04,
+				irq_pending_2      = 0x08,
+				fiq_control        = 0x0c,
+				enable_irqs_1      = 0x10,
+				enable_irqs_2      = 0x14,
+				enable_basic_irqs  = 0x18,
+				disable_irqs_1     = 0x1c,
+				disable_irqs_2     = 0x20,
+				disable_basic_irqs = 0x24,
 			} regOffset;
 
 			/**
