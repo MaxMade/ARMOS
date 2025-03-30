@@ -13,6 +13,7 @@ extern uintptr_t __DATA_END;
 extern uintptr_t __BSS_START;
 extern uintptr_t __BSS_END;
 
+extern uintptr_t __MAP_START;
 
 lib::pair<void*, size_t> linker::getTextSegment() {
 	void* start = &__TEXT_START;
@@ -44,4 +45,9 @@ lib::pair<void*, size_t> linker::getBSSSegment() {
 	size_t size = reinterpret_cast<uintptr_t>(end) - reinterpret_cast<uintptr_t>(start);
 
 	return lib::pair(start, size);
+}
+
+void* linker::getSymbolMapStart() {
+	void* start = &__MAP_START;
+	return start;
 }

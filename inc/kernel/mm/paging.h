@@ -119,7 +119,7 @@ namespace mm {
 			 * @fn static int createEarlyKernelMapping()
 			 * @brief Create initial mapping
 			 * @details
-			 * Create mapping for text, data, rodata and bss segment.
+			 * Create mapping for text, data, rodata, bss and symbol map
 			 */
 			static int createEarlyKernelMapping();
 
