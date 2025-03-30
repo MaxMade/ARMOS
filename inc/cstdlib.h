@@ -50,6 +50,18 @@ namespace lib {
 	 */
 	void *realloc(void *ptr, size_t size);
 
+	/**
+	 * @fn void* memalign(size_t alignment, size_t size)
+	 * @brief Allocate aligned memory
+	 * @param alignment Alignment
+	 * @param size Allocation size
+	 * @return
+	 *
+	 *	- Pointer to memory - Success
+	 *	-              NULL - Failure
+	 */
+	void* memalign(size_t alignment, size_t size);
+
 } /* namespace lib */
 
 #endif /* ifndef _INC_CSTDLIB_H_ */
