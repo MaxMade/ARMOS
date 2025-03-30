@@ -73,6 +73,19 @@ int Scheduler::create(void* (*start_routine)(void*), void* arg, void* user_stack
 	return id;
 }
 
+int Scheduler::enqueue(lib::shared_ptr<Context> thread) {
+	if (static_cast<bool>(thread) == false)
+		return -EINVAL;
+
+	lock.lock();
+	auto ret = queue.push_back(thread);
+	lock.unlock();
+
+	thread->setState(State::WAITING);
+
+	return ret;
+}
+
 lib::shared_ptr<Context> Scheduler::getActive() {
 	return lib::shared_ptr<Context>(activeThreads.get());
 }
