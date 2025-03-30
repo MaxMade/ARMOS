@@ -1,4 +1,5 @@
 #include <cerrno.h>
+#include <kernel/error.h>
 #include <driver/generic_intc.h>
 
 using namespace driver;
@@ -8,13 +9,13 @@ int generic_intc::init(const config& conf) {
 	return -ENXIO;
 }
 
-int generic_intc::registerHandler(void* data, size_t size, lib::function<int()> handler) {
+int generic_intc::registerHandler(void* data, size_t size, generic_driver* driver) {
 	(void) data;
 	(void) size;
-	(void) handler;
+	(void) driver;
 	return -ENXIO;
 }
 
-int generic_intc::handleIRQ() {
-	return -1;
+generic_driver* generic_intc::getHandler() const {
+	return makeError<generic_driver*>(-ENXIO);
 }
