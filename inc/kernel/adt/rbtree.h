@@ -42,6 +42,12 @@ namespace adt {
 			struct RBNode {
 
 				/**
+				 * @fn RBNode
+				 * @brief Construct empty node
+				 */
+				RBNode() : t(), parent(nullptr), left(nullptr), right(nullptr), color(BLACK) {}
+
+				/**
 				 * @fn RBNode(Args&&... args)
 				 * @brief Construct node
 				 */

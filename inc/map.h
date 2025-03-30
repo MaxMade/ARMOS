@@ -1,34 +1,117 @@
-#ifndef _INC_SET_H_
-#define _INC_SET_H_
+#ifndef _INC_MAP_H_
+#define _INC_MAP_H_
 
+#include <new.h>
 #include <cerrno.h>
+#include <utility.h>
 #include <functional.h>
 #include <kernel/adt/rbtree.h>
 
+/**
+ * @file map.h
+ * @brief Sorted associative container that contains key-value pairs with unique keys
+ */
 namespace lib {
 
 	/**
-	 * @class set
-	 * @brief Associative Container
-	 * @tparam Key Entry
-	 * @tparam Compare Compare function
+	 * @class map
+	 * @brief Sorted associative container that contains key-value pairs with unique keys
 	 */
-	template <typename Key, typename Compare = lib::less<Key>>
-	class set {
+	template <typename Key, typename T, typename Compare = lib::less<Key>>
+	class map {
 		private:
+			/**
+			 * @struct Entry
+			 * @brief Entry in RB Tree
+			 */
+			struct Entry : public lib::pair<const Key, T> {
+
+				/**
+				 * @fn Entry()
+				 * @brief Construct Entry
+				 */
+				Entry() : lib::pair<const Key, T>() {}
+
+				/**
+				 * @fn Entry(const lib::pair<const Key, T>& o)
+				 * @brief Copy-Construct Entry from lib::pair
+				 */
+				Entry(const lib::pair<const Key, T>& o) : lib::pair<const Key, T>(o) { }
+
+				/**
+				 * @fn Entry(const lib::pair<const Key, T>& o)
+				 * @brief Move-Construct Entry from lib::pair
+				 */
+				Entry(lib::pair<const Key, T>&& o) : lib::pair<const Key, T>(lib::move(o)) { }
+
+				/**
+				 * @fn bool operator==(const Entry& other) const
+				 * @brief Compare operator
+				 */
+				bool operator==(const Entry& other) const {
+					return this->first == other.first;
+				}
+
+				/**
+				 * @fn bool operator!=(const Entry& other) const
+				 * @brief Compare operator
+				 */
+				bool operator!=(const Entry& other) const {
+					return this->first != other.first;
+				}
+
+				/**
+				 * @fn bool operator<(const Entry& other) const
+				 * @brief Compare operator
+				 */
+				bool operator<(const Entry& other) const {
+					return this->first < other.first;
+				}
+
+				/**
+				 * @fn bool operator>(const Entry& other) const
+				 * @brief Compare operator
+				 */
+				bool operator>(const Entry& other) const {
+					return this->first < other.k;
+				}
+
+			};
+
+			/**
+			 * @struct __Compare
+			 * @brief Custom Compare Wrapper for RBTree
+			 */
+			struct __Compare {
+				Compare cmp;
+
+				bool operator()(const Entry& a, const Entry& b) {
+					return cmp(a.first, b.first);
+				};
+			};
+
 			/**
 			 * @typedef Node
 			 * @brief Alias for underlying RBNode
 			 */
-			using Node = typename adt::RBTree<Key, Compare>::RBNode;
+			using Node = typename adt::RBTree<Entry, __Compare>::RBNode;
 
 			/**
 			 * @var rbtree
 			 * @brief Red Black Tree
 			 */
-			adt::RBTree<Key, Compare> rbtree;
+			adt::RBTree<Entry, __Compare> rbtree;
+
 
 		public:
+			using key_type = Key;
+			using mapped_type = T;
+			using value_type = lib::pair<const Key, T>;
+			using size_type	 = size_t;
+			using key_compare = Compare;
+			using reference	= value_type&;
+			using const_reference = const value_type&;
+
 			/**
 			 * @struct iterator
 			 * @brief Iterator for Node
@@ -82,110 +165,36 @@ namespace lib {
 					}
 
 					/**
-					 * @fn Key& operator*()
+					 * @fn value_type & operator*()
 					 * @brief Accesss underlying Key
 					 */
-					Key& operator*() {
+					value_type & operator*() {
 						return node->t;
 					}
 
 					/**
-					 * @fn const Key& operator*()
+					 * @fn const value_type & operator*() const
 					 * @brief Accesss underlying Key
 					 */
-					const Key& operator*() const {
+					const value_type & operator*() const {
 						return node->t;
 					}
 
 			};
 
-			/**
-			 * @typedef key_type
-			 * @brief Key type
-			 */
-			using key_type = Key;
+			map() { }
 
-			/**
-			 * @typedef value_type
-			 * @brief Value type
-			 */
-			using value_type = Key;
+			map(const map& other) = delete;
 
-			/**
-			 * @typedef size_type
-			 * @brief Size type
-			 */
-			using size_type	= size_t;
+			map(map&& other) = default;
 
-			/**
-			 * @typedef key_compare
-			 * @brief Compare function
-			 */
-			using key_compare = Compare;
-
-			/**
-			 * @typedef value_compare
-			 * @brief Compare function
-			 */
-			using value_compare = Compare;
-
-			/**
-			 * @typedef reference
-			 * @brief Reference type
-			 */
-			using reference	= value_type&;
-
-			/**
-			 * @typedef const_reference
-			 * @brief Constant reference type
-			 */
-			using const_reference = const value_type&;
-
-			/**
-			 * @typedef pointer
-			 * @brief Pointer
-			 */
-			using pointer = Key*;
-
-			/**
-			 * @typedef const_pointer
-			 * @brief Constant Pointer
-			 */
-			using const_pointer = const pointer;
-
-			/**
-			 * @fn set()
-			 * @brief Create empty set
-			 */
-			set() {}
-
-			set(const set& other) = delete;
-
-			/**
-			 * @fn set(set&& other)
-			 * @brief Move Construct
-			 */
-			set(set&& other) {
-				rbtree(other.rbtree);
-			}
-
-			/**
-			 * @fn ~set
-			 * @brief Destruct set
-			 */
-			~set() {
+			~map() {
 				clear();
 			}
 
-			set& operator=(const set& other) = delete;
+			map& operator=(const map& other) = delete;
 
-			/**
-			 * @fn set& operator=(set&& other)
-			 * @brief Move Assignment
-			 */
-			set& operator=(set&& other) {
-				rbtree = other.rbtree;
-			}
+			map& operator=(map&& other) = default;
 
 			/**
 			 * @fn bool empty() const
@@ -268,13 +277,13 @@ namespace lib {
 			}
 
 			/**
-			 * @fn int emplace(Args&&... args)
-			 * @brief Empace value if non existing
+			 * @fn int emplace(O&& key, U&& t)
+			 * @brief Emplace pair
 			 */
-			template<typename... Args>
-			int emplace(Args&&... args) {
+			template<typename O, typename U>
+			int emplace(O&& key, U&& t) {
 				/* Allocate new entry */
-				auto entry = new Node(lib::forward<Args>(args)...);
+				auto entry = new Node(lib::pair<const Key, T>(lib::forward<O>(key), lib::forward<U>(t)));
 				if (entry == nullptr)
 					return -ENOMEM;
 
@@ -321,7 +330,8 @@ namespace lib {
 			 * @brief Find entry for given key
 			 */
 			iterator find(const Key& key) {
-				auto entry = rbtree.search(key);
+				Entry tmp(key, T());
+				auto entry = rbtree.search(tmp);
 				return iterator(entry);
 			}
 
@@ -340,8 +350,8 @@ namespace lib {
 			iterator end() {
 				return iterator(nullptr);
 			}
-
 	};
-}
 
-#endif /* ifndef _INC_SET_H_ */
+} /* namespace lib */
+
+#endif /* ifndef _INC_MAP_H_ */
