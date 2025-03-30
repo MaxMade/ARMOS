@@ -82,6 +82,13 @@ namespace lib {
 	 */
 	lib::ostream& bin(lib::ostream& str);
 
+
+	/**
+	 * @fn lib::ostream& endl(lib::ostream& str)
+	 * @brief Signal end of line and flush
+	 */
+	lib::ostream& endl(lib::ostream& str);
+
 	struct ostreamFill {
 		char c;
 
