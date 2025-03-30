@@ -1,3 +1,5 @@
+#include "../../inc/kernel/debug/frame_magic.h"
+
 /*
  * Exception vector
  *
@@ -76,6 +78,9 @@
 	// Pass pointer to register file to fn
 	mov x0, sp
 	add x0, x0, EXCEPTION_FRAME_SIZE
+
+	// Mark outermost stack frame
+	mov x29, FRAME_MAGIC
 
 	// Branch to actual handler
 	bl \fn
