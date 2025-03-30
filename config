@@ -63,3 +63,15 @@ CONFIG_INTC = BCM_SYS_TIMER
 # Possible Values:
 # BCM_MAILBOX: Broadcom 2835 Mailbox
 CONFIG_IPI = BCM_MAILBOX
+
+# CONFIG_MAX_CPU
+# Description:
+# The CONFIG_MAX_CPU option sets the max. number of supported CPUs
+# Possible Values:
+# 4
+# 8
+# 16
+# 32
+# 64
+# 128
+CONFIG_MAX_CPU = 4
