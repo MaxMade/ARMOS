@@ -566,6 +566,14 @@ namespace lib {
 
 				return *this;
 			}
+
+			/**
+			 * @fn ostreamHelper& operator<<(ostreamHelper& (*fn)(ostreamHelper&))
+			 * @brief Call function upon stream
+			 */
+			ostreamHelper& operator<<(ostreamHelper& (*fn)(ostreamHelper&)) {
+				return fn(*this);
+			}
 	};
 
 	/**
