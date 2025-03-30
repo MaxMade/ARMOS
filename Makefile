@@ -27,6 +27,8 @@ CC = aarch64-linux-gnu-g++
 
 WARNFLAGS = -Wall -Wextra -Werror
 
+DEFINEFLAGS = $(shell ./scripts/config)
+
 STANDALONEFLAGS = -ffreestanding -fno-builtin -nostartfiles -nodefaultlibs \
 				  -nostdlib -nostdinc -fno-pie -no-pie -fno-omit-frame-pointer \
 				  -mgeneral-regs-only -fno-exceptions -fno-rtti \
