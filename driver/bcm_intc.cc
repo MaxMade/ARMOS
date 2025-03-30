@@ -12,13 +12,11 @@ using namespace driver;
 generic_driver* bcm_intc::handlers[NUM_SETS * NUM_ENTRIES] = {nullptr};
 
 bcm_intc::bcm_intc() {
-	name = "brcm,bcm2836-l1-intc";
+	name = "brcm,bcm2836-armctrl-ic";
 }
 
 int bcm_intc::init(const config& conf) {
-	/* XXX: Apply range fix and save in base */
-	uintptr_t patched_base = reinterpret_cast<uintptr_t>(conf.getRange().first) - FIXUP_RANGE;
-	base = reinterpret_cast<void*>(patched_base);
+	base = reinterpret_cast<void*>(conf.getRange().first);
 
 	return 0;
 }
