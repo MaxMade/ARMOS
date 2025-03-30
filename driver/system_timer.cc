@@ -1,4 +1,5 @@
 #include <cerrno.h>
+#include <kernel/cpu.h>
 #include <kernel/math.h>
 #include <driver/cpu.h>
 #include <driver/drivers.h>
@@ -17,7 +18,7 @@ int system_timer::init(const config& conf) {
 	base = conf.getRange().first;
 
 	/* Clear ticks */
-	ticks = 0;
+	ticks.store(0);
 
 	/* Clear idxCallback */
 	idxCallback = 0;
@@ -34,6 +35,9 @@ int system_timer::init(const config& conf) {
 }
 
 int system_timer::windup(size_t ms) {
+	if (::CPU::getProcessorID() != 0)
+		return 0;
+
 	intv = ms;
 	ts = readRegister<CLO>();
 	ts += ms * TICKS_PER_MS;
@@ -42,15 +46,21 @@ int system_timer::windup(size_t ms) {
 }
 
 int system_timer::registerFunction(size_t ms, lib::function<int(void)> callback) {
-	if (idxCallback == MAX_CALLBACKS)
+	lock.lock();
+	if (idxCallback == MAX_CALLBACKS) {
+		lock.unlock();
 		return -ENOMEM;
+	}
 
 	size_t numTicks = math::roundUp(ms, intv) / intv;
 	callbacks[idxCallback] = lib::pair(numTicks, lib::move(callback));
-	if (!callbacks[idxCallback].second.isValid())
+	if (!callbacks[idxCallback].second.isValid()) {
+		lock.unlock();
 		return -ENOMEM;
+	}
 
 	idxCallback++;
+	lock.unlock();
 	return 0;
 }
 
@@ -58,9 +68,17 @@ size_t system_timer::interval() const {
 	return intv;
 }
 
+/**
+ * @fn size_t getTicks() const
+ * @brief Get number of ticks since startup
+ */
+size_t system_timer::getTicks() const {
+	return ticks.load();
+}
+
 int system_timer::prologue() {
 	/* Update timer ticks */
-	this->ticks++;
+	this->ticks.fetch_add(1);
 
 	/* Windup timer (again) */
 	this->ts += this->intv * TICKS_PER_MS;
@@ -72,12 +90,14 @@ int system_timer::prologue() {
 
 int system_timer::epilogue() {
 	/* Call handlers */
+	lock.lock();
 	for (size_t i = 0; i < MAX_CALLBACKS; i++) {
 		auto& callback = callbacks[i];
-		if (ticks % callback.first == 0) {
+		if (ticks.load() % callback.first == 0) {
 			callback.second();
 		}
 	}
+	lock.unlock();
 
 	/* Send IPIs to remaining cores */
 	auto numCPUs = driver::cpus.numCPUs();
