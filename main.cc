@@ -36,9 +36,14 @@ namespace mm {
 
 namespace thread {
 	SMP smp;
+	IdleThreads idleThreads;
 }
 
 Symbols symbols;
+
+thread::Context mainThread;
+
+extern "C" int main();
 
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */
@@ -148,17 +153,34 @@ int kernelMain(void *fdt) {
 	}
 	cout << "PANIC: Setup finished" << lib::endl;
 
+	/* Prepare Idle Threads */
+	if (thread::idleThreads.init() != 0)
+		debug::panic::generate("Thread: Unable to initialize idle thread");
+	cout << "Thread: Idle Thread Setup finished" << lib::endl;
+
 	/* Prepare SMP */
 	if (thread::smp.start() != 0)
-		debug::panic::generate("SMP: Unable to inialize");
+		debug::panic::generate("SMP: Unable to initialize");
 	cout << "SMP: Setup finished" << lib::endl;
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
-	/* TODO: Start scheduling loop */
-	while (1);
+	/* Prepare Main Thread */
+	char* kernelStack = new char[STACK_SIZE];
+	if (kernelStack == nullptr)
+		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
+	char* userStack = new char[STACK_SIZE];
+	if (userStack == nullptr)
+		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
+	mainThread.init(0, kernelStack, userStack, false, (void*) main);
+	cout << "Thread: Setup of main thread finished" << lib::endl;
 
-	return 0;
+	/* Preform initial context switch */
+	thread::Context tmpContext;
+	thread::Context::switching(&tmpContext, &mainThread);
+
+	debug::panic::generate("End of kernelMain must never be reached!");
+	return -1;
 }
 
 int kernelMainApp() {
@@ -189,10 +211,18 @@ int kernelMainApp() {
 	/* Local output stream */
 	lib::ostream cout;
 
+	/* Prepare Idle Thread */
+	if (thread::idleThreads.init() != 0)
+		debug::panic::generate("Thread: Unable to initialize idle thread");
+	cout << "Thread: Idle Thread Setup finished" << lib::endl;
+
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
-	/* TODO: Start scheduling loop */
-	while (1);
+	/* Preform initial context switch */
+	thread::Context tmpContext;
+	auto& idleThread = thread::idleThreads.get();
+	thread::Context::switching(&tmpContext, &idleThread);
 
-	return 0;
+	debug::panic::generate("End of kernelMain must never be reached!");
+	return -1;
 }

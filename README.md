@@ -37,6 +37,11 @@ using the `-verbose` suffix:
 make all-verbose
 ```
 
+To select the target user-space application, the APP variable can be changed.
+```bash
+make APP=<app> all
+```
+
 # Documentation
 
 ARMOS uses Doxygen to generated documentation from annotations within the
