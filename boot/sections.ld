@@ -38,6 +38,7 @@ SECTIONS
 	.app.text : {
 		*(app.text*)
 
+		. = ALIGN(8);
 		PROVIDE_HIDDEN (__app_init_array_start = .);
 		KEEP (*(SORT(app.init_array.*)))
 		KEEP (*(app.init_array*))
@@ -68,6 +69,7 @@ SECTIONS
 
 	.init_array :
 	{
+		. = ALIGN(8);
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP (*(SORT(.init_array.*)))
 		KEEP (*(.init_array*))
