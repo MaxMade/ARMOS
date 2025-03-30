@@ -1,12 +1,12 @@
 #ifndef _INC_KERNEL_MM_PAGING_H_
 #define _INC_KERNEL_MM_PAGING_H_
 
-#include "kernel/mm/translation_table.h"
-#include <tuple.h>
+#include <map.h>
 #include <cerrno.h>
 #include <climits.h>
 #include <cstdint.h>
 #include <kernel/lock/spinlock.h>
+#include <kernel/mm/translation_table.h>
 
 /**
  * @file kernel/mm/paging.h
@@ -59,6 +59,12 @@ namespace mm {
 			 * @brief Synchronization lock
 			 */
 			static lock::spinlock lock;
+
+			/**
+			 * @var frameRefCount
+			 * @breif Reference counting for mapped pages
+			 */
+			static lib::map<void*, size_t> frameRefCount;
 
 			/**
 			 * @fn static size_t getOffset(void* addr)
@@ -121,6 +127,26 @@ namespace mm {
 			 */
 			template<bool earlyBoot = false>
 			int internalMap(void* vaddr, void* paddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr);
+
+			/**
+			 * @fn int decRefCount(void* paddr)
+			 * @brief Decrement reference count for paddr
+			 * @return
+			 *
+			 *	- >= 0 - Updated reference count
+			 *	-  < 0 - Failure (-errno)
+			 */
+			int decRefCount(void* paddr);
+
+			/**
+			 * @fn int incRefCount(void* paddr)
+			 * @brief Increment reference count for paddr
+			 * @return
+			 *
+			 *	- >= 0 - Updated reference count
+			 *	-  < 0 - Failure (-errno)
+			 */
+			int incRefCount(void* paddr);
 
 		public:
 			/**
