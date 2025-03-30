@@ -204,7 +204,7 @@ namespace mm {
 				ELX_RW_EL0_NONE = 0b00, /**< Privileged: RW or User: None */
 				ELX_RW_EL0_RW   = 0b01, /**< Privileged: RW or User: RW */
 				ELX_RO_EL0_NONE = 0b10, /**< Privileged: RO or User: None */
-				ELX_RO_EL0_RO   = 0b10, /**< Privileged: RO or User: RO */
+				ELX_RO_EL0_RO   = 0b11, /**< Privileged: RO or User: RO */
 			} access_t;
 
 			/**
