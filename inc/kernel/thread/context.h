@@ -3,6 +3,7 @@
 
 #include <cstdint.h>
 #include <cstdlib.h>
+#include <kernel/lock/spinlock.h>
 #include <kernel/irq/exception_handler.h>
 
 /**
@@ -21,6 +22,7 @@ namespace thread {
 		TERMINATED, /**< Terminated thread */
 		WAITING,    /**< Waiting thread */
 		INVALID,    /**< INVALID state */
+		BLOCKED,    /**< INVALID state */
 	};
 
 	/**
@@ -28,6 +30,7 @@ namespace thread {
 	 * @brief Saved context (for context switching)
 	 */
 	struct SavedContext {
+		uint64_t x18;
 		uint64_t x19;
 		uint64_t x20;
 		uint64_t x21;
@@ -179,10 +182,10 @@ namespace thread {
 			bool operator>(const Context& o) const;
 
 			/**
-			 * @fn static void switching(Context* old, Context* next)
-			 * @brief Perform context switch
+			 * @fn static void switching(Context* old, Context* next, lock::spinlock* lock)
+			 * @brief Perform context switch and optionally unlock lock (if non null);
 			 */
-			static void switching(Context* old, Context* next);
+			static void switching(Context* old, Context* next, lock::spinlock* lock);
 	};
 
 } /* namespace thread */

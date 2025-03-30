@@ -58,4 +58,10 @@ namespace lock {
 
 } /* namespace lock */
 
+/**
+ * @fn extern "C" void __unlock_spinlock(lock::spinlock* lock)
+ * @brief Unlock spinlock from assembly
+ */
+extern "C" void __unlock_spinlock(lock::spinlock* lock);
+
 #endif /* ifndef _INC_KERNEL_LOCK_SPINLOCK_H_ */

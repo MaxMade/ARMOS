@@ -90,7 +90,7 @@ lib::shared_ptr<Context> Scheduler::getThread(size_t id) {
 	return ret;
 }
 
-void Scheduler::schedule() {
+void Scheduler::__schedule(lock::spinlock* l) {
 	lock.lock();
 
 	/* Check queue */
@@ -116,15 +116,24 @@ void Scheduler::schedule() {
 			debug::panic::generate("Unable to enqueue thread into ready queue", ret);
 
 
-		Context::switching(thread.get(), activeThreads.get().get());
+		Context::switching(thread.get(), activeThreads.get().get(), l);
 
 	} else {
 		thread.swap(activeThreads.get());
 		Context tmpContext;
-		Context::switching(&tmpContext, activeThreads.get().get());
+		Context::switching(&tmpContext, activeThreads.get().get(), l);
 	}
 
 	lock.unlock();
+}
+
+void Scheduler::schedule() {
+	__schedule(nullptr);
+}
+
+
+void Scheduler::schedule(lock::spinlock& lock) {
+	__schedule(&lock);
 }
 
 void Scheduler::__unlock() {
