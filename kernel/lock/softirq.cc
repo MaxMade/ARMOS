@@ -32,6 +32,10 @@ int Softirq::execute(driver::generic_driver* driver, irq::ExceptionContext* cont
 	if (isError(retPrologue))
 		return retPrologue;
 
+	/* Check if Epilogue is necessary */
+	if (retPrologue == 0)
+		return 0;
+
 	/* Save current CPU ID */
 	auto cpuID = CPU::getProcessorID();
 	assert(cpuID < numCPUs);
@@ -44,7 +48,7 @@ int Softirq::execute(driver::generic_driver* driver, irq::ExceptionContext* cont
 	auto currentlyUsed = used.get().test_and_set();
 
 	/* If currently an epilogue is executed postpone driver (if necessary) */
-	if (currentlyUsed && retPrologue == 1) {
+	if (currentlyUsed) {
 		/* Check if driver is already pending */
 		auto alreadyPending = (drivers[cpuID * numDrivers + driverID] != nullptr);
 		/* Update driver */
@@ -55,15 +59,13 @@ int Softirq::execute(driver::generic_driver* driver, irq::ExceptionContext* cont
 	}
 
 	/* Execute current epilogue */
-	if (retPrologue == 1) {
-		CPU::enableInterrupts();
-		auto retEpilogue = driver->epilogue();
-		CPU::disableInterrupts();
-		if (isError(retEpilogue)) {
-			/* Mark softirq as unused */
-			used.get().clear();
-			return retEpilogue;
-		}
+	CPU::enableInterrupts();
+	auto retEpilogue = driver->epilogue();
+	CPU::disableInterrupts();
+	if (isError(retEpilogue)) {
+		/* Mark softirq as unused */
+		used.get().clear();
+		return retEpilogue;
 	}
 
 	/* Execute postponed drivers */
