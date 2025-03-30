@@ -130,7 +130,7 @@ $(IMAGE): $(KERNEL) $(SYM_MAP)
 
 app_objects_prefixed: $(APP_OBJECTS)
 	@echo "OBJCOPY"
-	$(VERBOSE) for i in $^; do aarch64-linux-gnu-objcopy --prefix-sections=app $${i} $${i}; done
+	$(VERBOSE) for i in $^; do aarch64-linux-gnu-objcopy --prefix-alloc-sections=app $${i} $${i}; done
 
 qemu: debug
 	@echo "QEMU"
