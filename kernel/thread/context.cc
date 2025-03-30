@@ -33,9 +33,9 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 
 	/* Set user stack */
 	auto userPtr = reinterpret_cast<uintptr_t>(userStack);
-	ptr += STACK_SIZE;
-	ptr -= 8;
-	ptr = math::roundDown(ptr, 8);
+	userPtr += STACK_SIZE;
+	userPtr -= 8;
+	userPtr = math::roundDown(userPtr, 8);
 	kickoff->sp_el0 = userPtr;
 
 	/* Set ELR */

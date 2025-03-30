@@ -50,6 +50,9 @@ thread::Context mainThread;
 
 extern "C" int main();
 
+/* User stack for main application */
+static char userStack[STACK_SIZE] __attribute__((aligned(PAGESIZE),section("app.bss")));
+
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */
 	CPU::disableInterrupts();
@@ -184,9 +187,6 @@ int kernelMain(void *fdt) {
 	char* kernelStack = new char[STACK_SIZE];
 	if (kernelStack == nullptr)
 		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
-	char* userStack = new char[STACK_SIZE];
-	if (userStack == nullptr)
-		debug::panic::generate("Thread: Unable to allocate user stack for main thread");
 	mainThread.init(0, kernelStack, userStack, false, (void*) main);
 	cout << "Thread: Setup of main thread finished" << lib::endl;
 
