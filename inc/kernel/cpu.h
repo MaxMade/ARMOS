@@ -70,6 +70,18 @@ namespace CPU {
 	 */
 	size_t getProcessorID();
 
+	/**
+	 * @fn void setTranslationTable(void *addr)
+	 * @brief Update TTBR0
+	 */
+	void setTranslationTable(void *addr);
+
+	/**
+	 * @fn void* getTranslationTable()
+	 * @brief Receive current value of TTBR0
+	 */
+	void* getTranslationTable();
+
 } /* namespace CPU */
 
 #endif /* ifndef _INC_KERNEL_CPU_H_ */

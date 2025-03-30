@@ -53,3 +53,8 @@ char mini_uart::read() {
 	while ((readRegister<AUX_MU_LSR_REG>() & 1) == 0);
 	return readRegister<AUX_MU_IO_REG>() & 0xFF;
 }
+
+lib::pair<void*, size_t> mini_uart::getConfigSpace() const {
+	uintptr_t baseIncAuxEnable = reinterpret_cast<uintptr_t>(base) + AUX_ENABLES;
+	return lib::pair(reinterpret_cast<void*>(baseIncAuxEnable), 0x80);
+}

@@ -66,3 +66,13 @@ size_t CPU::getProcessorID() {
 	asm("mrs %0, MPIDR_EL1" : "=r"(mpidr));
 	return (mpidr & 0xFF);
 }
+
+void CPU::setTranslationTable(void *addr) {
+	asm("msr TTBR0_EL1, %0" :: "r"(addr));
+}
+
+void* CPU::getTranslationTable() {
+	void* addr;
+	asm("mrs %0, TTBR0_EL1" : "=r"(addr));
+	return addr;
+}

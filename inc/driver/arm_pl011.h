@@ -81,6 +81,12 @@ namespace driver {
 			 * @brief Read a single byte
 			 */
 			char read();
+
+			/**
+			 * @fn lib::pair<void*, size_t> getConfigSpace() const
+			 * @brief Get used address range
+			 */
+			lib::pair<void*, size_t> getConfigSpace() const;
 	};
 
 } /* namespace driver */
