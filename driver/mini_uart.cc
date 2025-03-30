@@ -26,7 +26,7 @@ int mini_uart::init(const config& conf) {
 	};
 
 	/* Register interrupt controller */
-	if (int err = intc.registerHandler(intConfig.first, intConfig.second, lib::function<int()>(handler)); !err)
+	if (int err = intc.registerHandler(intConfig.first, intConfig.second, lib::function<int()>(handler)); err)
 		return err;
 
 	/* Enable Mini UART */
