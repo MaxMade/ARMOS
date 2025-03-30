@@ -23,6 +23,39 @@
  * Armv8, for Armv8-A architecture profile
  */
 
+.global current_el_sp_el0_fiq_entry
+.global current_el_sp_el0_irq_entry
+.global current_el_sp_el0_serror_entry
+.global current_el_sp_el0_sync_entry
+.global current_el_sp_elx_fiq_entry
+.global current_el_sp_elx_irq_entry
+.global current_el_sp_elx_serror_entry
+.global current_el_sp_elx_sync_entry
+.global lower_el_aarch32_fiq_entry
+.global lower_el_aarch32_irq_entry
+.global lower_el_aarch32_serror_entry
+.global lower_el_aarch32_sync_entry
+.global lower_el_aarch64_fiq_entry
+.global lower_el_aarch64_irq_entry
+.global lower_el_aarch64_serror_entry
+.global lower_el_aarch64_sync_entry
+
+.global restore_current_el_sp_el0_fiq_entry
+.global restore_current_el_sp_el0_irq_entry
+.global restore_current_el_sp_el0_serror_entry
+.global restore_current_el_sp_el0_sync_entry
+.global restore_current_el_sp_elx_fiq_entry
+.global restore_current_el_sp_elx_irq_entry
+.global restore_current_el_sp_elx_serror_entry
+.global restore_current_el_sp_elx_sync_entry
+.global restore_lower_el_aarch32_fiq_entry
+.global restore_lower_el_aarch32_irq_entry
+.global restore_lower_el_aarch32_serror_entry
+.global restore_lower_el_aarch32_sync_entry
+.global restore_lower_el_aarch64_fiq_entry
+.global restore_lower_el_aarch64_irq_entry
+.global restore_lower_el_aarch64_serror_entry
+.global restore_lower_el_aarch64_sync_entry
 
 /**
  * @var EXCEPTION_FRAME_SIZE
@@ -78,6 +111,7 @@
 
 	// Branch to actual handler
 	bl \fn
+restore_\name:
 
 	// Restore ELR_EL1 and SPSR_EL1
 	ldp x10, x11, [sp, 16 * 16]

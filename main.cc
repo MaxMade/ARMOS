@@ -11,6 +11,8 @@
 #include <kernel/debug/panic.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/exception_handler.h>
+#include <kernel/thread/idle.h>
+#include <kernel/thread/context.h>
 #include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/translation_table_allocator.h>

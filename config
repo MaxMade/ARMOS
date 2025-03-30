@@ -75,3 +75,16 @@ CONFIG_IPI = BCM_MAILBOX
 # 64
 # 128
 CONFIG_MAX_CPU = 4
+
+# CONFIG_STACK_SIZE
+# Description:
+# The CONFIG_STACK_SIZE option sets the allocated stack size (in KiB)
+# Possible Values:
+# 16
+# 32
+# 64
+# 128
+# 256
+# 512
+# 1024
+CONFIG_STACK_SIZE = 64
