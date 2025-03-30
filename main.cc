@@ -1,4 +1,5 @@
 #include <cassert.h>
+#include <ios.h>
 #include <ostream.h>
 #include <driver/cpu.h>
 #include <driver/drivers.h>
@@ -97,16 +98,16 @@ int kernelMain(void *fdt) {
 	/* Prepare timer */
 	auto timerConfig = dtp.findConfig(driver::timer);
 	if (!timerConfig.isValid()) {
-		cout << "Timer: Construction failed!\n\r";
+		cout << "Timer: Construction failed!" << lib::endl;
 		return -1;
 	}
 
 	if (isError(driver::timer.init(timerConfig))) {
-		cout << "Timer: Initialization failed!\n\r";
+		cout << "Timer: Initialization failed!" << lib::endl;
 		return -1;
 	}
 	driver::timer.windup(200);
-	cout << "Timer: Setup finished\n\r";
+	cout << "Timer: Setup finished" << lib::endl;
 
 	/* Prepare CPU information */
 	for (auto node : dtp) {
@@ -130,7 +131,7 @@ int kernelMain(void *fdt) {
 			}
 		}
 	}
-	cout << "CPUs: Setup finished\n\r";
+	cout << "CPUs: Setup finished" << lib::endl;
 
 	/* Prepare IPI driver */
 	auto ipiConfig = dtp.findConfig(driver::ipi);
@@ -138,19 +139,21 @@ int kernelMain(void *fdt) {
 		return -1;
 	if (isError(driver::ipi.init(ipiConfig)))
 		return -1;
-	cout << "IPI: Setup finished\n\r";
+	cout << "IPI: Setup finished" << lib::endl;
 
 	/* Prepare panic */
 	if (debug::panic::init() != 0) {
-		cout << "PANIC: Unable to initialize\n\r";
+		cout << "PANIC: Unable to initialize" << lib::endl;
 		return -1;
 	}
-	cout << "PANIC: Setup finished\n\r";
+	cout << "PANIC: Setup finished" << lib::endl;
 
 	/* Prepare SMP */
 	if (thread::smp.start() != 0)
 		debug::panic::generate("SMP: Unable to inialize");
-	cout << "SMP: Setup finished\n\r";
+	cout << "SMP: Setup finished" << lib::endl;
+
+	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
 	CPU::enableInterrupts();
 	while (1);
@@ -186,7 +189,7 @@ int kernelMainApp() {
 	/* Local output stream */
 	lib::ostream cout;
 
-	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization\n\r";
+	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
 	CPU::enableInterrupts();
 	while (1);
