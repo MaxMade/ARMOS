@@ -27,7 +27,7 @@ void debug::panic::generate(const char msg[]) {
 	CPU::disableInterrupts();
 
 	/* Send IPIs */
-	auto numCPUS = driver::cpu.getCoreCount();
+	auto numCPUS = driver::cpus.numCPUs();
 	for (size_t i = 0; i < numCPUS; i++) {
 		driver::ipi.sendIPI(i, driver::IPI::IPI_MSG::PANIC);
 	}
