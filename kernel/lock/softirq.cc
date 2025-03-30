@@ -96,3 +96,7 @@ int Softirq::execute(driver::generic_driver* driver, irq::ExceptionContext* cont
 
 	return 0;
 }
+
+void Softirq::__unlock() {
+	used.get().clear();
+}

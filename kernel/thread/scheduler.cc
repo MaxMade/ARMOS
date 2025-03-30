@@ -140,7 +140,3 @@ void Scheduler::schedule() {
 void Scheduler::__unlock() {
 	lock.unlock();
 }
-
-extern "C" void __unlock_global_scheduler() {
-	scheduler.__unlock();
-}

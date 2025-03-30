@@ -4,7 +4,9 @@
 #include <kernel/error.h>
 #include <kernel/config.h>
 #include <kernel/mm/paging.h>
+#include <kernel/lock/softirq.h>
 #include <kernel/thread/context.h>
+#include <kernel/thread/scheduler.h>
 #include <kernel/irq/exception_handler.h>
 
 using namespace thread;
@@ -156,4 +158,10 @@ bool Context::operator>(const Context& o) const {
 
 void Context::switching(Context* old, Context* next) {
 	__context_switch(&old->savedContext, &next->savedContext);
+}
+
+extern "C" void __unlock_for_kickoff() {
+	CPU::disableInterrupts();
+	scheduler.__unlock();
+	lock::softirq.__unlock();
 }

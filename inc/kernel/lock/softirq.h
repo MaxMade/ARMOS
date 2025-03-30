@@ -70,6 +70,13 @@ namespace lock {
 			 *	- <0 - Failure (-errno)
 			 */
 			int execute(driver::generic_driver* driver, irq::ExceptionContext* context);
+
+			/**
+			 * @fn void __unlock()
+			 * @brief Unlock epilogue layer
+			 * @warning This function must be never called directly!
+			 */
+			void __unlock();
 	};
 
 	/**

@@ -96,11 +96,4 @@ namespace thread {
 
 } /* namespace thread */
 
-/**
-* @fn extern "C" void __unlock_global_scheduler()
-* @brief Manually unlock global scheduler
-* @warning This function mustn't be called directly
-*/
-extern "C" void __unlock_global_scheduler();
-
 #endif /* ifndef _INC_KERNEL_THREAD_SCHEDULER_H_ */
