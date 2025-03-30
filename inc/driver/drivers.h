@@ -35,11 +35,9 @@ namespace driver {
 #elif defined(CONFIG_CONSOLE_BCM_MINI_UART)
 	using Console = mini_uart;
 
-/* No valid choice for console
- * Use (invalid) generic driver
- */
+/* No valid choice for console */
 #else
-	using Console = generic_console;
+	#error "No valid choice for Console (see config file)"
 #endif
 
 /***************************************
@@ -53,11 +51,9 @@ namespace driver {
 #if defined(CONFIG_INTC_BCM_INTC)
 	using Intc = bcm_intc;
 
-/* No valid choice for interrupt controller
- * Use (invalid) generic driver
- */
+/* No valid choice for interrupt controller */
 #else
-	using Intc = generic_intc;
+	#error "No valid choice for Intc (see config file)"
 #endif
 
 /************************
@@ -70,11 +66,9 @@ namespace driver {
 #if defined(CONFIG_INTC_BCM_SYS_TIMER)
 	using Timer = system_timer;
 
-/* No valid choice for timer
- * Use (invalid) generic driver
- */
+/* No valid choice for timer */
 #else
-	using Timer = generic_timer;
+	#error "No valid choice for Timer (see config file)"
 #endif
 
 /**********************
@@ -87,11 +81,9 @@ namespace driver {
 #if defined(CONFIG_IPI_BCM_MAILBOX)
 	using IPI = mailbox;
 
-/* No valid choice for IPI device
- * Use (invalid) generic driver
- */
+/* No valid choice for IPI device */
 #else
-	using IPI = generic_ipi;
+	#error "No valid choice for IPI (see config file)"
 #endif
 
 /***************************
@@ -115,7 +107,6 @@ extern driver::Intc intc;
  * @brief Interrupt controller driver
  */
 extern driver::Timer timer;
-
 
 /**
  * @var ipi

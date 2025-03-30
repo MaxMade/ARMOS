@@ -55,12 +55,6 @@ namespace driver {
 			 *	- <0 - Failure (-errno)
 			 */
 			int registerFunction(size_t ms, lib::function<int(void)> callback);
-
-			/**
-			 * @fn lib::pair<void*, size_t> getConfigSpace() const
-			 * @brief Get used address range
-			 */
-			lib::pair<void*, size_t> getConfigSpace() const;
 	};
 
 } /* namespace driver */

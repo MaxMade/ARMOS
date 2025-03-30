@@ -45,7 +45,7 @@ namespace driver {
 			 * @var handlers
 			 * @brief Available handlers
 			 */
-			static lib::function<int()> handlers[96];
+			static generic_driver* handlers[96];
 
 			/**
 			 * @fn void writeRegister(uint32_t value)
@@ -58,11 +58,11 @@ namespace driver {
 			}
 
 			/**
-			 * @fn void readRegister(uint32_t value)
+			 * @fn void readRegister(uint32_t value) const
 			 * @brief Internal read register
 			 */
 			template<regOffset off>
-			uint32_t readRegister() {
+			uint32_t readRegister() const {
 				uint32_t* reg = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(base) + off);
 				return util::mmioRead(reg);
 			}
@@ -85,24 +85,45 @@ namespace driver {
 			int init(const config& conf);
 
 			/**
-			 * @fn int registerHandler(void* data, size_t size, lib::function<int()> handler)
-			 * @brief Register handler for driver specific configuration
+			 * @fn int registerHandler(void* data, size_t size, generic_driver* driver)
+			 * @brief Register driver for driver specific configuration
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int registerHandler(void* data, size_t size, lib::function<int()> handler);
+			int registerHandler(void* data, size_t size, generic_driver* driver);
 
 			/**
-			 * @fn int handleIRQ()
-			 * @brief Handle pending irq
+			 * @fn generic_driver* getHandler()
+			 * @brief Get handler for pending IRQ
+			 * @return
+			 *
+			 *	- Pointer to handler      - Success
+			 *	- makeError<generic_driver*>(errno) - Failure
+			 */
+			generic_driver* getHandler();
+
+			/**
+			 * @fn int prologue() override
+			 * @brief Exception prologue
+			 * @return
+			 *
+			 *	-  1 - Epilogue is needed
+			 *	-  0 - Epilogue isn't needed
+			 *	- <0 - Error (errno)
+			 */
+			int prologue() override;
+
+			/**
+			 * @fn int epilogue() override
+			 * @brief Exception epilogue
 			 * @return
 			 *
 			 *	-  0 - Success
-			 *	- <0 - Failure (-errno)
+			 *	- <0 - Error (errno)
 			 */
-			int handleIRQ();
+			int epilogue() override;
 
 	};
 } /* namespace driver */

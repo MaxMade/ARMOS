@@ -25,8 +25,8 @@ namespace driver {
 			 * @brief IPI Message
 			 */
 			enum class IPI_MSG : uint32_t {
-				PANIC = 1,      /**< Panic Broadcast */
-				RESCHEDULE = 2, /**< Panic Broadcast */
+				PANIC = (1 << 0),      /**< Panic Broadcast */
+				RESCHEDULE = (1 << 1), /**< Panic Broadcast */
 			};
 
 			/**
@@ -54,12 +54,6 @@ namespace driver {
 			 * @brief Register Handler for specific value
 			 */
 			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
-
-			/**
-			 * @fn lib::pair<void*, size_t> getConfigSpace() const
-			 * @brief Get used address range
-			 */
-			lib::pair<void*, size_t> getConfigSpace() const;
 	};
 
 } /* namespace driver */

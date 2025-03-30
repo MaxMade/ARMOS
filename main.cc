@@ -17,6 +17,7 @@
 #include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/translation_table_allocator.h>
+#include <kernel/lock/softirq.h>
 #include <hw/register/tcr.h>
 #include <hw/register/mair.h>
 #include <hw/register/sctlr.h>
@@ -37,6 +38,10 @@ namespace mm {
 namespace thread {
 	SMP smp;
 	IdleThreads idleThreads;
+}
+
+namespace lock {
+	Softirq softirq;
 }
 
 Symbols symbols;
@@ -152,6 +157,12 @@ int kernelMain(void *fdt) {
 		return -1;
 	}
 	cout << "PANIC: Setup finished" << lib::endl;
+
+	/* Prepare softirq */
+	if (isError(lock::softirq.init()))
+		debug::panic::generate("Softirq: Unable to initialize");
+	cout << "Softirq: Setup finished" << lib::endl;
+
 
 	/* Prepare Idle Threads */
 	if (thread::idleThreads.init() != 0)

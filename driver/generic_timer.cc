@@ -24,8 +24,3 @@ int generic_timer::registerFunction(size_t ms, lib::function<int(void)> callback
 
 	return -ENXIO;
 }
-
-
-lib::pair<void*, size_t> generic_timer::getConfigSpace() const {
-	return lib::pair(nullptr, 0);
-}

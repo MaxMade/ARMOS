@@ -142,10 +142,25 @@ namespace driver {
 			int registerFunction(size_t ms, lib::function<int(void)> callback);
 
 			/**
-			 * @fn lib::pair<void*, size_t> getConfigSpace() const
-			 * @brief Get used address range
+			 * @fn int prologue() override
+			 * @brief Exception prologue
+			 * @return
+			 *
+			 *	-  1 - Epilogue is needed
+			 *	-  0 - Epilogue isn't needed
+			 *	- <0 - Error (errno)
 			 */
-			lib::pair<void*, size_t> getConfigSpace() const;
+			int prologue() override;
+
+			/**
+			 * @fn int epilogue() override
+			 * @brief Exception epilogue
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Error (errno)
+			 */
+			int epilogue() override;
 	};
 
 } /* namespace driver */

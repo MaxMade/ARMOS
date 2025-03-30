@@ -1,8 +1,10 @@
 #include <cstdint.h>
 #include <driver/drivers.h>
 #include <hw/register/esr.h>
-#include <kernel/irq/exception_handler.h>
+#include <kernel/error.h>
 #include <kernel/debug/panic.h>
+#include <kernel/lock/softirq.h>
+#include <kernel/irq/exception_handler.h>
 
 extern "C" {
 
@@ -64,9 +66,14 @@ extern "C" {
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Implement me correctly */
-		int ret = driver::intc.handleIRQ();
-		(void) ret;
+		/* Implement me correctly */
+		auto driver = driver::intc.getHandler();
+		if (isError(driver))
+			debug::panic::generateFromIRQ("current_el_sp_elx_irq: No suitable driver found!", saved_state);
+
+		auto err = lock::softirq.execute(driver);
+		if (isError(err))
+			debug::panic::generateFromIRQ("current_el_sp_elx_irq: Error during softirq!", saved_state);
 	}
 
 	void current_el_sp_elx_fiq(irq::ExceptionContext* saved_state) {
@@ -107,9 +114,13 @@ extern "C" {
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Implement me correcly */
-		int ret = driver::intc.handleIRQ();
-		(void) ret;
+		auto driver = driver::intc.getHandler();
+		if (isError(driver))
+			debug::panic::generateFromIRQ("current_el_sp_elx_irq: No suitable driver found!", saved_state);
+
+		auto err = lock::softirq.execute(driver);
+		if (isError(err))
+			debug::panic::generateFromIRQ("current_el_sp_elx_irq: Error during softirq!", saved_state);
 	}
 
 	void lower_el_aarch64_fiq(irq::ExceptionContext* saved_state) {

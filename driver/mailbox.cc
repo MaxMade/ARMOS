@@ -17,50 +17,8 @@ int mailbox::init(const config& conf) {
 	intConfig.first = conf.getInterruptRange().first;
 	intConfig.second = conf.getInterruptRange().second;
 
-	/* Prepare handler */
-	auto handler = [this] () mutable {
-		auto cpuID = CPU::getProcessorID();
-		if (cpuID >= 4)
-			return -EINVAL;
-
-		/* Read message and aknowledge interrupt */
-		uint32_t msg = 0;
-		if (cpuID == 0) {
-			msg = readRegister<MAILBOX_READ_CORE_0>();
-			writeRegister<MAILBOX_READ_CORE_0>(msg);
-		}
-
-		if (cpuID == 1) {
-			msg = readRegister<MAILBOX_READ_CORE_1>();
-			writeRegister<MAILBOX_READ_CORE_1>(msg);
-		}
-
-		if (cpuID == 2) {
-			msg = readRegister<MAILBOX_READ_CORE_2>();
-			writeRegister<MAILBOX_READ_CORE_2>(msg);
-		}
-
-		if (cpuID == 3) {
-			msg = readRegister<MAILBOX_READ_CORE_3>();
-			writeRegister<MAILBOX_READ_CORE_3>(msg);
-		}
-
-		for (size_t i = 0; i < numHandlers; i++) {
-			if (!handlers[i].second.isValid())
-				continue;
-
-			if (handlers[i].first != static_cast<IPI_MSG>(msg))
-				continue;
-
-			auto ret = handlers[i].second();
-			if (ret != 0)
-				return ret;
-		}
-		return 0;
-	};
-
 	/* Register interrupt controller */
-	if (int err = intc.registerHandler(intConfig.first, intConfig.second, lib::function<int()>(handler)); err)
+	if (int err = intc.registerHandler(intConfig.first, intConfig.second, this); err)
 		return err;
 
 	/* Enable IRQs */
@@ -117,10 +75,6 @@ int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
 	return -ENOMEM;
 }
 
-lib::pair<void*, size_t> mailbox::getConfigSpace() const {
-	return lib::pair(base, 0x60);
-}
-
 void mailbox::enableIRQ(size_t core) {
 	if (core == 0)
 		writeRegister<MAILBOX_IRQ_CORE_0>(1);
@@ -133,4 +87,58 @@ void mailbox::enableIRQ(size_t core) {
 
 	if (core == 3)
 		writeRegister<MAILBOX_IRQ_CORE_3>(1);
+}
+
+int mailbox::prologue() {
+	auto cpuID = CPU::getProcessorID();
+	if (cpuID >= 4)
+		return -EINVAL;
+
+	/* Read message and aknowledge interrupt */
+	uint32_t msg = 0;
+	if (cpuID == 0) {
+		msg = readRegister<MAILBOX_READ_CORE_0>();
+		writeRegister<MAILBOX_READ_CORE_0>(msg);
+	}
+
+	if (cpuID == 1) {
+		msg = readRegister<MAILBOX_READ_CORE_1>();
+		writeRegister<MAILBOX_READ_CORE_1>(msg);
+	}
+
+	if (cpuID == 2) {
+		msg = readRegister<MAILBOX_READ_CORE_2>();
+		writeRegister<MAILBOX_READ_CORE_2>(msg);
+	}
+
+	if (cpuID == 3) {
+		msg = readRegister<MAILBOX_READ_CORE_3>();
+		writeRegister<MAILBOX_READ_CORE_3>(msg);
+	}
+
+	/* Buffer message for epilogue */
+	messages[cpuID].fetch_or(msg);
+	return 1;
+}
+
+int mailbox::epilogue() {
+	auto cpuID = CPU::getProcessorID();
+	if (cpuID >= 4)
+		return -EINVAL;
+
+	uint32_t savedMsg = 0;
+	savedMsg = messages[cpuID].exchange(savedMsg);
+	for (size_t i = 0; i < numHandlers; i++) {
+		if (!handlers[i].second.isValid())
+			continue;
+
+		if ((static_cast<uint32_t>(handlers[i].first) & savedMsg) == 0)
+			continue;
+
+		auto ret = handlers[i].second();
+		if (ret != 0)
+			return ret;
+	}
+
+	return 0;
 }

@@ -1,3 +1,4 @@
+#include <cerrno.h>
 #include <driver/drivers.h>
 #include <driver/mini_uart.h>
 
@@ -14,20 +15,6 @@ int mini_uart::init(const config& conf) {
 	/* Prepare interrupt configuration */
 	intConfig.first = conf.getInterruptRange().first;
 	intConfig.second = conf.getInterruptRange().second;
-
-	/* Prepare handler */
-	auto handler = [this] () mutable {
-		/* Read character */
-		this->character = this->read();
-
-		/* Clear pending interrupt */
-		writeRegister<AUX_MU_IC_REG>(0);
-		return 0;
-	};
-
-	/* Register interrupt controller */
-	if (int err = intc.registerHandler(intConfig.first, intConfig.second, lib::function<int()>(handler)); err)
-		return err;
 
 	/* Enable Mini UART */
 	writeRegister<AUX_ENABLES>(1);
@@ -48,6 +35,10 @@ int mini_uart::init(const config& conf) {
 	 * TODO: Currently, the system clock is expected to run at 250MHz.
 	 */
 	writeRegister<AUX_MU_BAUD_REG>(270);
+
+	/* Register interrupt controller */
+	if (int err = intc.registerHandler(intConfig.first, intConfig.second, this); err)
+		return err;
 
 	/* Clear fifo */
 	writeRegister<AUX_MU_IER_REG>(0b110);
@@ -73,7 +64,15 @@ char mini_uart::read() {
 	return readRegister<AUX_MU_IO_REG>() & 0xFF;
 }
 
-lib::pair<void*, size_t> mini_uart::getConfigSpace() const {
-	uintptr_t baseIncAuxEnable = reinterpret_cast<uintptr_t>(base) + AUX_ENABLES;
-	return lib::pair(reinterpret_cast<void*>(baseIncAuxEnable), 0x80);
+int mini_uart::prologue() {
+	/* Read character */
+	character = read();
+
+	/* Clear pending interrupt */
+	writeRegister<AUX_MU_IC_REG>(0);
+	return 0;
+}
+
+int mini_uart::epilogue() {
+	return -EINVAL;
 }

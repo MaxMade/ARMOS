@@ -21,7 +21,3 @@ int generic_ipi::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
 
 	return -ENXIO;
 }
-
-lib::pair<void*, size_t> generic_ipi::getConfigSpace() const {
-	return lib::pair(nullptr, 0);
-}

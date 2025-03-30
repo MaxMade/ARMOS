@@ -22,7 +22,29 @@ namespace driver {
 			 */
 			const char* name;
 
+			/**
+			 * @var driverIdx
+			 * @brief Index of current driver
+			 */
+			size_t driverIdx;
+
+			/**
+			 * @var driverNum
+			 * @brief Number of registered drivers
+			 */
+			static size_t driverNum;
+
 		public:
+			/**
+			 * @fn generic_driver
+			 * @brief Construct generic driver
+			 */
+			generic_driver();
+
+			generic_driver(const generic_driver& other) = delete;
+
+			generic_driver(generic_driver&& other) = delete;
+
 			/**
 			 * @fn const char* getName() const
 			 * @brief Get name of driver
@@ -30,10 +52,37 @@ namespace driver {
 			const char* getName() const;
 
 			/**
-			 * @fn lib::pair<void*, size_t> getConfigSpace() const
-			 * @brief Get used address range
+			 * @fn static size_t getNumDrivers()
+			 * @brief Get number of registered drivers
 			 */
-			lib::pair<void*, size_t> getConfigSpace() const;
+			static size_t getNumDrivers();
+
+			/**
+			 * @fn size_t getIndexDriver() const
+			 * @brief Get index of driver
+			 */
+			size_t getIndexDriver() const;
+
+			/**
+			 * @fn virtual int prologue()
+			 * @brief Exception prologue
+			 * @return
+			 *
+			 *	-  1 - Epilogue is needed
+			 *	-  0 - Epilogue isn't needed
+			 *	- <0 - Error (errno)
+			 */
+			virtual int prologue() = 0;
+
+			/**
+			 * @fn virtual int epilogue()
+			 * @brief Exception epilogue
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Error (errno)
+			 */
+			virtual int epilogue() = 0;
 	};
 
 } /* namespace driver */

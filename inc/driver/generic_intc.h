@@ -30,24 +30,24 @@ namespace driver {
 			int init(const config& conf);
 
 			/**
-			 * @fn int registerHandler(void* data, size_t size, lib::function<int()> handler)
-			 * @brief Register handler for driver specific configuration
+			 * @fn int registerHandler(void* data, size_t size, generic_driver* driver)
+			 * @brief Register driver (prologue/epilogue) for driver specific configuration
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int registerHandler(void* data, size_t size, lib::function<int()> handler);
+			int registerHandler(void* data, size_t size, generic_driver* driver);
 
 			/**
-			 * @fn int handleIRQ()
-			 * @brief Handle pending irq
+			 * @fn generic_driver* getHandler() const
+			 * @brief Get handler for pending IRQ
 			 * @return
 			 *
-			 *	-  0 - Success
-			 *	- <0 - Failure (-errno)
+			 *	- Pointer to handler      - Success
+			 *	- makeError<generic_driver*>(errno) - Failure
 			 */
-			int handleIRQ();
+			generic_driver* getHandler() const;
 	};
 
 } /* namespace driver */
