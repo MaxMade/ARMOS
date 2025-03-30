@@ -1,5 +1,7 @@
 #include <driver/drivers.h>
+#include <kernel/cpu.h>
 #include <kernel/device_tree/parser.h>
+#include <kernel/irq/exception_handler.h>
 
 driver::console console;
 
@@ -16,6 +18,10 @@ int kernelMain(void *fdt) {
 	if (!console.init(consoleConfig))
 		return -1;
 	console.write("Console: Setup finished\n\r", 25);
+
+	/* Prepare exeption vector */
+	CPU::loadExeptionVector(irq::getExceptionVector());
+	console.write("Exception vector: Loaded\n\r", 26);
 
 	return 0;
 }
