@@ -4,6 +4,8 @@
 #include <tuple.h>
 #include <utility.h>
 #include <cstddef.h>
+#include <driver/config.h>
+#include <driver/generic_driver.h>
 #include <kernel/device_tree/node_iterator.h>
 
 /**
@@ -62,6 +64,12 @@ namespace DeviceTree {
 			 * @brief Iterator to position after end node
 			 */
 			NodeIt end() const;
+
+			/**
+			 * @fn driver::config findConfig(const driver::generic_driver& driver) const
+			 * @brief Find configuration for given driver based of the driver name
+			 */
+			driver::config findConfig(const driver::generic_driver& driver) const;
 	};
 
 } /* namespace DeviceTree */
