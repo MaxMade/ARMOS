@@ -23,12 +23,12 @@ int Softirq::init() {
 	return 0;
 }
 
-int Softirq::execute(driver::generic_driver* driver) {
+int Softirq::execute(driver::generic_driver* driver, irq::ExceptionContext* context) {
 	/* Assert that interrupts are currently disabled */
 	assert(CPU::areInterruptsEnabled() == false);
 
 	/* Execute Prologue */
-	auto retPrologue = driver->prologue();
+	auto retPrologue = driver->prologue(context);
 	if (isError(retPrologue))
 		return retPrologue;
 

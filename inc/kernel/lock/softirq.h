@@ -62,14 +62,14 @@ namespace lock {
 			int init();
 
 			/**
-			 * @fn int execute(driver::generic_driver* driver)
+			 * @fn int execute(driver::generic_driver* driver, irq::ExceptionContext* context)
 			 * @brief Execute prologue and epilogue of driver
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int execute(driver::generic_driver* driver);
+			int execute(driver::generic_driver* driver, irq::ExceptionContext* context);
 	};
 
 	/**
