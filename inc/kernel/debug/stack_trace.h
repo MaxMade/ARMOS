@@ -4,6 +4,7 @@
 #include <cstddef.h>
 #include <ostream.h>
 #include <kernel/symbols.h>
+#include <kernel/irq/exception_handler.h>
 #include <hw/register/general_purpose_reg.h>
 
 /**
@@ -53,7 +54,7 @@ namespace debug {
 	 */
 	template<typename ostream = lib::panic, bool flush = false>
 	void stack_trace(size_t maxFrames, void* fp = nullptr) {
-		/* Get current stack pointer */
+		/* Get current frame pointer */
 		if (fp == nullptr)
 			x29(fp);
 
@@ -73,6 +74,99 @@ namespace debug {
 
 			/* Check if symbol is found */
 			auto sym = symbols.lookup(addr);
+			if (sym.first == nullptr) {
+				stream << "Abort: Found non-existing function (" << addr << ")\n\r";
+				break;
+			}
+
+			/* Print Symbol */
+			stream << sym.first << "+" << sym.second;
+
+			/* Print newline */
+			stream << "\n\r";
+
+			/* Check if outermost frame is reached */
+			uintptr_t funcAddress = reinterpret_cast<uintptr_t>(addr) - sym.second;
+			if (funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_serror)) {
+
+				break;
+			}
+
+			/* Exaime next frame */
+			frame = reinterpret_cast<func_prolog*>(frame->fp);
+		}
+
+		if constexpr(flush)
+			stream.flush();
+	}
+
+	/**
+	 * @fn void stack_trace(size_t maxFrames, irq::ExceptionContext* context)
+	 * @brief Generate stack trace from exception context
+	 * @tparam ostream Used ostream (lib::ostream or lib::panic)
+	 * @tparam flush   Flag to flush stream
+	 * @param maxFrames Max. number of observed frames
+	 * @param context   Pointer to exception context
+	 */
+	template<typename ostream = lib::panic, bool flush = false>
+	void stack_trace(size_t maxFrames, irq::ExceptionContext* context) {
+		/* Get current frame pointer */
+		auto fp = context->x29;
+
+		/* Get output stream */
+		ostream stream;
+		stream.setf(lib::ostream::showbase);
+		stream.setf(lib::ostream::hex, lib::ostream::basefield);
+
+		/* Print outer-most frame */
+		stream.width(5);
+		stream << 0;
+		stream.width(0);
+		stream << ": ";
+
+		/* Print outermost frame */
+		auto addr = reinterpret_cast<void*>(context->elr_el1);
+		auto sym = symbols.lookup(addr);
+		if (sym.first == nullptr) {
+			stream << "Abort: Found non-existing function (" << addr << ")\n\r";
+			if constexpr(flush)
+				stream.flush();
+			return;
+		}
+
+		/* Print Symbol */
+		stream << sym.first << "+" << sym.second;
+
+		/* Print newline */
+		stream << "\n\r";
+
+		func_prolog* frame = reinterpret_cast<func_prolog*>(fp);
+		for (size_t i = 1; i < maxFrames; i++) {
+			addr = frame->lr;
+			/* Print frame number */
+			stream.width(5);
+			stream << i;
+			stream.width(0);
+			stream << ": ";
+
+			/* Check if symbol is found */
+			sym = symbols.lookup(addr);
 			if (sym.first == nullptr) {
 				stream << "Abort: Found non-existing function (" << addr << ")\n\r";
 				break;
