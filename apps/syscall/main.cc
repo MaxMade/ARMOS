@@ -2,7 +2,7 @@
 
 static char integers[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-extern "C" int main(void) {
+int main(void) {
 
 	/* Perform write system call */
 	const char* msg =  "Hallo Welt!\n\r";

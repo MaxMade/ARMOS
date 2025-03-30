@@ -23,7 +23,7 @@ static int fn(void* msg) {
 	return 0;
 }
 
-extern "C" int main(void) {
+int main(void) {
 	if (clone(fn, &stack[0][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 0\n\r") == -1)
 		return -1;
 
