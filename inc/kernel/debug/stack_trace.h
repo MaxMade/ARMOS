@@ -4,8 +4,31 @@
 #include <cstddef.h>
 #include <ostream.h>
 #include <kernel/symbols.h>
-#include <kernel/debug/frame_magic.h>
 #include <hw/register/general_purpose_reg.h>
+
+/**
+ * @file kernel/debug/stack_trace.h
+ * @brief Kernel-space stack trace
+ */
+
+/* Outermost frames */
+extern int kernelMain(void *fdt);
+extern "C" void current_el_sp_el0_sync(void* saved_state);
+extern "C" void current_el_sp_el0_irq(void* saved_state);
+extern "C" void current_el_sp_el0_fiq(void* saved_state);
+extern "C" void current_el_sp_el0_serror(void* saved_state);
+extern "C" void current_el_sp_elx_sync(void* saved_state);
+extern "C" void current_el_sp_elx_irq(void* saved_state);
+extern "C" void current_el_sp_elx_fiq(void* saved_state);
+extern "C" void current_el_sp_elx_serror(void* saved_state);
+extern "C" void lower_el_aarch64_sync(void* saved_state);
+extern "C" void lower_el_aarch64_irq(void* saved_state);
+extern "C" void lower_el_aarch64_fiq(void* saved_state);
+extern "C" void lower_el_aarch64_serror(void* saved_state);
+extern "C" void lower_el_aarch32_sync(void* saved_state);
+extern "C" void lower_el_aarch32_irq(void* saved_state);
+extern "C" void lower_el_aarch32_fiq(void* saved_state);
+extern "C" void lower_el_aarch32_serror(void* saved_state);
 
 namespace debug {
 
@@ -38,7 +61,7 @@ namespace debug {
 
 
 		func_prolog* frame = reinterpret_cast<func_prolog*>(fp);
-		for (size_t i = 0; i < maxFrames && reinterpret_cast<uintptr_t>(frame->fp) != FRAME_MAGIC; i++) {
+		for (size_t i = 0; i < maxFrames; i++) {
 			void* addr = frame->lr;
 			/* Print frame number */
 			stream.width(5);
@@ -46,16 +69,41 @@ namespace debug {
 			stream.width(0);
 			stream << ": ";
 
-			/* Print symbol or address */
+			/* Check if symbol is found */
 			auto sym = symbols.lookup(addr);
 			if (sym.first == nullptr) {
-				stream << sym.first;
-			} else {
-				stream << sym.first << "+" << sym.second;
+				stream << "Abort: Found non-existing function (" << addr << ")\n\r";
+				break;
 			}
+
+			/* Print Symbol */
+			stream << sym.first << "+" << sym.second;
 
 			/* Print newline */
 			stream << "\n\r";
+
+			/* Check if outermost frame is reached */
+			uintptr_t funcAddress = reinterpret_cast<uintptr_t>(addr) - sym.second;
+			if (funcAddress == reinterpret_cast<uintptr_t>(kernelMain) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_el0_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(current_el_sp_elx_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch64_serror) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_sync) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_irq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_fiq) ||
+				funcAddress == reinterpret_cast<uintptr_t>(lower_el_aarch32_serror)) {
+
+				break;
+			}
 
 			/* Exaime next frame */
 			frame = reinterpret_cast<func_prolog*>(frame->fp);
