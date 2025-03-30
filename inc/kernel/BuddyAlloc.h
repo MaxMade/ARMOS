@@ -15,6 +15,16 @@
 /* XXX: Comment in for debug assertions */
 //#define BUDDY_ALLOC_ASSERT 1
 
+/* XXX: The constructor might have an implicit call to memset in order to zero
+ * object. As the memset function is only defined in user space, this function
+ * must be defiend.
+*
+ * TODO: Pass flag to g++ in order to prevent the generation of such functions
+ */
+extern "C" void* memset(void *s, int c, size_t n) {
+	return lib::memset(s, c, n);
+}
+
 /* Setting for assertions */
 #ifdef BUDDY_ALLOC_ASSERT
 #include <cassert> /* assert */
