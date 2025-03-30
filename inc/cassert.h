@@ -33,32 +33,32 @@
 				line = line / 10;                              \
 			}                                                  \
                                                                \
-			int len = strlen(lineStr);                         \
+			int len = lib::strlen(lineStr);                    \
 			for (int j = 0; j < (len / 2); j++) {              \
 				char tmp = lineStr[j];                         \
 				lineStr[j] = lineStr[len - 1 - j];             \
 				lineStr[len - 1 - j] = tmp;                    \
 			}                                                  \
                                                                \
-			strncpy(&tmp[offset], msg, 512 - offset);          \
-			offset += strlen(msg);                             \
-			strncpy(&tmp[offset], " '", 512 - offset);         \
+			lib::strncpy(&tmp[offset], msg, 512 - offset);     \
+			offset += lib::strlen(msg);                        \
+			lib::strncpy(&tmp[offset], " '", 512 - offset);    \
 			offset += 2;                                       \
-			strncpy(&tmp[offset], test, 512 - offset);         \
-			offset += strlen(test);                            \
-			strncpy(&tmp[offset], "' (", 512 - offset);        \
+			lib::strncpy(&tmp[offset], test, 512 - offset);    \
+			offset += lib::strlen(test);                       \
+			lib::strncpy(&tmp[offset], "' (", 512 - offset);   \
 			offset += 3;                                       \
-			strncpy(&tmp[offset], func, 512 - offset);         \
-			offset += strlen(func);                            \
-			strncpy(&tmp[offset], "@", 512 - offset);          \
+			lib::strncpy(&tmp[offset], func, 512 - offset);    \
+			offset += lib::strlen(func);                       \
+			lib::strncpy(&tmp[offset], "@", 512 - offset);     \
 			offset += 1;                                       \
-			strncpy(&tmp[offset], file, 512 - offset);         \
-			offset += strlen(file);                            \
-			strncpy(&tmp[offset], ":", 512 - offset);          \
+			lib::strncpy(&tmp[offset], file, 512 - offset);    \
+			offset += lib::strlen(file);                       \
+			lib::strncpy(&tmp[offset], ":", 512 - offset);     \
 			offset += 1;                                       \
-			strncpy(&tmp[offset], lineStr, 512 - offset);      \
-			offset += strlen(lineStr);                         \
-			strncpy(&tmp[offset], ")", 512 - offset);          \
+			lib::strncpy(&tmp[offset], lineStr, 512 - offset); \
+			offset += lib::strlen(lineStr);                    \
+			lib::strncpy(&tmp[offset], ")", 512 - offset);     \
 			offset += 1;                                       \
                                                                \
 			debug::panic::generate(tmp);                       \

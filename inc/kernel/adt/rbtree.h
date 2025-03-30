@@ -428,7 +428,7 @@ namespace adt {
 			 */
 			RBTree() {
 				/* Initialize it */
-				memset(&null_node, 0, sizeof(null_node));
+				lib::memset(&null_node, 0, sizeof(null_node));
 				root = &null_node;
 				count = 0;
 			}

@@ -16,7 +16,7 @@ SyscallHandler::SyscallHandler() {
 	num_ecs = 2;
 
 	/* Register handlers */
-	memset(&handlers, 0, sizeof(void*) * NUM_HANDLERS);
+	lib::memset(&handlers, 0, sizeof(void*) * NUM_HANDLERS);
 	handlers[SYS_WRITE] = syscall::__write;
 	handlers[SYS_EXIT] = syscall::__exit;
 }

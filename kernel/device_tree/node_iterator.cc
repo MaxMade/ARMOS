@@ -23,7 +23,7 @@ NodeIt& NodeIt::operator++() {
 
 	/* Skip next entry ("<node-name>@<unit-address>") */
 	auto name = reinterpret_cast<const char *>(ptr);
-	auto off = math::roundUp(strlen(name) + 1, FDT_ALIGNMENT);
+	auto off = math::roundUp(lib::strlen(name) + 1, FDT_ALIGNMENT);
 	ptr = reinterpret_cast<decltype(ptr)>(reinterpret_cast<uintptr_t>(ptr) + off);
 
 	/* Skip next entries (properties, node end or nops) */

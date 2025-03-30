@@ -181,7 +181,7 @@ static void buddy_init() {
 	size_t idx = MAX_ALLOC_SIZE_LOG2 - MIN_ALLOC_SIZE_LOG2;
 
 	/* Prepare freelist */
-	memset(&free_lists, 0, sizeof(struct buddy_free_list) * FREE_LISTS_LEN);
+	lib::memset(&free_lists, 0, sizeof(struct buddy_free_list) * FREE_LISTS_LEN);
 
 	/* Prepare root */
 	struct buddy_node_free *root = (struct buddy_node_free *) __mem;
@@ -247,14 +247,14 @@ static void *buddy_memalign(size_t alignment, size_t size) {
 
 	/* Save old header */
 	struct buddy_node_used saved_header;
-	memcpy(&saved_header, oldEntry, sizeof(saved_header));
+	lib::memcpy(&saved_header, oldEntry, sizeof(saved_header));
 
 	/* Get new header */
 	ret = reinterpret_cast<void*>(math::roundUp(reinterpret_cast<uintptr_t>(ret), alignment));
 	struct buddy_node_used* newEntry = container_of(ret, struct buddy_node_used, mem);
 
 	/* Write old header */
-	memcpy(newEntry, &saved_header, sizeof(*newEntry));
+	lib::memcpy(newEntry, &saved_header, sizeof(*newEntry));
 
 	return ret;
 }
@@ -295,7 +295,7 @@ static void *buddy_calloc(size_t nmemb, size_t size) {
 
 	void *ret = buddy_malloc(nmemb * size);
 	if (ret != nullptr)
-		memset(ret, 0, nmemb * size);
+		lib::memset(ret, 0, nmemb * size);
 
 	return ret;
 }
@@ -323,7 +323,7 @@ static void *buddy_realloc(void *ptr, size_t size) {
 
 	void *ret = buddy_malloc(size);
 	if (!ret) {
-		memcpy(ret, ptr, tmp->size - sizeof(struct buddy_node_used));
+		lib::memcpy(ret, ptr, tmp->size - sizeof(struct buddy_node_used));
 		buddy_free(ptr);
 	}
 	return ret;

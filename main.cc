@@ -135,7 +135,7 @@ int kernelMain(void *fdt) {
 		if (!node.isValid())
 			continue;
 
-		if (strncmp("cpu@", node.getName(), 4) == 0) {
+		if (lib::strncmp("cpu@", node.getName(), 4) == 0) {
 			const char* cpuName = nullptr;
 			void* spintable = nullptr;
 

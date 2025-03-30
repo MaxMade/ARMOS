@@ -52,7 +52,7 @@ Node Node::getParent() const {
 			/* Move to next entry */
 			drag++;
 			auto name = reinterpret_cast<const char *>(drag);
-			auto off = math::roundUp(strlen(name) + 1, FDT_ALIGNMENT);
+			auto off = math::roundUp(lib::strlen(name) + 1, FDT_ALIGNMENT);
 			drag = reinterpret_cast<decltype(drag)>(reinterpret_cast<uintptr_t>(drag) + off);
 
 			/* Skip content of prop */
@@ -108,7 +108,7 @@ PropertyIt Node::begin() const {
 	/* Skip node */
 	drag++;
 	auto name = reinterpret_cast<const char *>(drag);
-	auto off = math::roundUp(strlen(name) + 1, FDT_ALIGNMENT);
+	auto off = math::roundUp(lib::strlen(name) + 1, FDT_ALIGNMENT);
 	drag = reinterpret_cast<decltype(drag)>(reinterpret_cast<uintptr_t>(drag) + off);
 
 	/* Skip nops */
@@ -136,7 +136,7 @@ Property Node::findProperty(const char* name) const {
 			continue;
 
 		/* Check for matching properties */
-		if (strcmp(name, property.getName()) == 0)
+		if (lib::strcmp(name, property.getName()) == 0)
 			return Property(property);
 	}
 
