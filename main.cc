@@ -155,7 +155,7 @@ int kernelMain(void *fdt) {
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
-	CPU::enableInterrupts();
+	/* TODO: Start scheduling loop */
 	while (1);
 
 	return 0;
@@ -191,7 +191,7 @@ int kernelMainApp() {
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
-	CPU::enableInterrupts();
+	/* TODO: Start scheduling loop */
 	while (1);
 
 	return 0;
