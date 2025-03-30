@@ -5,6 +5,7 @@
 #include <atomic.h>
 #include <utility.h>
 #include <type_traits.h>
+#include <cassert.h>
 
 /**
  * @file memory.h

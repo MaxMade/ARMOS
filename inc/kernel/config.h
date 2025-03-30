@@ -33,26 +33,43 @@
  * @def STACK_SIZE
  * @brief Stack size in bytes
  */
-#if defined(CONFIGSTACK_SIZE_16)
+#if defined(CONFIG_STACK_SIZE_16)
 	#define STACK_SIZE (16 * 1024)
 
-#elif defined(CONFIGSTACK_SIZE_32)
+#elif defined(CONFIG_STACK_SIZE_32)
 	#define STACK_SIZE (32 * 1024)
 
-#elif defined(CONFIGSTACK_SIZE_64)
+#elif defined(CONFIG_STACK_SIZE_64)
 	#define STACK_SIZE (64 * 1024)
 
-#elif defined(CONFIGSTACK_SIZE_128)
+#elif defined(CONFIG_STACK_SIZE_128)
 	#define STACK_SIZE (128 * 1024)
 
-#elif defined(CONFIGSTACK_SIZE_256)
+#elif defined(CONFIG_STACK_SIZE_256)
 	#define STACK_SIZE (256 * 1024)
 
-#elif defined(CONFIGSTACK_SIZE_512)
+#elif defined(CONFIG_STACK_SIZE_512)
 	#define STACK_SIZE (512 * 1024)
 
 #else
 	#define STACK_SIZE (1024 * 1024)
+#endif
+
+/*
+ * @def MAX_TID
+ * @brief Max Thread ID (TID)
+ */
+#if defined(CONFIG_MAX_TID_128)
+	#define MAX_TID 128
+
+#elif defined(CONFIG_MAX_TID_256)
+	#define MAX_TID 256
+
+#elif defined(CONFIG_MAX_TID_512)
+	#define MAX_TID 512
+
+#else
+	#define MAX_TID 1024
 #endif
 
 #endif /* ifndef _INC_KENREL_CONFIG_H_ */

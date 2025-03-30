@@ -88,3 +88,13 @@ CONFIG_MAX_CPU = 4
 # 512
 # 1024
 CONFIG_STACK_SIZE = 64
+
+# CONFIG_MAX_TID
+# Description:
+# The CONFIG_MAX_TID option sets the maximum number of used TIDs
+# Possible Values:
+# 128
+# 256
+# 512
+# 1024
+CONFIG_MAX_TID = 128

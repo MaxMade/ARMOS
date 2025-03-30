@@ -89,7 +89,6 @@ long syscall(long number, T0 t0 = 0, T1 t1 = 0, T2 t2 = 0, T3 t3 = 0, T4 t4 = 0,
 /**
  * @fn ssize_t write(int fd, const void *buf, size_t count);
  * @brief Write up to \c count character from \c buf
- * @todo Implement errno handling
  * @return
  *
  *	- >= 0 - Number of written characters
