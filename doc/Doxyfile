@@ -1,0 +1,24 @@
+PROJECT_NAME            = "ARMOS"
+
+INPUT                   = ./
+RECURSIVE               = yes
+FILE_PATTERNS           = *.h *.md
+OUTPUT_DIRECTORY        = doc/build/
+OPTIMIZE_OUTPUT_FOR_C   = yes
+LOOKUP_CACHE_SIZE       = 9
+QUIET                   = yes
+
+CITE_BIB_FILES          = doc/refernces.bib
+GENERATE_LATEX          = no
+
+GENERATE_HTML           = yes
+HTML_OUTPUT             = ./
+
+SORT_MEMBER_DOCS        = no
+INLINE_SIMPLE_STRUCTS   = yes
+TYPEDEF_HIDES_STRUCT    = yes
+HIDE_UNDOC_MEMBERS      = yes
+HIDE_UNDOC_CLASSES      = yes
+ENUM_VALUES_PER_LINE    = 1
+
+EXTRACT_STATIC          = yes
