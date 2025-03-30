@@ -175,6 +175,10 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Synchronous Exceptions: Unable to register syscall handler");
 	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
+	/* Prepare idle threads */
+	if(isError(thread::idleThreads.init()))
+		debug::panic::generate("Scheduler: Unable to create idlethreads");
+
 	/* Prepare Schedulder */
 	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) main, nullptr, mainThreadUserStack)))
 		debug::panic::generate("Scheduler: Unable to create main thread");

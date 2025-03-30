@@ -12,12 +12,13 @@ extern "C" void thread::idle() {
 		CPU::halt();
 }
 
-IdleThreads::IdleThreads() {
+int IdleThreads::init() {
 	for (size_t i = 0; i < MAX_NUM_CPUS; i++) {
 		if (int err = threads[i].init(-1, true, (void*) thread::idle, nullptr, nullptr); isError(err))
-			debug::panic::generate("Unable to initialize idle thread", err);
-
+			return err;
 	}
+
+	return 0;
 }
 
 Context& IdleThreads::get() {
