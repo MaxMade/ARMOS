@@ -4,6 +4,7 @@
 #include <kernel/error.h>
 #include <kernel/debug/panic.h>
 #include <kernel/syscall/write.h>
+#include <kernel/syscall/exit.h>
 #include <kernel/irq/syscall.h>
 #include <kernel/irq/exception_handler.h>
 
@@ -17,6 +18,7 @@ SyscallHandler::SyscallHandler() {
 	/* Register handlers */
 	memset(&handlers, 0, sizeof(void*) * NUM_HANDLERS);
 	handlers[SYS_WRITE] = syscall::__write;
+	handlers[SYS_EXIT] = syscall::__exit;
 }
 
 int SyscallHandler::prologue(irq::ExceptionContext* context) {

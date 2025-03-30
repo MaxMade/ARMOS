@@ -11,7 +11,5 @@ extern "C" int main(void) {
 	syscall(1, 1, &integers[id], 1);
 	syscall(1, 1, "\n\r", 2);
 
-	while(1);
-
 	return 0;
 }
