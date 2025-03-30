@@ -214,6 +214,51 @@ namespace lib {
 		lib::swap(x.second, y.second);
 	}
 
+	/**
+	 * @struct tuple_size
+	 * @brief Number of entries in tuple
+	 */
+	template<typename T>
+	struct tuple_size;
+
+	/**
+	 * @struct tuple_size<lib::pair<T1, T2>>
+	 * @brief Number of entries in pair
+	 */
+	template <typename T1, typename T2>
+	struct tuple_size<lib::pair<T1, T2>> : public lib::integral_constant<size_t, 2> { };
+
+	/**
+	 * @struct tuple_element
+	 * @brief Typedef for i-th element of tuple
+	 */
+	template<size_t I, typename T>
+	struct tuple_element;
+ 
+	/** @struct tuple_element<I, lib::pair<T1,T2>>
+	 * @brief Typedef for i-th element of pair
+	 */
+	template<size_t I, typename T1, typename T2>
+	struct tuple_element<I, lib::pair<T1,T2>> {
+		static_assert(I < 2, "lib::pair has only 2 elements!");
+	};
+ 
+	/** @struct tuple_element<0, lib::pair<T1,T2>>
+	 * @brief Typedef for first element of pair
+	 */
+	template<typename T1, typename T2>
+	struct tuple_element<0, lib::pair<T1,T2>> {
+		using type = T1;
+	};
+
+	/** @struct tuple_element<1, lib::pair<T1,T2>>
+	 * @brief Typedef for second element of pair
+	 */
+	template<typename T1, typename T2>
+	struct tuple_element<1, lib::pair<T1,T2>> {
+		using type = T2;
+	};
+
 } /* namespace lib */
 
 #endif /* endif _INC_UTILITY_H_ */

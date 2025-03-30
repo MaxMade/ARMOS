@@ -10,261 +10,202 @@
  */
 
 namespace lib {
-	/* forward declartion */
 
-	template<typename First, typename... Rest>
-	struct tuple;
-
-	template<typename First, typename... Rest>
-	void swap(tuple<First, Rest...>& lhs, tuple<First, Rest...>& rhs);
-
-	template<typename First, typename... Rest>
-	void assign(tuple<First, Rest...>& lhs, const tuple<First, Rest...>& rhs);
-
-	template<typename First, typename... Rest>
-	void assign(tuple<First, Rest...>& lhs, tuple<First, Rest...>&& rhs);
-
-	/* tuple defintion */
-
-	//! @cond Doxygen_Suppress
 	/**
 	 * @struct tuple
-	 * @brief Tuple
+	 * @brief Tuple Container
 	 */
-	template<typename First, typename... Rest>
-	struct tuple : public tuple<Rest...> {
-		tuple(First first, Rest... rest): tuple<Rest...>(rest...), first(first) {}
+	template <typename T, typename... Ts>
+	struct tuple {
+		/**
+		 * @var value
+		 * @brief Head value
+		 */
+		T value;
 
 		/**
-		 * @var first
-		 * @brief Entry for current index
+		 * @var rest
+		 * @brief Tail values
 		 */
-		First first;
+		tuple<Ts...> rest;
 
 		/**
-		 * @fn void swap(tuple<First, Rest...>& other)
-		 * @brief Swap contents
+		 * @fn tuple(const T& t, const Ts&... ts)
+		 * @brief Construct tuple
 		 */
-		void swap(tuple<First, Rest...>& other) {
-			lib::swap(*this, other);
+		tuple(const T& t, const Ts&... ts) : value(t), rest(ts...) {}
+
+		/**
+		 * @fn void swap(tuple& o)
+		 * @brief Swap tuples
+		 */
+		void swap(tuple& o) {
+			lib::swap(*this, o);
+		}
+	};
+
+	template <typename T>
+	struct tuple<T> {
+		/**
+		 * @var value
+		 * @brief Head value
+		 */
+		T value;
+
+		/**
+		 * @fn tuple(const T& t, const Ts&... ts)
+		 * @brief Construct tuple
+		 */
+		tuple(const T& t) : value(t) {}
+
+		/**
+		 * @fn void swap(tuple& o)
+		 * @brief Swap tuples
+		 */
+		void swap(tuple& o) {
+			lib::swap(*this, o);
+		}
+	};
+
+	//! @cond Doxygen_Suppress
+	template <size_t i, typename T, typename... Ts>
+	struct __GetHelper : __GetHelper<i-1, Ts...> {
+		static_assert(i < sizeof...(Ts) + 1, "Index out of bounds");
+	};
+
+	template <typename T, typename... Ts>
+	struct __GetHelper<0, T, Ts...> {
+		T value;
+	};
+
+	template <size_t i>
+	struct __Get {
+		template <typename... Ts>
+		static auto& get(tuple<Ts...>& t) {
+			return __Get<i-1>::get(t.rest);
 		}
 
-		/**
-		 * @fn tuple& operator=(const tuple& other)
-		 * @brief Copy Assignment
-		 */
-		tuple& operator=(const tuple& other) {
-			assign(*this, other);
-			return *this;
+		template <typename... Ts>
+		static const auto& get(const tuple<Ts...>& t) {
+			return __Get<i-1>::get(t.rest);
 		}
 
-		/**
-		 * @fn tuple& operator=(tuple&& other)
-		 * @brief Move Assignment
-		 */
-		tuple& operator=(tuple&& other) {
-			assign(*this, move(other));
-			return *this;
+		template <typename... Ts>
+		static auto&& get(tuple<Ts...>&& t) {
+			return __Get<i-1>::get(t.rest);
+		}
+
+		template <typename... Ts>
+		static const auto&& get(const tuple<Ts...>&& t) {
+			return __Get<i-1>::get(t.rest);
+		}
+	};
+
+	template <>
+	struct __Get<0> {
+		template <typename T, typename... Ts>
+		static T& get(tuple<T, Ts...>& t) {
+			return t.value;
+		}
+
+		template <typename T, typename... Ts>
+		static const T& get(const tuple<T, Ts...>& t) {
+			return t.value;
+		}
+
+		template <typename T, typename... Ts>
+		static T&& get(tuple<T, Ts...>&& t) {
+			return t.value;
+		}
+
+		template <typename T, typename... Ts>
+		static const T&& get(const tuple<T, Ts...>&& t) {
+			return t.value;
 		}
 	};
 	//! @endcond
 
-	template<typename First, typename... Rest>
-	tuple(First, Rest...) -> tuple<First, Rest...>;
-
-	template<typename First>
-	struct tuple<First> {
-		tuple(First first): first(first) {}
-		First first;
-
-		void swap(tuple<First>& other) {
-			swap(this->first, other.first);
-		}
-
-		tuple& operator=(const tuple& other) {
-			assign(*this, other);
-			return *this;
-		}
-
-		tuple& operator=(tuple&& other) {
-			assign(*this, move(other));
-			return *this;
-		}
-	};
-
-	template<typename First>
-	tuple(First) -> tuple<First>;
-
-	/* get implementation */
-
-	template<size_t index, typename First, typename... Rest>
-	struct _GetImpl {
-		static auto& value(tuple<First, Rest...>& t) {
-			return _GetImpl<index - 1, Rest...>::value(t);
-		}
-
-		static const auto& value(const tuple<First, Rest...>& t) {
-			return _GetImpl<index - 1, Rest...>::value(t);
-		}
-	};
-
-	template<typename First, typename... Rest>
-	struct _GetImpl<0, First, Rest...> {
-		static First& value(tuple<First, Rest...>& t) {
-			return t.first;
-		}
-
-		static const First& value(const tuple<First, Rest...>& t) {
-			return t.first;
-		}
-	};
-
 	/**
-	 * @fn auto& get(tuple<First, Rest...>& t)
-	 * @brief Get value at given index
+	 * @fn auto& get(tuple<Ts...>& t)
+	 * @brief Get i-th element
 	 */
-	template<size_t index, typename First, typename... Rest>
-	auto& get(tuple<First, Rest...>& t) {
-		return _GetImpl<index, First, Rest...>::value(t);
+	template <size_t i, typename... Ts>
+	auto& get(tuple<Ts...>& t) {
+		return __Get<i>::get(t);
 	}
 
 	/**
-	 * @fn const auto& get(const tuple<First, Rest...>& t)
-	 * @brief Get value at given index
+	 * @fn const auto& get(const tuple<Ts...>& t)
+	 * @brief Get i-th element
 	 */
-	template<size_t index, typename First, typename... Rest>
-	const auto& get(const tuple<First, Rest...>& t) {
-		return _GetImpl<index, First, Rest...>::value(t);
+	template <size_t i, typename... Ts>
+	const auto& get(const tuple<Ts...>& t) {
+		return __Get<i>::get(t);
 	}
-
-	/* assign implementation */
-
-	template<size_t index, typename First, typename... Rest>
-	struct _assignImpl {
-		static void assign(tuple<First, Rest...>& lhs, const tuple<First, Rest...>& rhs) {
-			auto& _lhs = get<index>(lhs);
-			auto& _rhs = get<index>(rhs);
-
-			_lhs = _rhs;
-
-			_assignImpl<index - 1, First, Rest...>::assign(lhs, rhs);
-		}
-
-		static void assign(tuple<First, Rest...>& lhs, tuple<First, Rest...>&& rhs) {
-			auto& _lhs = get<index>(lhs);
-			auto& _rhs = get<index>(rhs);
-
-			_lhs = move(_rhs);
-
-			_assignImpl<index - 1, First, Rest...>::assign(lhs, move(rhs));
-		}
-	};
-
-	template<typename First, typename... Rest>
-	struct _assignImpl<0, First, Rest...> {
-		static void assign(tuple<First, Rest...>& lhs, const tuple<First, Rest...>& rhs) {
-			auto& _lhs = get<0>(lhs);
-			auto& _rhs = get<0>(rhs);
-
-			_lhs = _rhs;
-		}
-
-		static void assign(tuple<First, Rest...>& lhs, tuple<First, Rest...>&& rhs) {
-			auto& _lhs = get<0>(lhs);
-			auto& _rhs = get<0>(rhs);
-
-			_lhs = move(_rhs);
-		}
-	};
-
-
-	template<typename First, typename... Rest>
-	void assign(tuple<First, Rest...>& lhs, const tuple<First, Rest...>& rhs) {
-		_assignImpl<sizeof...(Rest), First, Rest...>::assign(lhs, rhs);
-	}
-
-	template<typename First, typename... Rest>
-	void assign(tuple<First, Rest...>& lhs, tuple<First, Rest...>&& rhs) {
-		_assignImpl<sizeof...(Rest), First, Rest...>::assign(lhs, move(rhs));
-	}
-
-
-	/* swap implementation */
-
-	template<size_t index, typename First, typename... Rest>
-	struct _swapImpl {
-		static void swap(tuple<First, Rest...>& lhs, tuple<First, Rest...>& rhs) {
-			auto& _lhs = get<index>(lhs);
-			auto& _rhs = get<index>(rhs);
-
-			swap(_lhs, _rhs);
-
-			_swapImpl<index - 1, First, Rest...>::swap(lhs, rhs);
-		}
-	};
-
-	template<typename First, typename... Rest>
-	struct _swapImpl<0, First, Rest...> {
-		static void swap(tuple<First, Rest...>& lhs, tuple<First, Rest...>& rhs) {
-			auto& _lhs = get<0>(lhs);
-			auto& _rhs = get<0>(rhs);
-
-			swap(_lhs, _rhs);
-		}
-	};
-
 
 	/**
-	 * @fn void swap(tuple<First, Rest...>& lhs, tuple<First, Rest...>& rhs)
-	 * @brief Swap contents of two tuples
+	 * @fn auto&& get(tuple<Ts...>&& t)
+	 * @brief Get i-th element
 	 */
-	template<typename First, typename... Rest>
-	void swap(tuple<First, Rest...>& lhs, tuple<First, Rest...>& rhs) {
-		_swapImpl<sizeof...(Rest), First, Rest...>::swap(lhs, rhs);
+	template <size_t i, typename... Ts>
+	auto&& get(tuple<Ts...>&& t) {
+		return __Get<i>::get(t);
 	}
 
-	/* tuple_size implementation */
-
-	template<typename T>
-	class tuple_size {
-	};
+	/**
+	 * @fn const auto&& get(const tuple<Ts...>&& t)
+	 * @brief Get i-th element
+	 */
+	template <size_t i, typename... Ts>
+	const auto&& get(const tuple<Ts...>&& t) {
+		return __Get<i>::get(t);
+	}
 
 	/**
 	 * @struct tuple_size
-	 * @brief Get tuple size
+	 * @brief Number of entries in tuple
 	 */
-	template<typename...T>
-	struct tuple_size<tuple<T...>> {
-	   public:
-		   /**
-			* @typedef value_type
-			* @brief Type of value member
-			*/
-		   using value_type = size_t;
+	template<typename... Types>
+	struct tuple_size<tuple<Types...>> : integral_constant<size_t, sizeof...(Types)> { };
 
-		   /**
-			* @var value
-			* @brief Size of tuple
-			*/
-		   constexpr static size_t value = sizeof...(T);
-
-		   /**
-			* @fn operator size_t() const
-			* @brief Overloaded size cast
-			*/
-		   operator size_t() const {
-			   return value;
-		   }
-
-		   /**
-			* @fn value_type operator() ()
-			* @brief Get size
-			*/
-		   value_type operator() () {
-				return value;
-		   }
+	/**
+	 * @struct tuple_element
+	 * @brief Get type of i-th entry
+	 */
+	template<size_t I, typename T>
+	struct tuple_element;
+ 
+	/**
+	 * @struct tuple_element
+	 * @brief Get type of i-th entry
+	 */
+	template<size_t I, typename Head, typename... Tail>
+	struct tuple_element<I, tuple<Head, Tail...>> : tuple_element<I-1, tuple<Tail...>> { };
+ 
+	/**
+	 * @struct tuple_element
+	 * @brief Get type of i-th entry
+	 */
+	template<typename Head, typename... Tail >
+	struct tuple_element<0, tuple<Head, Tail...>> {
+	   using type = Head;
 	};
 
 } /* namespace lib */
+
+namespace std {
+	template<typename T>
+	struct tuple_size;
+
+	template<typename... Types>
+	struct tuple_size<lib::tuple<Types...>> : lib::tuple_size<lib::tuple<Types...>> {};
+
+	template<size_t I, typename T>
+	struct tuple_element;
+ 
+	template<size_t I, typename... Types>
+	struct tuple_element<I, lib::tuple<Types...>> : lib::tuple_element<I, lib::tuple<Types...>> { };
+ 
+} /* namespace std */
 
 #endif /* ifndef _INC_TUPLE_H_ */
