@@ -4,10 +4,12 @@
 # List of Variables #
 #####################
 
-VERBOSE  = @
-KERNEL   = boot/system
-LINKER   = boot/sections.ld
-DTB      = boot/rpi3.dtb
+VERBOSE      = @
+KERNEL       = boot/system
+SYM_MAP      = boot/symbol_map
+IMAGE        = boot/kernel8.img
+LINKER       = boot/sections.ld
+DTB          = boot/rpi3.dtb
 
 #########################
 # List of Prerequisites #
@@ -54,7 +56,7 @@ LDFLAGS = -nostartfiles -T $(LINKER)
 ########
 
 QEMU = qemu-system-aarch64
-QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -serial vc -kernel $(KERNEL) -dtb $(DTB)
+QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -serial vc -kernel $(IMAGE) -dtb $(DTB)
 
 #######
 # GDB #
@@ -94,7 +96,12 @@ $(KERNEL): $(CC_OBJECTS) $(S_OBJECTS)
 	@echo "LD		$(KERNEL)"
 	$(VERBOSE) $(LD) $(LDFLAGS) -o $(KERNEL) $^ -lgcc
 
-all: $(KERNEL)
+$(IMAGE): $(KERNEL) $(SYM_MAP)
+	@echo "OBJCOPY		$(KERNEL)"
+	$(VERBOSE)  aarch64-linux-gnu-objcopy --update-section map=$(SYM_MAP) $(KERNEL)
+	$(VERBOSE)  aarch64-linux-gnu-objcopy $(KERNEL) -O binary $(IMAGE)
+
+all: $(IMAGE)
 
 qemu: debug
 	@echo "QEMU"
@@ -116,6 +123,10 @@ clean:
 tags:
 	@echo "TAGS"
 	$(VERBOSE) ctags -R .
+
+$(SYM_MAP): $(KERNEL)
+	@echo "SYMBOLS		$(SYM_MAP)"
+	$(VERBOSE) ./scripts/symbol_map $(KERNEL) $(SYM_MAP)
 
 doc:
 	@echo "DOC		$(DOXYGENTARGET)"

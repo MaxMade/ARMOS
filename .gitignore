@@ -1,4 +1,6 @@
 *.o
 tags
 boot/system
+boot/symbol_map
+boot/kernel8.img
 doc/build

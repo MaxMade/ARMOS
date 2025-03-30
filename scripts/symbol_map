@@ -1,0 +1,95 @@
+#!/bin/env python3
+
+import sys
+import lief
+import struct
+
+MAGIC = 0x7553017854221078
+HEADER_SIZE = 40
+SYMBOL_SIZE = 24
+
+def usage():
+    sys.stderr.write("Usage: {} <ELF< <OUTPUT<\n".format(sys.argv[0]))
+    sys.stderr.write("  ELF: Input ELF file\n");
+    sys.stderr.write("  OUTPUT: OUTPUT map\n");
+
+
+def generateMap(elf):
+    ret = []
+    binary = lief.parse(elf)
+    for symbol in binary.symbols:
+        # Skip any non function symbol
+        if not symbol.is_function:
+            continue
+
+        # Collect all necessary data
+        name = (symbol.demangled_name)
+        value = int(symbol.value)
+        size = int(symbol.size)
+        ret.append({"name" : name, "value" : value, "size" : size})
+
+    return ret
+
+
+def main():
+    if len(sys.argv) != 3:
+        usage()
+        sys.exit(1)
+
+    # Generate map
+    symbolMap = generateMap(sys.argv[1])
+
+    # open file for writing in binary mode
+    outputFile = open(sys.argv[2], "wb")
+
+
+    # Write header
+    #
+    #   struct header {
+    #       uint64_t magic;
+    #       uint64_t size;
+    #       uint64_t numEntries;
+    #       uint64_t offSymbol;
+    #       uint64_t offString;
+    #   };
+    numEntries = len(symbolMap)
+    offSymbol = HEADER_SIZE
+    offString = offSymbol + numEntries * SYMBOL_SIZE
+    sizeStrings = 0;
+    for symbol in symbolMap:
+        sizeStrings += len(symbol["name"]) + 1
+    size = HEADER_SIZE + numEntries * SYMBOL_SIZE + sizeStrings
+
+
+    outputFile.write(struct.pack("<Q", MAGIC))
+    outputFile.write(struct.pack("<Q", size))
+    outputFile.write(struct.pack("<Q", numEntries))
+    outputFile.write(struct.pack("<Q", offSymbol))
+    outputFile.write(struct.pack("<Q", offString))
+
+    # Write symbol
+    #
+    #   struct symbol {
+    #       uint64_t idx;
+    #       uint64_t value;
+    #       uint64_t size;
+    #   };
+    idx = 0
+    for symbol in symbolMap:
+        outputFile.write(struct.pack("<Q", idx))
+        outputFile.write(struct.pack("<Q", symbol["value"]))
+        outputFile.write(struct.pack("<Q", symbol["size"]))
+        idx += len(symbol["name"]) + 1
+
+
+    # Write strings
+    for symbol in symbolMap:
+        outputFile.write(bytearray(symbol["name"].encode('utf-8')))
+        outputFile.write(b'\0');
+
+
+    outputFile.close();
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

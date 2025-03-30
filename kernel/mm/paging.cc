@@ -2,6 +2,7 @@
 #include <kernel/math.h>
 #include <kernel/error.h>
 #include <kernel/linker.h>
+#include <kernel/symbols.h>
 #include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/translation_table_allocator.h>
@@ -144,6 +145,16 @@ int Paging::createEarlyKernelMapping() {
 	auto bss = linker::getBSSSegment();
 	for (uintptr_t addr = reinterpret_cast<uintptr_t>(bss.first);
 			addr < math::roundUp(reinterpret_cast<uintptr_t>(bss.first) + bss.second, PAGESIZE);
+			addr += PAGESIZE) {
+
+		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), KERNEL_MAPPING, WRITABLE, NORMAL_ATTR);
+		if (isError(ret))
+			return castError<int, decltype(ret)>(ret);
+	}
+
+    auto sym_map = symbols.getRange();
+	for (uintptr_t addr = reinterpret_cast<uintptr_t>(sym_map.first);
+			addr < math::roundUp(reinterpret_cast<uintptr_t>(sym_map.first) + sym_map.second, PAGESIZE);
 			addr += PAGESIZE) {
 
 		auto ret = paging.earlyMap(reinterpret_cast<void*>(addr), reinterpret_cast<void*>(addr), KERNEL_MAPPING, WRITABLE, NORMAL_ATTR);

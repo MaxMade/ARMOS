@@ -41,4 +41,11 @@ SECTIONS
 		PROVIDE_HIDDEN (__init_array_end = .);
 	}
 
+	. = ALIGN(4096);
+	__MAP_START = .;
+	map ALIGN(4K) : {
+		*(.data*);
+		*(.bss*);
+		*(.rodata*);
+	}
 }

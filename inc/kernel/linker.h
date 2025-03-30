@@ -33,6 +33,12 @@ namespace linker {
 	 * @brief Get (page-aligned) start address and size of BSS segment
 	 */
 	lib::pair<void*, size_t> getBSSSegment();
+
+	/**
+	 * @fn void* getSymbolMapStart()
+	 * @brief Get (page-aligned) start address of the symbol map
+	 */
+	void* getSymbolMapStart();
 }
 
 #endif /* ifndef _INC_KERNEL_LINKER_H_ */
