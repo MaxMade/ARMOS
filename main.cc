@@ -13,6 +13,7 @@
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/sync_handler.h>
 #include <kernel/irq/pagefault.h>
+#include <kernel/irq/syscall.h>
 #include <kernel/irq/exception_handler.h>
 #include <kernel/thread/idle.h>
 #include <kernel/thread/context.h>
@@ -49,6 +50,7 @@ namespace lock {
 namespace irq {
 	SyncHandler syncHandler;
 	PagefaultHandler pagefaultHandler;
+	SyscallHandler syscallHandler;
 }
 
 Symbols symbols;
@@ -176,6 +178,8 @@ int kernelMain(void *fdt) {
 	/* Prepare synchronous exception handlers */
 	if (isError(irq::syncHandler.registerHandler(&irq::pagefaultHandler)))
 		debug::panic::generate("Synchronous Exceptions: Unable to register pagefault handler");
+	if (isError(irq::syncHandler.registerHandler(&irq::syscallHandler)))
+		debug::panic::generate("Synchronous Exceptions: Unable to register syscall handler");
 
 	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
