@@ -1,6 +1,8 @@
 #ifndef _APP_LIB_UNISTD_H_
 #define _APP_LIB_UNISTD_H_
 
+#include <stddef.h>
+
 /**
  * @file apps/lib/unistd.h
  * @brief Standard symbolic constants and types
@@ -65,5 +67,34 @@ long syscall(long number, T0 t0 = 0, T1 t1 = 0, T2 t2 = 0, T3 t3 = 0, T4 t4 = 0,
 
 	return ret;
 }
+
+/**
+ * @def STDIN_FILENO
+ * @brief File number of stdin
+ */
+#define STDIN_FILENO  0
+
+/**
+ * @def STDOUT_FILENO
+ * @brief File number of stdout
+ */
+#define STDOUT_FILENO 1
+
+/**
+ * @def STDERR_FILENO
+ * @brief File number of stderr
+ */
+#define STDERR_FILENO 2
+
+/**
+ * @fn ssize_t write(int fd, const void *buf, size_t count);
+ * @brief Write up to \c count character from \c buf
+ * @todo Implement errno handling
+ * @return
+ *
+ *	- >= 0 - Number of written characters
+ *	-   -1 - Error (see errno)
+ */
+ssize_t write(int fd, const void *buf, size_t count);
 
 #endif /* ifndef _APP_LIB_UNISTD_H_ */
