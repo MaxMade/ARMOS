@@ -541,6 +541,18 @@ namespace lib {
 			}
 
 			/**
+			 * @fn ostreamHelper& operator<<(char value)
+			 * @brief Output string
+			 */
+			ostreamHelper& operator<<(char value) {
+				lock();
+				char msg[] = {value, '\0'};
+				submitWithWidth(msg);
+
+				return *this;
+			}
+
+			/**
 			 * @fn ostreamHelper& operator<<(const char* value)
 			 * @brief Output string
 			 */

@@ -1,16 +1,22 @@
-#include <cassert.h>
 #include <cerrno.h>
+#include <cassert.h>
+#include <sys/syscall.h>
 #include <kernel/error.h>
 #include <kernel/debug/panic.h>
+#include <kernel/syscall/write.h>
 #include <kernel/irq/syscall.h>
 #include <kernel/irq/exception_handler.h>
 
 using namespace irq;
 
 SyscallHandler::SyscallHandler() {
+	/* Register exception class */
 	ecs = __ecs;
 	num_ecs = 2;
+
+	/* Register handlers */
 	memset(&handlers, 0, sizeof(void*) * NUM_HANDLERS);
+	handlers[SYS_WRITE] = syscall::__write;
 }
 
 int SyscallHandler::prologue(irq::ExceptionContext* context) {
@@ -24,7 +30,8 @@ int SyscallHandler::prologue(irq::ExceptionContext* context) {
 	/* Save context for prologue */
 	savedContext.get() = context;
 
-	return 0;
+	/* Signal required epilogue */
+	return 1;
 }
 
 int SyscallHandler::epilogue() {

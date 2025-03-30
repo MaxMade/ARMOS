@@ -151,44 +151,6 @@ namespace util {
 		return -1;
 	}
 
-	/**
-	 * @fn T getSyscallArg(irq::ExceptionContext* context)
-	 * @brief Get N-th syscall argument
-	 * @warning N must be in range [0, 5]
-	 * @brief context Saved syscall context
-	 */
-	template<size_t N, typename T>
-	T getSyscallArg(irq::ExceptionContext* context) {
-		static_assert(N < 6, "Invalid argument number");
-
-		if constexpr(N == 0)
-			return (T) (uintptr_t) context->x0;
-
-		if constexpr(N == 1)
-			return (T) (uintptr_t) context->x1;
-
-		if constexpr(N == 2)
-			return (T) (uintptr_t) context->x2;
-
-		if constexpr(N == 3)
-			return (T) (uintptr_t) context->x3;
-
-		if constexpr(N == 4)
-			return (T) (uintptr_t) context->x4;
-
-		if constexpr(N == 5)
-			return (T) (uintptr_t) context->x5;
-	}
-
-	/**
-	 * @fn void setSyscallRetValue(irq::ExceptionContext* context, T value)
-	 * @brief Set syscall return value
-	 */
-	template<typename T>
-	void setSyscallRetValue(irq::ExceptionContext* context, T value) {
-		context->x0 = (uintptr_t) value;
-	}
-
 } /* namespace util */
 
 #endif /* ifndef _INC_KERNEL_UTILITY_H_ */
