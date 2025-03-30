@@ -1,14 +1,14 @@
 #ifndef _INC_DRIVER_MAILBOX_H_
 #define _INC_DRIVER_MAILBOX_H_
 
-#include "kernel/lock/spinlock.h"
 #include <atomic.h>
 #include <cstdint.h>
 #include <cstddef.h>
 #include <functional.h>
-#include <kernel/utility.h>
 #include <driver/config.h>
 #include <driver/generic_ipi.h>
+#include <kernel/utility.h>
+#include <kernel/lock/spinlock.h>
 
 /**
  * @file driver/mailbox.h
@@ -46,6 +46,12 @@ namespace driver {
 			 * @brief Buffered messages
 			 */
 			lib::atomic<uint32_t> messages[NUM_MAILBOXES];
+
+			/**
+			 * @var lock
+			 * @brief Synchronazation lock
+			 */
+			lock::spinlock lock;
 
 			/**
 			 * @typedef regOffset
