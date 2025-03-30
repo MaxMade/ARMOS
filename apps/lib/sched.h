@@ -27,7 +27,6 @@
 /**
  * @fn int clone(int (*fn)(void *), void *stack, int flags, void* arg)
  * @brief Create a child process
- * @warning errno must be set
  * @return
  *
  *	- >= 0 - ID of the created thread

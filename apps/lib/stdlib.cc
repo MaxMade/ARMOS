@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <__ListAllocator.h>
@@ -23,6 +24,9 @@ static void unlock() {
 void *malloc(size_t size) {
 	lock();
 	auto ret = allocator.allocate(size);
+	if (ret == nullptr) {
+		errno = ENOMEM;
+	}
 	unlock();
 	return ret;
 }
@@ -38,6 +42,8 @@ void *calloc(size_t nmemb, size_t size) {
 	auto ret = allocator.allocate(nmemb * size);
 	if (ret != nullptr) {
 		memset(ret, 0, nmemb * size);
+	} else {
+		errno = ENOMEM;
 	}
 	unlock();
 	return ret;
