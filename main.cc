@@ -19,7 +19,7 @@
 #include <kernel/thread/context.h>
 #include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
-#include <kernel/mm/translation_table_allocator.h>
+#include <kernel/mm/frame_allocator.h>
 #include <kernel/lock/softirq.h>
 #include <hw/register/tcr.h>
 #include <hw/register/mair.h>
@@ -35,7 +35,7 @@ namespace driver {
 }
 
 namespace mm {
-	TTAllocator ttAlloc;
+	FrameAllocator frameAlloc;
 }
 
 namespace thread {
@@ -79,7 +79,7 @@ int kernelMain(void *fdt) {
 		return -1;
 
 	/* Initialize Translation Table Allocator */
-	mm::ttAlloc.init();
+	mm::frameAlloc.init();
 
 	/* Use default MAIR layout */
 	hw::reg::MAIR mair;
