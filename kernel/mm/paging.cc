@@ -11,13 +11,11 @@ using namespace mm;
 
 lock::spinlock Paging::lock;
 
-void* Paging::kernel_tt0 = nullptr;
+void* Paging::tables = nullptr;
 
 Paging::Paging() {
-	tt0 = CPU::getTranslationTable();
+	tables = CPU::getTranslationTable();
 }
-
-Paging::Paging(void* tt0) : tt0(tt0) {}
 
 template<size_t level>
 size_t Paging::getOffset(void* addr) {
@@ -48,7 +46,7 @@ int Paging::genTTs(void* vaddr) {
 	size_t offsets[NUM_TABLES];
 	getOffsets(vaddr, offsets);
 
-	void* drag = tt0;
+	void* drag = tables;
 	for (size_t i = 0; i < NUM_TABLES - 1; i++) {
 		TranslationTable tt(drag);
 
@@ -84,7 +82,7 @@ int Paging::getTTs(void *vaddr, TranslationTable tt[4]) const {
 	size_t offsets[NUM_TABLES];
 	getOffsets(vaddr, offsets);
 
-	void* drag = tt0;
+	void* drag = tables;
 	void* tts[NUM_TABLES] = {drag, nullptr, nullptr, nullptr};
 	for (size_t i = 0; i < NUM_TABLES - 1; i++) {
 		TranslationTable tt(drag);
@@ -200,7 +198,8 @@ int Paging::createEarlyKernelMapping() {
 	tt.setDefault();
 
 	/* Create translation tables */
-	Paging paging(frame);
+	Paging paging;
+	paging.tables = frame;
 	auto text = linker::getTextSegment();
 	for (uintptr_t addr = reinterpret_cast<uintptr_t>(text.first);
 			addr < math::roundUp(reinterpret_cast<uintptr_t>(text.first) + text.second, PAGESIZE);
@@ -291,19 +290,16 @@ int Paging::createEarlyKernelMapping() {
 			return castError<int, decltype(ret)>(ret);
 	}
 
-	/* Save translation tabel 0 */
-	kernel_tt0 = frame;
-
 	/* Update TTBR0 */
 	tt.updateTTBR0();
 	return 0;
 }
 
 int Paging::loadKernelMapping() {
-	if (!kernel_tt0)
+	if (!tables)
 		return -EINVAL;
 
-	TranslationTable tt(kernel_tt0);
+	TranslationTable tt(tables);
 	tt.updateTTBR0();
 
 	return 0;
