@@ -32,7 +32,7 @@ STANDALONEFLAGS = -ffreestanding -fno-builtin -nostartfiles -nodefaultlibs \
 				  -mgeneral-regs-only -fno-exceptions -fno-rtti \
 				  -fno-stack-protector -mno-omit-leaf-frame-pointer
 
-OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -I include/ -std=c++17
+OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -I inc/ -std=c++17
 
 CCFLAGS = $(WARNFLAGS) $(OPTFLAGS) $(STANDALONEFLAGS) $(FLOATINGPOINT) $(DEFINEFLAGS)
 
