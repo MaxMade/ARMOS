@@ -82,6 +82,12 @@ namespace CPU {
 	 */
 	void* getTranslationTable();
 
+	/**
+	 * @fn void halt()
+	 * @brief Enter power-saving halt mode
+	 */
+	void halt();
+
 } /* namespace CPU */
 
 #endif /* ifndef _INC_KERNEL_CPU_H_ */
