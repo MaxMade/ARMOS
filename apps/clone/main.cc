@@ -9,7 +9,7 @@ static const size_t STACK_ALIGN = 16;
 
 static const size_t STACK_SIZE = 4096 * 16;
 
-static char stack[4][STACK_SIZE] __attribute__((aligned(4096)));
+static char stack[8][STACK_SIZE] __attribute__((aligned(4096)));
 
 static int fn(void* msg) {
 	auto o = reinterpret_cast<const char*>(msg);
@@ -34,6 +34,18 @@ extern "C" int main(void) {
 		return -1;
 
 	if (clone(fn, &stack[3][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 3\n\r") == -1)
+		return -1;
+
+	if (clone(fn, &stack[4][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 4\n\r") == -1)
+		return -1;
+
+	if (clone(fn, &stack[5][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 5\n\r") == -1)
+		return -1;
+
+	if (clone(fn, &stack[6][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 6\n\r") == -1)
+		return -1;
+
+	if (clone(fn, &stack[7][STACK_SIZE - STACK_ALIGN], CLONE_VM | CLONE_THREAD, (void*) "Hello World 7\n\r") == -1)
 		return -1;
 
 	fn((void*) "Hello World 4\n\r");

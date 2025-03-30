@@ -9,6 +9,8 @@ mailbox::mailbox() {
 	name = ("brcm,bcm2835-mbox");
 }
 
+#include <ostream.h>
+
 int mailbox::init(const config& conf) {
 	/* Set base */
 	base = conf.getRange().first;
@@ -128,8 +130,12 @@ int mailbox::epilogue() {
 	if (cpuID >= 4)
 		return -EINVAL;
 
-	while (messages[cpuID].load()) {
-		int performedHandlers = 0;
+	while (1) {
+		auto msg = messages[cpuID].exchange(0);
+
+		/* Early out */
+		if (msg == 0)
+			break;
 
 		for (size_t i = 0; i < numHandlers; i++) {
 			/* Check if valid handler */
@@ -139,11 +145,9 @@ int mailbox::epilogue() {
 
 			/* Check if handler is pending otherwise continue */
 			auto handleredMsg = static_cast<uint32_t>(handlers[i].first);
-			if ((messages[cpuID].fetch_and(~handleredMsg) & handleredMsg) == 0)
+			if ((msg & handleredMsg) == 0)
 				continue;
-
-			/* Mark progress */
-			performedHandlers++;
+			msg &= ~handleredMsg;
 
 			/* Execute handler */
 			auto ret = handlers[i].second();
@@ -151,9 +155,7 @@ int mailbox::epilogue() {
 				return ret;
 		}
 
-		/* Check if a suitable handler was found */
-		if (performedHandlers == 0)
-			return -EINVAL;
+		assert(msg == 0);
 	}
 
 	return 0;
