@@ -49,16 +49,10 @@ namespace mm {
 
 		private:
 			/**
-			 * @var tt0
-			 * @brief Pointer to Translation Table Level 0
+			 * @var tables
+			 * @brief (Global) Translation Tables
 			 */
-			void* tt0;
-
-			/**
-			 * @var kernel_tt0
-			 * @brief Poiner to translation table 0 created by createEarlyKernelMapping
-			 */
-			static void* kernel_tt0;
+			static void* tables;
 
 			/**
 			 * @var lock
@@ -141,12 +135,6 @@ namespace mm {
 			 */
 			Paging();
 
-			/**
-			 * @fn explicit Paging(void* tt0)
-			 * @brief Constructor Paging from given pointer
-			 */
-			explicit Paging(void* tt0);
-
 			Paging(const Paging& other) = delete;
 
 			Paging(Paging&& other) = delete;
@@ -157,7 +145,7 @@ namespace mm {
 
 			/**
 			 * @fn static int createEarlyKernelMapping()
-			 * @brief Create initial mapping
+			 * @brief Create and load initial mapping
 			 * @details
 			 * Create mapping for text, data, rodata, bss (of kernel and app) and symbol map
 			 */
