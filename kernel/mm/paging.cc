@@ -11,6 +11,8 @@ using namespace mm;
 
 lock::spinlock Paging::lock;
 
+void* Paging::kernelLevel0TT = nullptr;
+
 Paging::Paging() {
 	level0TT = CPU::getTranslationTable();
 }
@@ -105,7 +107,7 @@ lib::tuple<bool, void*, void*, void*, void*> Paging::getTTEntries(void *vaddr) c
 }
 
 int Paging::createEarlyKernelMapping() {
-	/* Create translation table level 3 */
+	/* Create translation table level 0 */
 	void* frame = ttAlloc.earlyAlloc();
 	TranslationTable tt(frame);
 	tt.setDefault();
@@ -162,8 +164,21 @@ int Paging::createEarlyKernelMapping() {
 			return castError<int, decltype(ret)>(ret);
 	}
 
+	/* Save translation tabel 0 */
+	kernelLevel0TT = frame;
+
 	/* Update TTBR0 */
 	tt.updateTTBR0();
+	return 0;
+}
+
+int Paging::loadKernelMapping() {
+	if (!kernelLevel0TT)
+		return -EINVAL;
+
+	TranslationTable tt(kernelLevel0TT);
+	tt.updateTTBR0();
+
 	return 0;
 }
 
