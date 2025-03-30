@@ -48,18 +48,6 @@ namespace driver {
 			lib::atomic<uint32_t> messages[NUM_MAILBOXES];
 
 			/**
-			 * @var replyFlags
-			 * @brief Reply flag
-			 */
-			lib::atomic_flag replyFlags[NUM_MAILBOXES];
-
-			/**
-			 * @var lock
-			 * @brief Synchronazation lock
-			 */
-			lock::spinlock lock;
-
-			/**
 			 * @typedef regOffset
 			 * @brief Memory mapped registers
 			 */
@@ -140,6 +128,7 @@ namespace driver {
 			/**
 			 * @fn int registerHandler(IPI_MSG msg, lib::function<int()> handler)
 			 * @brief Register Handler for specific value
+			 * @warning This function should be only used in early boot (before SMP startup)
 			 */
 			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
 
