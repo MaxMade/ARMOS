@@ -76,7 +76,9 @@ size_t system_timer::getTicks() const {
 	return ticks.load();
 }
 
-int system_timer::prologue() {
+int system_timer::prologue(irq::ExceptionContext* context) {
+	(void) context;
+
 	/* Update timer ticks */
 	this->ticks.fetch_add(1);
 

@@ -130,7 +130,7 @@ namespace driver {
 			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
 
 			/**
-			 * @fn int prologue() override
+			 * @fn int prologue(irq::ExceptionContext* context) override
 			 * @brief Exception prologue
 			 * @return
 			 *
@@ -138,7 +138,7 @@ namespace driver {
 			 *	-  0 - Epilogue isn't needed
 			 *	- <0 - Error (errno)
 			 */
-			int prologue() override;
+			int prologue(irq::ExceptionContext* context) override;
 
 			/**
 			 * @fn int epilogue() override
