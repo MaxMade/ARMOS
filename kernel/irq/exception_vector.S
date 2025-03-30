@@ -65,9 +65,10 @@
  * - SP_EL0: 8
  * - ELR_EL1: 8
  * - SPSR_EL1:8
- * - Total: 272
+ * - TPIDR_EL0: 8
+ * - Total: 280
  */
-.set EXCEPTION_FRAME_SIZE, 272
+.set EXCEPTION_FRAME_SIZE, 280
 
 /**
  * @fn exception_handler
@@ -106,12 +107,20 @@
 	mrs x11, SPSR_EL1
 	stp x10, x11, [sp, 16 * 16]
 
+	// Save TPIDR_EL0
+	mrs x10, TPIDR_EL0
+	str x10, [sp, 16 * 17]
+
 	// Pass pointer to register file to fn
 	mov x0, sp
 
 	// Branch to actual handler
 	bl \fn
 restore_\name:
+
+	// Restore TPIDR_EL0
+	ldr x10, [sp, 16 * 17]
+	msr TPIDR_El0, x10
 
 	// Restore ELR_EL1 and SPSR_EL1
 	ldp x10, x11, [sp, 16 * 16]
