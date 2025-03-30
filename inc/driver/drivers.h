@@ -2,6 +2,12 @@
 #define _INC_DRIVER_DRIVERS_H_
 
 #include <driver/arm_pl011.h>
+#include <driver/mini_uart.h>
+
+/**
+ * @file driver/drivers.h
+ * @brief Aliases for currently used drivers
+ */
 
 namespace driver {
 
@@ -12,6 +18,12 @@ namespace driver {
  */
 #if defined(CONFIG_CONSOLE_ARM_PL011)
 	using console = arm_pl011;
+
+/* Use mini uart
+ * Defined in driver/mini_uart.h
+ */
+#elif defined(CONFIG_CONSOLE_BCM_MINI_UART)
+	using console = mini_uart;
 
 /* No valid choice for console
  * Abort compiling with a error message
