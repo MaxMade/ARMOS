@@ -47,7 +47,7 @@ namespace lock {
 			/**
 			 * @fn int p()
 			 * @brief Decrement seamphore count and block eventually
-			 * @ret
+			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
@@ -57,7 +57,7 @@ namespace lock {
 			/**
 			 * @fn int v()
 			 * @brief Increment seamphore count and unblock eventually
-			 * @ret
+			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)

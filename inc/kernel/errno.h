@@ -8,10 +8,6 @@
  * @brief Global errno
  */
 
-/**
- * @var __errnos
- * @brief User Thread errno
- */
 extern int __errnos[MAX_TID] __attribute__((section(".app.data")));
 
 #endif /* ifndef _INC_KERNEL_ERRNO_H_ */
