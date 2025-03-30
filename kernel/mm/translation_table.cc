@@ -6,12 +6,23 @@
 
 using namespace mm;
 
+TranslationTable::TranslationTable() {
+	this->addr = nullptr;
+}
+
 TranslationTable::TranslationTable(void* addr) {
 	this->addr = static_cast<tt_format_t*>(addr);
 }
 
 bool TranslationTable::isValid() const {
+	if (addr == nullptr)
+		return false;
+
 	return reinterpret_cast<uintptr_t>(addr) % PAGESIZE == 0;
+}
+
+void* TranslationTable::getFrame() const {
+	return reinterpret_cast<void*>(addr);
 }
 
 int TranslationTable::updateTTBR0() const {
