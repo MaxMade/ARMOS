@@ -51,10 +51,28 @@ namespace driver {
 			int sendIPI(size_t cpuID, IPI_MSG msg);
 
 			/**
-			 * @fn int registerHandler(IPI_MSG msg, lib::function<int()> handler)
+			 * @fn int registerHandler(IPI_MSG msg, int (*handler)())
 			 * @brief Register Handler for specific value
 			 */
-			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
+			int registerHandler(IPI_MSG msg, int (*handler)());
+
+			/**
+			 * @fn static int haltCallback()
+			 * @brief Generic callback for HALT
+			 */
+			static int haltCallback();
+
+			/**
+			 * @fn static int reschduleCallback()
+			 * @brief Generic callback for RESCHEDULE
+			 */
+			static int reschduleCallback();
+
+			/**
+			 * @fn static int panicCallback()
+			 * @brief Generic callback for PANIC
+			 */
+			static int panicCallback();
 	};
 
 } /* namespace driver */

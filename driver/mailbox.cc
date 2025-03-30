@@ -60,17 +60,15 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	return 0;
 }
 
-int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
-	for (size_t i = 0; i < numHandlers; i++) {
+int mailbox::registerHandler(IPI_MSG msg, int (*handler)()) {
+	for (size_t i = 0; i < NUM_HANDLERS ; i++) {
 		/* Find valid entry */
-		if (!handlers[i].second.isValid()) {
-			/* Register handler */
-			handlers[i] = lib::pair(msg, lib::move(handler));
-			if (handlers[i].second.isValid())
-				return 0;
+		if (handlers[i].second == nullptr) {
 
-			/* Abort if registration failed */
-			return -ENOMEM;
+			/* Register handler */
+			handlers[i].first = msg;
+			handlers[i].second = handler;
+			return 0;
 		}
 	}
 	return -ENOMEM;
@@ -135,10 +133,9 @@ int mailbox::epilogue() {
 		if (msg == 0)
 			break;
 
-		for (size_t i = 0; i < numHandlers; i++) {
+		for (size_t i = 0; i < NUM_HANDLERS ; i++) {
 			/* Check if valid handler */
-			auto isValid = handlers[i].second.isValid();
-			if (!isValid)
+			if (handlers[i].second == nullptr)
 				continue;
 
 			/* Check if handler is pending otherwise continue */

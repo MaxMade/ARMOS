@@ -8,13 +8,6 @@
  * @brief Kernel Panic
  */
 namespace debug::panic {
-
-	/**
-	 * @fn int init()
-	 * @brief Initialize Panic Handler
-	 */
-	int init();
-
 	/**
 	 * @fn void generate(const char msg[], int error = 0)
 	 * @brief Generate panic

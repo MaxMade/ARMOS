@@ -9,18 +9,6 @@
 #include <kernel/irq/exception_handler.h>
 #include <hw/register/general_purpose_reg.h>
 
-int debug::panic::init() {
-	auto handler = []() -> int {
-		CPU::disableInterrupts();
-		while (1)
-			CPU::halt();
-
-		return 0;
-	};
-
-	return driver::ipi.registerHandler(driver::IPI::IPI_MSG::PANIC, lib::function<int()>(handler));
-}
-
 void debug::panic::generate(const char msg[], int error) {
 	lib::panic panic;
 

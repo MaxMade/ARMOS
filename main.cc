@@ -163,13 +163,6 @@ int kernelMain(void *fdt) {
 		return -1;
 	cout << "IPI: Setup finished" << lib::endl;
 
-	/* Prepare panic */
-	if (debug::panic::init() != 0) {
-		cout << "PANIC: Unable to initialize" << lib::endl;
-		return -1;
-	}
-	cout << "PANIC: Setup finished" << lib::endl;
-
 	/* Prepare softirq */
 	if (isError(lock::softirq.init()))
 		debug::panic::generate("Softirq: Unable to initialize");
@@ -180,7 +173,6 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Synchronous Exceptions: Unable to register pagefault handler");
 	if (isError(irq::syncHandler.registerHandler(&irq::syscallHandler)))
 		debug::panic::generate("Synchronous Exceptions: Unable to register syscall handler");
-
 	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
 	/* Prepare Schedulder */
@@ -188,22 +180,16 @@ int kernelMain(void *fdt) {
 		debug::panic::generate("Scheduler: Unable to create main thread");
 
 	/* Register RESCHEDULE IPI */
-	auto rescheduleHandler = []() -> int {
-		thread::scheduler.schedule();
-		return 0;
-	};
-	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::RESCHEDULE, lib::function<int()>(rescheduleHandler))))
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::RESCHEDULE, driver::generic_ipi::reschduleCallback)))
 		debug::panic::generate("Scheduler: Unable to register RESCHEDULE IPI");
 
 	/* Register HALT IPI */
-	auto haltHandler = []() -> int {
-		CPU::disableInterrupts();
-		while(1)
-			CPU::halt();
-		return 0;
-	};
-	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::HALT, lib::function<int()>(haltHandler))))
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::HALT, driver::generic_ipi::haltCallback)))
 		debug::panic::generate("Scheduler: Unable to register HALT IPI");
+
+	/* Register PANIC IPI */
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::PANIC, driver::generic_ipi::panicCallback)))
+		debug::panic::generate("Scheduler: Unable to register PANIC IPI");
 
 	/* Prepare SMP */
 	if (thread::smp.start() != 0)
