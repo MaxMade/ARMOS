@@ -1,4 +1,4 @@
-.PHONY: clean all debug qemu qemu-gdb tags
+.PHONY: clean all debug qemu qemu-gdb tags doc
 
 #####################
 # List of Variables #
@@ -59,6 +59,15 @@ QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -kernel $(KERNEL) -dtb $(DTB
 GDB = aarch64-linux-gnu-gdb
 GDBFLAGS = -ex "target remote :1234"
 
+###########
+# doxygen #
+###########
+
+DOXYGENCONFG = doc/Doxyfile
+DOXYGENBUILD = doc/build
+DOXYGENTARGET = $(DOXYGENBUILD)/index.html
+
+
 #################
 # Generic Rules #
 #################
@@ -104,3 +113,7 @@ clean:
 tags:
 	@echo "TAGS"
 	$(VERBOSE) ctags -R .
+
+doc:
+	@echo "DOC		$(DOXYGENTARGET)"
+	$(VERBOSE) doxygen $(DOXYGENCONFG)
