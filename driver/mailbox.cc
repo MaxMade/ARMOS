@@ -96,7 +96,9 @@ void mailbox::enableIRQ(size_t core) {
 		writeRegister<MAILBOX_IRQ_CORE_3>(1);
 }
 
-int mailbox::prologue() {
+int mailbox::prologue(irq::ExceptionContext* context) {
+	(void) context;
+
 	auto cpuID = CPU::getProcessorID();
 	if (cpuID >= 4)
 		return -EINVAL;

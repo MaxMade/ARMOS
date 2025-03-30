@@ -64,7 +64,9 @@ char mini_uart::read() {
 	return readRegister<AUX_MU_IO_REG>() & 0xFF;
 }
 
-int mini_uart::prologue() {
+int mini_uart::prologue(irq::ExceptionContext* context) {
+	(void) context;
+
 	/* Read character */
 	character = read();
 

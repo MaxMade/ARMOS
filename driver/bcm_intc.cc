@@ -115,7 +115,9 @@ generic_driver* bcm_intc::getHandler() {
 	return &driver::ipi;
 }
 
-int bcm_intc::prologue() {
+int bcm_intc::prologue(irq::ExceptionContext* context) {
+	(void) context;
+
 	return -EINVAL;
 }
 
