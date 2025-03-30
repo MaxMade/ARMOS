@@ -56,3 +56,10 @@ CONFIG_INTC = BCM_INTC
 # Possible Values:
 # BCM_SYS_TIMER: Broadcom 2835 System Timer
 CONFIG_INTC = BCM_SYS_TIMER
+
+# CONFIG_IPI
+# Description:
+# The CONFIG_IPI option sets the default IPI device.
+# Possible Values:
+# BCM_MAILBOX: Broadcom 2835 Mailbox
+CONFIG_IPI = BCM_MAILBOX

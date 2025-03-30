@@ -21,6 +21,7 @@ namespace driver {
 	Intc intc;
 	Timer timer;
 	CPU cpu;
+	IPI ipi;
 }
 
 namespace mm {
@@ -97,7 +98,6 @@ int kernelMain(void *fdt) {
 	}
 	driver::timer.windup(200);
 	cout << "Timer: Setup finished\n\r";
-	cout.flush();
 
 	/* Prepare CPU information */
 	const char* cpuName = nullptr;
@@ -120,6 +120,15 @@ int kernelMain(void *fdt) {
 		return -1;
 	}
 	driver::cpu.init(cpuName, cpuNumber);
+	cout << "CPU: Setup finished\n\r";
+
+	/* Prepare IPI driver */
+	auto ipiConfig = dtp.findConfig(driver::ipi);
+	if (!ipiConfig.isValid())
+		return -1;
+	if (isError(driver::ipi.init(ipiConfig)))
+		return -1;
+	cout << "IPI: Setup finished\n\r";
 
 	CPU::enableInterrupts();
 	while (1);
