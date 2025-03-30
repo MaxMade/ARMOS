@@ -53,7 +53,7 @@ LDFLAGS = -nostartfiles -T $(LINKER)
 ########
 
 QEMU = qemu-system-aarch64
-QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -kernel $(KERNEL) -dtb $(DTB)
+QEMUFLAGS = -machine raspi3 -m 1G -smp 4 -serial vc -serial vc -kernel $(KERNEL) -dtb $(DTB)
 
 #######
 # GDB #
