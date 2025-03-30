@@ -178,33 +178,33 @@ int TranslationTable::setNotGlobalBit(size_t entry, bool not_global) {
 	return 0;
 }
 
-int TranslationTable::getPrivilegedExecuteNeverBit(size_t entry) const {
+int TranslationTable::getExecuteNeverBitKernel(size_t entry) const {
 	if (entry >= NUM_ENTRIES)
 		return -EINVAL;
 
 	return addr[entry].pxn;
 }
 
-int TranslationTable::setPrivilegedExecuteNeverBit(size_t entry, bool pxn) {
+int TranslationTable::setExecuteNeverBitKernel(size_t entry, bool execute_never) {
 	if (entry >= NUM_ENTRIES)
 		return -EINVAL;
 
-	addr[entry].pxn = pxn;
+	addr[entry].pxn = execute_never ? 1 : 0;
 	return 0;
 }
 
-int TranslationTable::getExecuteNeverBit(size_t entry) const {
+int TranslationTable::getExecuteNeverBitUser(size_t entry) const {
 	if (entry >= NUM_ENTRIES)
 		return -EINVAL;
 
-	return addr[entry].xn;
+	return addr[entry].uxn;
 }
 
-int TranslationTable::setExecuteNeverBit(size_t entry, bool execute_never) {
+int TranslationTable::setExecuteNeverBitUser(size_t entry, bool execute_never) {
 	if (entry >= NUM_ENTRIES)
 		return -EINVAL;
 
-	addr[entry].xn = execute_never ? 1 : 0;
+	addr[entry].uxn = execute_never ? 1 : 0;
 	return 0;
 }
 
