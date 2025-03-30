@@ -211,3 +211,48 @@ lib::pair<RegisterIterator, RegisterIterator> Node::findRegisterProperty(const c
 
 	return lib::pair(begin, end);
 }
+
+lib::pair<RangeIterator, RangeIterator> Node::findRangeProperty(const char* name) const {
+	/* Get property with matching name */
+	auto prop = findProperty(name);
+	if (!prop.isValid())
+		return lib::pair(RangeIterator(), RangeIterator());
+	auto data = prop.getData();
+
+	/* Set to default values */
+	size_t addr = 1;
+	size_t size = 1;
+	size_t parentAddr = 1;
+
+	/* Lookup #address-cells & #size-cells in parent node */
+	auto parent = getParent();
+	if (parent.isValid()) {
+
+		/* Get #size-cells for current node */
+		auto sizeCells = findIntegerProperty("#size-cells");
+
+		/* Get #address-cells for current node */
+		auto addrCells = findIntegerProperty("#address-cells");
+
+		/* Get #address-cells for parent node */
+		auto parentAddrCells = parent.findIntegerProperty("#address-cells");
+
+		/* If no #address-cells given, assume default value of 2 */
+		if (!(addrCells.first == 0 && addrCells.second == 0))
+			addr = addrCells.first;
+
+		/* If no #size-cells given, assume default value of 1 */
+		if (!(sizeCells.first == 0 && sizeCells.second == 0))
+			size = sizeCells.first;
+
+		/* If no #address-cells given, assume default value of 2 */
+		if (!(parentAddrCells.first == 0 && parentAddrCells.second == 0))
+			parentAddr = addrCells.first;
+	}
+
+	/* Constructor iterators */
+	RangeIterator begin(data.first, static_cast<const uint32_t*>(data.first), data.second, addr, size, parentAddr);
+	RangeIterator end(nullptr, static_cast<const uint32_t*>(data.first), data.second, addr, size, parentAddr);
+
+	return lib::pair(begin, end);
+}

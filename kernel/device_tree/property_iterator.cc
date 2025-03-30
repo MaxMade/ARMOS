@@ -1,3 +1,4 @@
+#include <kernel/math.h>
 #include <kernel/utility.h>
 #include <kernel/device_tree/definition.h>
 #include <kernel/device_tree/property_iterator.h>
@@ -15,6 +16,7 @@ PropertyIt& PropertyIt::operator++() {
 
 	/* Move to next property or end (nullptr) */
 	auto tmp = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(prop) + off);
+	tmp = reinterpret_cast<uint32_t*>(math::roundUp(reinterpret_cast<uintptr_t>(tmp), FDT_ALIGNMENT));
 
 	/* Skip NOPs */
 	while (util::bigEndianToHost(*tmp) == FDT_NOP)

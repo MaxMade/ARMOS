@@ -4,6 +4,7 @@
 #include <cstdint.h>
 #include <kernel/device_tree/property_iterator.h>
 #include <kernel/device_tree/register_iterator.h>
+#include <kernel/device_tree/range_iterator.h>
 
 /**
  * @file kernel/device_tree/node.h
@@ -130,7 +131,19 @@ namespace DeviceTree {
 			 */
 			lib::pair<uint32_t, uint32_t> findIntegerProperty(const char* name) const;
 
+			/**
+			 * @fn lib::pair<RegisterIterator, RegisterIterator> findRegisterProperty(const char* name) const
+			 * @brief Find porperty by name and evaluate as list of registers (start address, size)
+			 * @return pair of begin and end iterator
+			 */
 			lib::pair<RegisterIterator, RegisterIterator> findRegisterProperty(const char* name) const;
+
+			/**
+			 * @fn lib::pair<RangeIterator, RangeIterator> findRangeProperty(const char* name) const
+			 * @brief Find porperty by name and evaluate as list of range (start address in child space, start address in parent space, size)
+			 * @return pair of begin and end iterator
+			 */
+			lib::pair<RangeIterator, RangeIterator> findRangeProperty(const char* name) const;
 	};
 
 } /* namespace DeviceTree */
