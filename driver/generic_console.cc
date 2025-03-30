@@ -1,10 +1,11 @@
+#include <cerrno.h>
 #include <driver/generic_console.h>
 
 using namespace driver;
 
-bool generic_console::init(const config& conf) {
+int generic_console::init(const config& conf) {
 	(void) conf;
-	return false;
+	return -ENXIO;
 }
 
 void generic_console::write(const char* buf, size_t len) {

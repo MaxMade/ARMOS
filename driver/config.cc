@@ -3,18 +3,28 @@
 using namespace driver;
 
 config::config(bool isValid) {
-	addr = nullptr;
-	size = 0;
+	configSpace.first = nullptr;
+	configSpace.second = 0;
+
 	valid = isValid;
 }
 
 void config::setRange(void* addr, size_t size) {
-	this->addr = addr;
-	this->size = size;
+	configSpace.first = addr;
+	configSpace.second = size;
 }
 
 lib::pair<void*, size_t> config::getRange() const {
-	return lib::pair(addr, size);
+	return lib::pair(configSpace);
+}
+
+void config::setInterruptRange(void* addr, size_t size) {
+	intSpace.first = addr;
+	intSpace.second = size;
+}
+
+lib::pair<void*, size_t> config::getInterruptRange() const {
+	return lib::pair(intSpace);
 }
 
 bool config::isValid() const {

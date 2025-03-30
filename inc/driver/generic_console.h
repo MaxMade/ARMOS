@@ -19,10 +19,14 @@ namespace driver {
 	class generic_console : public generic_driver {
 		public:
 			/**
-			 * @fn bool init(const config& conf)
+			 * @fn int init(const config& conf)
 			 * @brief Intialize console
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Failure (-errno)
 			 */
-			bool init(const config& conf);
+			int init(const config& conf);
 
 			/**
 			 * @fn void write(const char* buf, size_t len)

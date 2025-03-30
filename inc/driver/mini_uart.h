@@ -40,6 +40,7 @@ namespace driver {
 				AUX_MU_CNTL_REG =  0x20,
 				AUX_MU_STAT_REG =  0x24,
 				AUX_MU_BAUD_REG =  0x28,
+				AUX_MU_IC_REG   =  0x44,
 			} regOffset;
 
 			/**
@@ -62,6 +63,12 @@ namespace driver {
 				return util::mmioRead(reg);
 			}
 
+			/**
+			 * var character
+			 * @brief Last read character
+			 */
+			char character;
+
 		public:
 			/**
 			 * @fn mini_uart
@@ -70,11 +77,15 @@ namespace driver {
 			mini_uart();
 
 			/**
-			 * @fn bool init(const config& conf)
+			 * @fn int init(const config& conf)
 			 * @brief Intialize console
 			 * @todo Current the baudrate is calculated for a fixed clock rate of 4MHz
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Failure (-errno)
 			 */
-			bool init(const config& conf);
+			int init(const config& conf);
 
 			/**
 			 * @fn void write(const char* buf, size_t len)

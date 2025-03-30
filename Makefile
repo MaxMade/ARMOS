@@ -33,7 +33,7 @@ STANDALONEFLAGS = -ffreestanding -fno-builtin -nostartfiles -nodefaultlibs \
 				  -nostdlib -nostdinc -fno-pie -no-pie -fno-omit-frame-pointer \
 				  -mgeneral-regs-only -fno-exceptions -fno-rtti \
 				  -fno-stack-protector -mno-omit-leaf-frame-pointer \
-				  -mno-outline-atomics
+				  -mno-outline-atomics -fno-use-cxa-atexit
 
 OPTFLAGS = -mcpu=cortex-a53 -march=armv8-a -I inc/ -std=c++17
 

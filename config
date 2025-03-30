@@ -42,3 +42,10 @@
 # ARM_PL011: Serial console
 # BCM_MINI_UART: Serial console
 CONFIG_CONSOLE = BCM_MINI_UART
+
+# CONFIG_INTC
+# Description:
+# The CONFIG_INTC option sets the default interrupt controller.
+# Possible Values:
+# BCM_INTC: Broadcom 2835 Interrupt Controller
+CONFIG_INTC = BCM_INTC
