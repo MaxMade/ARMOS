@@ -48,7 +48,7 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	if (kernel) {
 		kickoff->spsr_el1 = 0b0101;
 	} else {
-		kickoff->spsr_el1 = 0x0001;
+		kickoff->spsr_el1 = 0x0000;
 	}
 
 	state = State::CREATED;
