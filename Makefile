@@ -90,7 +90,7 @@ DOXYGENTARGET = $(DOXYGENBUILD)/index.html
 ###########
 
 %-verbose:
-	@make --no-print-directory $* VERBOSE=""
+	@$(MAKE) --no-print-directory $* VERBOSE=""
 
 $(KERNEL): $(CC_OBJECTS) $(S_OBJECTS)
 	@echo "LD		$(KERNEL)"
