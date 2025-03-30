@@ -38,4 +38,34 @@ int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
  */
 int pthread_spin_destroy(pthread_spinlock_t *lock);
 
+/**
+ * @fn int pthread_spin_lock(pthread_spinlock_t *lock)
+ * @brief Lock spinlock
+ * @return
+ *
+ *	- 0        - Success
+ *	- EDADLOCK - The system detected a deadlock condition
+ */
+int pthread_spin_lock(pthread_spinlock_t *lock);
+
+/**
+ * @fn int pthread_spin_trylock(pthread_spinlock_t *lock)
+ * @brief Try to lock spinlock
+ * @return
+ *
+ *	- 0         - Success
+ *	- EDEADLOCK - The system dected a deadlock condition
+ *	- EBUSY     - The spinlock is currently locked by another thread
+ */
+int pthread_spin_trylock(pthread_spinlock_t *lock);
+
+/**
+ * @fn int pthread_spin_trylock(pthread_spinlock_t *lock)
+ * @brief Unlock spinlock
+ * @return
+ *
+ *	- 0 - Success
+ */
+int pthread_spin_unlock(pthread_spinlock_t *lock);
+
 #endif /* ifndef _APP_LIB_PTHREAD_H_ */
