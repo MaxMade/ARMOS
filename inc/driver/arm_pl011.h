@@ -9,6 +9,7 @@
 /**
  * @file driver/arm_pl011.h
  * @brief Driver for ARM PL011
+ * @todo Implement interrupt handling
  */
 
 namespace driver {
@@ -64,11 +65,15 @@ namespace driver {
 			arm_pl011();
 
 			/**
-			 * @fn bool init(const config& conf)
+			 * @fn int init(const config& conf)
 			 * @brief Intialize console
 			 * @todo Current the baudrate is calculated for a fixed clock rate of 4MHz
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Failure (-errno)
 			 */
-			bool init(const config& conf);
+			int init(const config& conf);
 
 			/**
 			 * @fn void write(const char* buf, size_t len)

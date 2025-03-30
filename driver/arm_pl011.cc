@@ -6,7 +6,7 @@ arm_pl011::arm_pl011() {
 	name = ("arm,pl011");
 }
 
-bool arm_pl011::init(const config& conf) {
+int arm_pl011::init(const config& conf) {
 	/* Set base */
 	base = conf.getRange().first;
 
@@ -36,7 +36,7 @@ bool arm_pl011::init(const config& conf) {
 	/* Enable console */
 	writeRegister<CONTROL_REG>((1 << 0) | (1 << 8) | (1 << 9));
 
-	return true;
+	return 0;
 }
 
 void arm_pl011::write(const char* buf, size_t len) {

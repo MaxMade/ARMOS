@@ -18,16 +18,16 @@ namespace driver {
 	class config {
 		private:
 			/**
-			 * @var addr
-			 * @brief Start address of configuration space
+			 * @var configSpace
+			 * @brief Configuration space of device
 			 */
-			void* addr;
+			lib::pair<void*,size_t> configSpace;
 
 			/**
-			 * @var size
-			 * @brief Size of configuration space
+			 * @var intSpace
+			 * @brief Configuration space of interrupts
 			 */
-			size_t size;
+			lib::pair<void*,size_t> intSpace;
 
 			/**
 			 * @var valid
@@ -53,6 +53,18 @@ namespace driver {
 			 * @brief Get range of configuration space
 			 */
 			lib::pair<void*, size_t> getRange() const;
+
+			/**
+			 * @fn void setInterruptRange(void* addr, size_t size)
+			 * @brief Set range of interrupt setting
+			 */
+			void setInterruptRange(void* addr, size_t size);
+
+			/**
+			 * @fn lib::pair<void*, size_t> getInterruptRange() const
+			 * @brief Get range of (device specific) interrupt setting
+			 */
+			lib::pair<void*, size_t> getInterruptRange() const;
 
 			/**
 			 * @fn bool isValid() const
