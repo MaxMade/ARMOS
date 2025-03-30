@@ -2,6 +2,7 @@
 #define _INC_MEMORY_H_
 
 #include <new.h>
+#include <atomic.h>
 #include <utility.h>
 #include <type_traits.h>
 
@@ -147,6 +148,154 @@ namespace lib {
 	void swap(unique_ptr<T>& lhs, unique_ptr<T>& rhs) {
 		lhs.swap(rhs);
 	}
+
+
+	/**
+	 * @class shared_ptr
+	 * @brief Shared Pointer
+	 */
+	template<typename T>
+	class shared_ptr {
+		private:
+			/**
+			 * @var val
+			 * @brief Pointer value
+			 */
+			T* val;
+
+			/**
+			 * @var ref
+			 * @brief Reference count
+			 */
+			atomic<size_t>* ref;
+
+		public:
+			/**
+			 * @fn shared_ptr()
+			 * @brief Create invalid shared pointer
+			 */
+			shared_ptr() : val(nullptr), ref(nullptr) {}
+
+			/**
+			 * @fn explicit shared_ptr(U* ptr)
+			 * @brief Create shared pointer from normal pointer
+			 */
+			template<typename U>
+			explicit shared_ptr(U* ptr) {
+				val = ptr;
+				ref = new atomic<size_t>(1);
+
+				if (!val || !ref) {
+					delete val;
+					delete ref;
+				}
+			}
+
+			/**
+			 * @fn shared_ptr(const shared_ptr<U>& r)
+			 * @brief Copy constructor
+			 */
+			template<typename U>
+			shared_ptr(const shared_ptr<U>& r) {
+				val = r.val;
+				ref = r.ref;
+				ref->fetch_add(1);
+			}
+
+			/**
+			 * @fn shared_ptr(shared_ptr<U>&& r)
+			 * @brief Move constructor
+			 */
+			template<typename U>
+			shared_ptr(shared_ptr<U>&& r) {
+				val = r.val;
+				ref = r.ref;
+
+				r.val = nullptr;
+				r.ref = 0;
+			}
+
+			/**
+			 * @fn ~shared_ptr()
+			 * @brief Destructor
+			 */
+			~shared_ptr() {
+				if (ref->fetch_sub(1) == 1) {
+					delete val;
+					delete ref;
+				}
+			}
+
+			/**
+			 * @fn shared_ptr& operator=(const shared_ptr<U>& r)
+			 * @brief Copy assignment
+			 */
+			template<class U>
+			shared_ptr& operator=(const shared_ptr<U>& r) {
+				shared_ptr<T>(r).swap(*this);
+				return *this;
+			}
+
+			/**
+			 * @fn shared_ptr& operator=(shared_ptr<U>&& r)
+			 * @brief Move assignment
+			 */
+			template<class U>
+			shared_ptr& operator=(shared_ptr<U>&& r) {
+				shared_ptr<T>(move(r)).swap(*this);
+				return *this;
+			}
+
+			/**
+			 * @fn operator bool() const
+			 * @brief Check if shared_pointer contains valid pointer
+			 */
+			operator bool() const {
+				return val != nullptr;
+			}
+
+			/**
+			 * @fn void swap(shared_ptr& r)
+			 * @brief Swap two shared_pointers
+			 */
+			void swap(shared_ptr& r) {
+				swap(this->val, r.val);
+				swap(this->ref, r.ref);
+			}
+
+			/**
+			 * @fn T* get() const
+			 * @brief Get underlying pointer
+			 */
+			T* get() const {
+				return val;
+			}
+
+			/**
+			 * @fn T& operator*() const
+			 * @brief Get underlying pointer
+			 */
+			T& operator*() const {
+				return *val;
+			}
+
+			/**
+			 * @fn T* operator->() const
+			 * @brief Get underlying pointer
+			 */
+			T* operator->() const {
+				return val;
+			}
+
+			/**
+			 * @fn size_t use_count() const
+			 * @brief Get underlying pointer
+			 */
+			size_t use_count() const {
+				auto ret = ref->load();
+				return ret;
+			}
+	};
 
 } /* namespace lib */
 
