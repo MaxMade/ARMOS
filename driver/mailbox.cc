@@ -55,8 +55,6 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
 	}
 
-	while (messages[cpuID].load() == 0);
-
 	lock.unlock();
 
 	return 0;
