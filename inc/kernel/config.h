@@ -29,4 +29,30 @@
 	#define MAX_NUM_CPUS 128
 #endif
 
+/**
+ * @def STACK_SIZE
+ * @brief Stack size in bytes
+ */
+#if defined(CONFIGSTACK_SIZE_16)
+	#define STACK_SIZE (16 * 1024)
+
+#elif defined(CONFIGSTACK_SIZE_32)
+	#define STACK_SIZE (32 * 1024)
+
+#elif defined(CONFIGSTACK_SIZE_64)
+	#define STACK_SIZE (64 * 1024)
+
+#elif defined(CONFIGSTACK_SIZE_128)
+	#define STACK_SIZE (128 * 1024)
+
+#elif defined(CONFIGSTACK_SIZE_256)
+	#define STACK_SIZE (256 * 1024)
+
+#elif defined(CONFIGSTACK_SIZE_512)
+	#define STACK_SIZE (512 * 1024)
+
+#else
+	#define STACK_SIZE (1024 * 1024)
+#endif
+
 #endif /* ifndef _INC_KENREL_CONFIG_H_ */
