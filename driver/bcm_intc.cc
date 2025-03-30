@@ -1,3 +1,4 @@
+#include "driver/drivers.h"
 #include <cerrno.h>
 #include <kernel/error.h>
 #include <kernel/utility.h>
@@ -107,7 +108,11 @@ generic_driver* bcm_intc::getHandler() {
 		}
 	}
 
-	return makeError<generic_driver*>(-EINVAL);
+	/* XXX: Return (bcm2635 mailbox) IPI driver if no other driver is pending!
+	 * According to https://github.com/torvalds/linux/commit/89214f009c1d38568456dcf997d93977928fe2c3
+	 * the pending bit might be ignored and not set even if the interrupt is generated.
+	 */
+	return &driver::ipi;
 }
 
 int bcm_intc::prologue() {
