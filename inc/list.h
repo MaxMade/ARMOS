@@ -253,19 +253,19 @@ namespace lib {
 			}
 
 			reference front() {
-				return *head;
+				return head->val;
 			}
 
 			const_reference front() const {
-				return *head;
+				return head->val;
 			}
 
 			reference back() {
-				return *tail;
+				return tail->val;
 			}
 
 			const_reference back() const {
-				return *tail;
+				return tail->val;
 			}
 
 			iterator begin() {
