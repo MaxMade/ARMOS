@@ -76,3 +76,7 @@ void* CPU::getTranslationTable() {
 	asm("mrs %0, TTBR0_EL1" : "=r"(addr));
 	return addr;
 }
+
+void CPU::halt() {
+	asm("wfe");
+}
