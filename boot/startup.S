@@ -1,5 +1,3 @@
-#include "../inc/kernel/debug/frame_magic.h"
-
 .global _start
 
 .global _endless_loop
@@ -87,9 +85,6 @@ and x1, x1, 0xFF
 	// Get CPU ID in x1
 	mrs x1, MPIDR_EL1
 	and x1, x1, 0xFF
-
-	// Save frame magic number in frame pointer (x29)
-	mov x29, FRAME_MAGIC
 
 	// Jump to C++ Code (x0: fdt, x1: cpuID)
 	bl kernelMainWrapper
