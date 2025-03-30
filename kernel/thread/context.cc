@@ -9,9 +9,10 @@
 
 using namespace thread;
 
-extern "C" void __context_switch(SavedContext* old, SavedContext* next);
 extern "C" void restore_current_el_sp_el0_sync_entry();
 extern "C" void __exit(int exit_value);
+extern "C" void __context_switch(SavedContext* old, SavedContext* next);
+extern "C" void __context_kickoff();
 
 Context::Context() : id(0), kernelStack(nullptr), userStack(nullptr), state(State::INVALID) { }
 
@@ -20,10 +21,12 @@ Context::Context(size_t id, void* kernelStack, void* userStack, bool kernel, voi
 }
 
 void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg) {
+	/* Update properties of the context */
 	this->id = id;
 	this->kernelStack = kernelStack;
 	this->userStack = userStack;
 
+	/* Prepare kickoff pointer */
 	auto ptr =  reinterpret_cast<uintptr_t>(kernelStack);
 	ptr += STACK_SIZE;
 	ptr -= CPU::getStackAlignment();
@@ -41,11 +44,34 @@ void Context::init(size_t id, void* kernelStack, void* userStack, bool kernel, v
 	/* Prepare thread ID */
 	kickoff->tpidr_el0 = id;
 
-	/* Set kernel stack */
-	this->savedContext.sp = reinterpret_cast<uintptr_t>(ptr);
 
-	/* Set return address */
-	this->savedContext.x30 = reinterpret_cast<uintptr_t>(restore_current_el_sp_el0_sync_entry);
+	/* If an user process is created, the __unlock_global_scheduler function
+	 * must be called in order to release the lock of the global scheduler
+	 * (which was acquired by scheduler.schedule() function call).  However, if
+	 * this function is executed on the previously prepared kernel stack, it
+	 * will corrupt its later register contents. Therefore, its SP will point
+	 * below the kickoff variable and update its content afterwards. For this
+	 * purpose, the __context_kickoff function exits.
+	 * In case of a kernel thread, the restore_current_el_sp_el0_sync_entry can
+	 * be called directly.
+	 */
+	if (kernel) {
+		/* Set return address */
+		this->savedContext.x30 = reinterpret_cast<uintptr_t>(restore_current_el_sp_el0_sync_entry);
+
+		/* Set kernel stack */
+		this->savedContext.sp = ptr;
+
+	} else {
+		/* x19 will be used to store the actual stack pointer */
+		this->savedContext.x19 = reinterpret_cast<uintptr_t>(kickoff);
+
+		/* Set return address */
+		this->savedContext.x30 = reinterpret_cast<uintptr_t>(__context_kickoff);
+
+		/* Set kernel stack */
+		this->savedContext.sp = ptr - PAGESIZE;
+	}
 
 	/* Set user stack */
 	auto userPtr = reinterpret_cast<uintptr_t>(userStack);
