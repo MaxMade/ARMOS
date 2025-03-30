@@ -111,10 +111,17 @@ extern driver::Console console;
 extern driver::Intc intc;
 
 /**
- * @var intc
+ * @var timer
  * @brief Interrupt controller driver
  */
 extern driver::Timer timer;
+
+
+/**
+ * @var ipi
+ * @brief IPI driver
+ */
+extern driver::IPI ipi;
 
 } /* namespace driver */
 
