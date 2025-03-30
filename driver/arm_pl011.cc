@@ -50,3 +50,8 @@ char arm_pl011::read() {
 	while ((readRegister<FLAG_REG>() & (1 << 4)) != 0);
 	return readRegister<DATA_REG>();
 }
+
+
+lib::pair<void*, size_t> arm_pl011::getConfigSpace() const {
+	return lib::pair(base, 0x200);
+}

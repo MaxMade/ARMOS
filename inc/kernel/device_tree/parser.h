@@ -28,6 +28,12 @@ namespace DeviceTree {
 			void* ptr;
 
 			/**
+			 * @var size_t size
+			 * @brief Size of raw data
+			 */
+			size_t size;
+
+			/**
 			 * @var bool valid
 			 * @brief Valid flag for rawData
 			 */
@@ -70,6 +76,18 @@ namespace DeviceTree {
 			 * @brief Find configuration for given driver based of the driver name
 			 */
 			driver::config findConfig(const driver::generic_driver& driver) const;
+
+			/**
+			 * @fn lib::pair<void*, size_t> getConfigSpace() const
+			 * @brief Get used address range
+			 */
+			lib::pair<void*, size_t> getConfigSpace() const;
+
+			/**
+			 * @fn int createMapping() const
+			 * @brief Create mapping for device tree parser and associated devices
+			 */
+			int createMapping() const;
 	};
 
 } /* namespace DeviceTree */

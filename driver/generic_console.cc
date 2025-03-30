@@ -15,3 +15,8 @@ void generic_console::write(const char* buf, size_t len) {
 char generic_console::read() {
 	return '\0';
 }
+
+
+lib::pair<void*, size_t> generic_console::getConfigSpace() const {
+	return lib::pair(nullptr, 0);
+}
