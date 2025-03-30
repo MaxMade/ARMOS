@@ -49,3 +49,10 @@ CONFIG_CONSOLE = BCM_MINI_UART
 # Possible Values:
 # BCM_INTC: Broadcom 2835 Interrupt Controller
 CONFIG_INTC = BCM_INTC
+
+# CONFIG_TIMER
+# Description:
+# The CONFIG_TIMER option sets the default timer.
+# Possible Values:
+# BCM_SYS_TIMER: Broadcom 2835 System Timer
+CONFIG_INTC = BCM_SYS_TIMER
