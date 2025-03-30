@@ -17,6 +17,7 @@
 #include <kernel/irq/exception_handler.h>
 #include <kernel/thread/idle.h>
 #include <kernel/thread/context.h>
+#include <kernel/thread/scheduler.h>
 #include <kernel/mm/paging.h>
 #include <kernel/mm/translation_table.h>
 #include <kernel/mm/frame_allocator.h>
@@ -40,6 +41,7 @@ namespace mm {
 
 namespace thread {
 	SMP smp;
+	Scheduler scheduler;
 	IdleThreads idleThreads;
 }
 
@@ -180,10 +182,17 @@ int kernelMain(void *fdt) {
 
 	cout << "Synchronous Exceptions: Setup finished" << lib::endl;
 
-	/* Prepare Idle Threads */
-	if (thread::idleThreads.init() != 0)
-		debug::panic::generate("Thread: Unable to initialize idle thread");
-	cout << "Thread: Idle Thread Setup finished" << lib::endl;
+	/* Prepare Schedulder */
+	if(isError(thread::scheduler.create((void*(*)(void*)) (void*) main, nullptr)))
+		debug::panic::generate("Scheduler: Unable to create main thread");
+
+	/* Register RESCHEDULE IPI */
+	auto ipiHandler = []() -> int {
+		thread::scheduler.schedule();
+		return 0;
+	};
+	if (isError(driver::ipi.registerHandler(driver::IPI::IPI_MSG::RESCHEDULE, lib::function<int()>(ipiHandler))))
+		debug::panic::generate("Scheduler: Unable to register RESCHEDULE IPI");
 
 	/* Prepare SMP */
 	if (thread::smp.start() != 0)
@@ -197,30 +206,8 @@ int kernelMain(void *fdt) {
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
-	/* Prepare Main Thread */
-	auto userStack = reinterpret_cast<char*>(lib::memalign(PAGESIZE, STACK_SIZE));
-	if (userStack == nullptr)
-		debug::panic::generate("Thread: Unable to allocate user stack for main thread");
-	for (size_t i = 0; i < STACK_SIZE / PAGESIZE; i++) {
-		auto ret = paging.protect(&userStack[i * PAGESIZE], mm::Paging::USER_MAPPING, mm::Paging::WRITABLE, mm::Paging::NORMAL_ATTR);
-		if (isError(ret)) {
-			lib::free(userStack);
-			debug::panic::generate("Thread: Unable to change permission of user stack for main thread");
-		}
-		CPU::invalidatePage(&userStack[i * PAGESIZE]);
-	}
-
-	char* kernelStack = new char[STACK_SIZE];
-	if (kernelStack == nullptr) {
-		lib::free(userStack);
-		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
-	}
-	mainThread.init(0, kernelStack, userStack, false, (void*) main);
-	cout << "Thread: Setup of main thread finished" << lib::endl;
-
 	/* Preform initial context switch */
-	thread::Context tmpContext;
-	thread::Context::switching(&tmpContext, &mainThread);
+	thread::scheduler.schedule();
 
 	debug::panic::generate("End of kernelMain must never be reached!");
 	return -1;
@@ -253,11 +240,6 @@ int kernelMainApp() {
 
 	/* Local output stream */
 	lib::ostream cout;
-
-	/* Prepare Idle Thread */
-	if (thread::idleThreads.init() != 0)
-		debug::panic::generate("Thread: Unable to initialize idle thread");
-	cout << "Thread: Idle Thread Setup finished" << lib::endl;
 
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 

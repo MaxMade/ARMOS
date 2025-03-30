@@ -32,7 +32,7 @@ struct buddy_node_used {
 	bool used;
 	void* addr;
 	char *mem[0];
-} __attribute__((packed));
+};
 
 /* Embbeded struct for free memory region */
 struct buddy_node_free {
@@ -41,7 +41,7 @@ struct buddy_node_free {
 	struct buddy_node_free *prev;
 	struct buddy_node_free *next;
 	char *mem[0];
-} __attribute__((packed));
+};
 
 static_assert(offsetof(buddy_node_free, used) == offsetof(buddy_node_used, used), "Member \"used\" must be at same offset");
 

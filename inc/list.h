@@ -46,16 +46,16 @@ namespace lib {
 				T val;
 
 				/**
-				 * @fn list_entry(const T& val)
+				 * @fn list_entry(const T& v)
 				 * @brief Construct entry from value
 				 */
-				list_entry(const T& val) : next(nullptr), prev(nullptr), val(val) { }
+				list_entry(const T& v) : next(nullptr), prev(nullptr), val(v) { }
 
 				/**
-				 * @fn list_entry(T&& val)
+				 * @fn list_entry(T&& v)
 				 * @brief Construct entry from value
 				 */
-				list_entry(T&& val) : next(nullptr), prev(nullptr), val(move(val)) { }
+				list_entry(T&& v) : next(nullptr), prev(nullptr), val(move(v)) { }
 			};
 
 			/**
@@ -418,14 +418,14 @@ namespace lib {
 			 *	-  0 - Success
 			 *	- <0 - Failure (errno)
 			 */
-			bool push_back(const T& value) {
+			int push_back(const T& value) {
 				list_entry* newEntry = new list_entry(value);
 				if (!newEntry)
-					return false;
+					return -ENOMEM;
 
 				insert(cend(), newEntry);
 
-				return true;
+				return 0;
 			}
 
 			/**

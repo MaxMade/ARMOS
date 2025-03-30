@@ -6,7 +6,8 @@
  * @brief Idle Threads
  */
 
-#include <kernel/cpu_local.h>
+#include <memory.h>
+#include <kernel/config.h>
 #include <kernel/thread/context.h>
 
 namespace thread {
@@ -27,15 +28,20 @@ namespace thread {
 			 * @var threads
 			 * @brief Contexts of the idle threads
 			 */
-			cpu_local<Context> threads;
+			Context threads[MAX_NUM_CPUS];
+
+			/**
+			 * @var stacks
+			 * @brief Stack of the idle threads
+			 */
+			char stacks[MAX_NUM_CPUS][STACK_SIZE];
 
 		public:
 			/**
-			 * @fn int init()
+			 * @fn IdleThreads()
 			 * @brief Initialize contexts of idle threads
-			 * @warning This function must be called on all processors
 			 */
-			int init();
+			IdleThreads();
 
 			/**
 			 * @fn Context& get()
