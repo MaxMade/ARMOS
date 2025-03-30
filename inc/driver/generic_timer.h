@@ -46,6 +46,12 @@ namespace driver {
 			size_t interval() const;
 
 			/**
+			 * @fn size_t getTicks() const
+			 * @brief Get number of ticks since startup
+			 */
+			size_t getTicks() const;
+
+			/**
 			 * @fn int registerFunction(size_t ms, lib::function<int(void)> callback)
 			 * @brief Register callback which is executed in a regular interval
 			 * @warning ms must be multiple of interval

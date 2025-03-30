@@ -1,10 +1,12 @@
 #ifndef _INC_DRIVER_SYSTEM_TIMER_H_
 #define _INC_DRIVER_SYSTEM_TIMER_H_
 
+#include <atomic.h>
 #include <cstdint.h>
 #include <kernel/utility.h>
 #include <driver/config.h>
 #include <driver/generic_timer.h>
+#include <kernel/lock/spinlock.h>
 
 /**
  * @file driver/system_timer.h
@@ -26,6 +28,12 @@ namespace driver {
 			 * @brief Interrupt configuration
 			 */
 			lib::pair<void*, size_t> intConfig;
+
+			/**
+			 * @var lock
+			 * @brief Synchronaztion lock
+			 */
+			lock::spinlock lock;
 
 			/**
 			 * @enum regOffset
@@ -77,7 +85,7 @@ namespace driver {
 			 * @var ticks;
 			 * @brief Number of ticks
 			 */
-			size_t ticks;
+			lib::atomic<size_t> ticks;
 
 			/**
 			 * @var MAX_CALLBACKS
@@ -117,6 +125,7 @@ namespace driver {
 			/**
 			 * @fn int windup(size_t ms)
 			 * @brief Windup and activate timer
+			 * @warning This function has to executed an all processors
 			 * @return
 			 *
 			 *	-  0 - Success
@@ -129,6 +138,12 @@ namespace driver {
 			 * @brief Get current configured interval (in ms)
 			 */
 			size_t interval() const;
+
+			/**
+			 * @fn size_t getTicks() const
+			 * @brief Get number of ticks since startup
+			 */
+			size_t getTicks() const;
 
 			/**
 			 * @fn int registerFunction(size_t ms, lib::function<int(void)> callback)

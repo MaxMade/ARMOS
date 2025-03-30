@@ -18,6 +18,10 @@ size_t generic_timer::interval() const {
 	return -ENXIO;
 }
 
+size_t generic_timer::getTicks() const {
+	return -ENXIO;
+}
+
 int generic_timer::registerFunction(size_t ms, lib::function<int(void)> callback) {
 	(void) ms;
 	(void) callback;
