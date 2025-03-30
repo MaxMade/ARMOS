@@ -291,9 +291,11 @@ namespace lib {
 			 * @brief Destructor
 			 */
 			~shared_ptr() {
-				if (ref->fetch_sub(1) == 1) {
-					delete val;
-					delete ref;
+				if (ref != nullptr) {
+					if (ref->fetch_sub(1) == 1) {
+						delete val;
+						delete ref;
+					}
 				}
 			}
 
