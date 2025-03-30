@@ -1,8 +1,9 @@
-#include "kernel/utility.h"
 #include <cstdlib.h>
 #include <cstddef.h>
 #include <cstring.h>
+#include <cassert.h>
 #include <kernel/math.h>
+#include <kernel/utility.h>
 #include <kernel/lock/spinlock.h>
 
 /* DEFINITION -------------------------------------------------------------- */
@@ -40,6 +41,8 @@ struct buddy_node_free {
 	struct buddy_node_free *next;
 	char *mem[0];
 } __attribute__((packed));
+
+static_assert(offsetof(buddy_node_free, used) == offsetof(buddy_node_used, used), "Member \"used\" must be at same offset");
 
 /* List of free memory including metadata about list */
 struct buddy_free_list {
@@ -240,6 +243,11 @@ static void buddy_free(void *ptr) {
 	struct buddy_node_used *used_buddy = container_of(ptr, struct buddy_node_used, mem);
 	size_t size = used_buddy->size;
 
+	/* Sanity check */
+	assert(reinterpret_cast<uintptr_t>(ptr) >= reinterpret_cast<uintptr_t>(__mem));
+	assert(reinterpret_cast<uintptr_t>(ptr) < reinterpret_cast<uintptr_t>(__mem) + __size);
+	assert(used_buddy->used == true);
+
 	/* Prepare free buddy */
 	struct buddy_node_free *free_buddy = (struct buddy_node_free *) used_buddy;
 	free_buddy->size = size;
@@ -280,9 +288,10 @@ static void *buddy_realloc(void *ptr, size_t size) {
 	}
 
 	/* Check if ptr is valid */
-
 	struct buddy_node_used *tmp = container_of(ptr, struct buddy_node_used, mem);
-
+	assert(reinterpret_cast<uintptr_t>(ptr) >= reinterpret_cast<uintptr_t>(__mem));
+	assert(reinterpret_cast<uintptr_t>(ptr) < reinterpret_cast<uintptr_t>(__mem) + __size);
+	assert(tmp->used == true);
 
 	/* Check if reallocation is necessary */
 	if (tmp->size >= size + sizeof(struct buddy_node_used))
