@@ -93,10 +93,10 @@ namespace thread {
 			Context();
 
 			/**
-			 * @fn void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr)
+			 * @fn void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr)
 			 * @brief Initialize context
 			 */
-			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* retAddr);
+			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr);
 
 			Context(const Context& other) = delete;
 
