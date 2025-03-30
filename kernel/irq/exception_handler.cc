@@ -1,9 +1,11 @@
+#include <ostream.h>
 #include <cstdint.h>
 #include <driver/drivers.h>
 #include <hw/register/esr.h>
 #include <kernel/error.h>
 #include <kernel/debug/panic.h>
 #include <kernel/lock/softirq.h>
+#include <kernel/irq/sync_handler.h>
 #include <kernel/irq/exception_handler.h>
 
 extern "C" {
@@ -55,8 +57,7 @@ extern "C" {
 		const char* description = esr.getECString();
 		(void) description;
 
-		/* TODO: Implement me */
-		debug::panic::generateFromIRQ("TODO: current_el_sp_elx_sync currently unimplemented!", saved_state);
+		debug::panic::generateFromIRQ("current_el_sp_elx_sync must never be used!", saved_state);
 	}
 
 	void current_el_sp_elx_irq(irq::ExceptionContext* saved_state) {
@@ -101,10 +102,26 @@ extern "C" {
 
 		hw::reg::ESR esr;
 		const char* description = esr.getECString();
-		(void) description;
 
-		/* TODO: Implement me */
-		debug::panic::generateFromIRQ("TODO: lower_el_aarch64_sync currently unimplemented!", saved_state);
+		auto driver = irq::syncHandler.getHandler();
+		if (driver == nullptr) {
+			lib::panic panic;
+			panic << "lower_el_aarch64_sync: " << description << "\n\r";
+			panic << "ESR:\n\r";
+			panic.setf(lib::ostream::hex, lib::ostream::basefield);
+			panic.setf(lib::ostream::showbase);
+			panic << "  ISS: " << esr.getISS() << "\n\r";
+			panic << "  IL:  " << esr.getIL() << "\n\r";
+			panic << "  EC:  " << esr.getEC() << "\n\r";
+			panic.unsetf(lib::ostream::hex);
+			panic.unsetf(lib::ostream::showbase);
+
+			debug::panic::generateFromIRQ("No Handler found!", saved_state);
+		}
+
+		auto err = lock::softirq.execute(driver, saved_state);
+		if (isError(err))
+			debug::panic::generateFromIRQ("lower_el_aarch64_sync: Error during softirq!", saved_state);
 	}
 
 	void lower_el_aarch64_irq(irq::ExceptionContext* saved_state) {
