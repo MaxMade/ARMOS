@@ -7,6 +7,7 @@
 #include <kernel/error.h>
 #include <kernel/linker.h>
 #include <kernel/symbols.h>
+#include <kernel/thread/smp.h>
 #include <kernel/debug/panic.h>
 #include <kernel/device_tree/parser.h>
 #include <kernel/irq/exception_handler.h>
@@ -28,6 +29,10 @@ namespace driver {
 
 namespace mm {
 	TTAllocator ttAlloc;
+}
+
+namespace thread {
+	SMP smp;
 }
 
 Symbols symbols;
@@ -138,6 +143,24 @@ int kernelMain(void *fdt) {
 		return -1;
 	}
 	cout << "PANIC: Setup finished\n\r";
+
+	/* Prepare SMP */
+	if (thread::smp.start() != 0)
+		debug::panic::generate("SMP: Unable to inialize");
+	cout << "SMP: Setup finished\n\r";
+
+	CPU::enableInterrupts();
+	while (1);
+
+	return 0;
+}
+
+int kernelMainApp() {
+	/* Local output stream */
+	lib::ostream cout;
+
+	/* Register CPU */
+	thread::smp.registerCPU();
 
 	CPU::enableInterrupts();
 	while (1);

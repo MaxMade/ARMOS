@@ -13,6 +13,7 @@
 
 /* Outermost frames */
 extern int kernelMain(void *fdt);
+extern int kernelMainApp();
 extern "C" void current_el_sp_el0_sync(void* saved_state);
 extern "C" void current_el_sp_el0_irq(void* saved_state);
 extern "C" void current_el_sp_el0_fiq(void* saved_state);
