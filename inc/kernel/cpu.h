@@ -1,6 +1,8 @@
 #ifndef _INC_KERNEL_CPU_H_
 #define _INC_KERNEL_CPU_H_
 
+#include <cstddef.h>
+
 /**
  * @file kernel/cpu.h
  * @brief Common CPU operations
@@ -25,6 +27,48 @@ namespace CPU {
 	 * @brief Load exception vector at addr
 	 */
 	void loadExeptionVector(void* addr);
+
+	/**
+	 * @fn void enableInterrupts()
+	 * @brief Enable Debug interrupts, SErrror interrupts, IRQs and FIQs
+	 */
+	void enableInterrupts();
+
+	/**
+	 * @fn void disableInterrupts()
+	 * @brief Disable Debug interrupts, SErrror interrupts, IRQs and FIQs
+	 */
+	void disableInterrupts();
+
+	/**
+	 * @fn bool areInterruptsEnabled()
+	 * @brief Check if at least one of the following is enabled: Debug interrupts, SErrror interrupts, IRQs and FIQs
+	 */
+	bool areInterruptsEnabled();
+
+	/**
+	 * @fn bool areInterruptsEnabled()
+	 * @brief Check if all of the following are disabled: Debug interrupts, SErrror interrupts, IRQs and FIQs
+	 */
+	bool areInterruptsDisabled();
+
+	/**
+	 * @fn void invalidatePage(void *vaddr)
+	 * @brief Invalidate page
+	 */
+	void invalidatePage(void *vaddr);
+
+	/**
+	 * @fn void invalidateTLB()
+	 * @brief invalidate whole TLB
+	 */
+	void invalidateTLB();
+
+	/**
+	 * @fn size_t getProcessorID()
+	 * @brief Get processor ID
+	 */
+	size_t getProcessorID();
 
 } /* namespace CPU */
 
