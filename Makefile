@@ -1,4 +1,4 @@
-.PHONY: clean all debug qemu qemu-gdb tags doc app_objects_prefixed
+.PHONY: clean all debug qemu qemu-gdb tags user-doc kernel-doc doc app_objects_prefixed
 
 #####################
 # List of Variables #
@@ -74,9 +74,7 @@ GDBFLAGS = -ex "target remote :1234"
 # doxygen #
 ###########
 
-DOXYGENCONFG = doc/Doxyfile
-DOXYGENBUILD = doc/build
-DOXYGENTARGET = $(DOXYGENBUILD)/index.html
+DOXYGEN_CONFG_BASE = doc/Doxyfile
 
 ########
 # Apps #
@@ -149,6 +147,12 @@ $(SYM_MAP): $(KERNEL)
 	@echo "SYMBOLS		$(SYM_MAP)"
 	$(VERBOSE) ./scripts/symbol_map $(KERNEL) $(SYM_MAP)
 
-doc:
-	@echo "DOC		$(DOXYGENTARGET)"
-	$(VERBOSE) doxygen $(DOXYGENCONFG)
+user-doc:
+	@echo "DOC		$(DOXYGEN_CONFG_BASE)_User"
+	$(VERBOSE) doxygen $(DOXYGEN_CONFG_BASE)_User
+
+kernel-doc:
+	@echo "DOC		$(DOXYGEN_CONFG_BASE)_Kernel"
+	$(VERBOSE) doxygen $(DOXYGEN_CONFG_BASE)_Kernel
+
+doc: user-doc kernel-doc
