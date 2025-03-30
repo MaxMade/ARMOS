@@ -1,7 +1,7 @@
 ARMOS <img src="Other/logo.png" width="28">
 =====
 
-ARMOS is a operating system kernel targeting the ARMv8-A architecture. Hereby,
+ARMOS is an operating system kernel targeting the ARMv8-A architecture. Hereby,
 the Raspberry Pi 3B+ serves as the main test platform. The overall goal of this
 project is about providing some insights of operating system development in the
 context of the ARM architecture.
@@ -52,7 +52,7 @@ located in the `doc/build/index.html` subdirectory:
 make doc
 ```
 
-**IMPORTANT:** Every committed interfaces must be documented via Doxygen!
+**IMPORTANT:** Every committed interface must be documented via Doxygen!
 
 # Debugging
 
