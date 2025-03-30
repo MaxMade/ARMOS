@@ -80,3 +80,11 @@ void* CPU::getTranslationTable() {
 void CPU::halt() {
 	asm("wfe");
 }
+
+void CPU::wakeup() {
+	asm("sev");
+}
+
+void CPU::dataBarrier() {
+	asm("dsb sy");
+}

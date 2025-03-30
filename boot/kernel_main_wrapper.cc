@@ -1,4 +1,5 @@
 extern int kernelMain(void *fdt);
+extern int kernelMainApp();
 
 static void csu_init() {
 	extern void (*__init_array_start []) ();
@@ -22,6 +23,7 @@ extern "C" void kernelMainWrapper(void *fdt, int cpuID) {
 		kernelMain(fdt);
 
 	} else {
-		/* TODO: Call kernelMainApp */
+		kernelMainApp();
 	}
 }
+
