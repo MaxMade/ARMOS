@@ -1,0 +1,73 @@
+#!/bin/env python3
+
+import sys
+import re
+
+binary = ""
+
+def help():
+    sys.stderr.write("Usage: {} [CONFIG]\n".format(binary))
+    sys.stderr.write("Write define flags for CONFIG to stdout\n\n")
+    sys.stderr.write("CONFIG: Optional path to config file (defaults to ./config)\n")
+
+def parse(config):
+    lineNr = 0;
+    ret = 0;
+
+    for line in config:
+        lineNr += 1
+
+        # Check for empty line
+        result = re.search("^\s*$", line)
+        if result is not None:
+            continue
+
+        # Check for comment
+        result = re.search("^\s*#.*", line)
+        if result is not None:
+            continue
+
+        # Check for config
+        p = re.compile("^\s*CONFIG_(\w*)\s*.\s*(\w*)\s*")
+        result = p.sub(r"CONFIG_\1_\2", line);
+        if result != line:
+            sys.stdout.write("-D {}\n".format(result))
+            continue
+
+        # Found unknown string sequence
+        sys.stderr.write("Found unknown string sequence:\n")
+        sys.stderr.write("{}: {}\n\n".format(str(lineNr), line.strip()));
+        ret = 1
+
+    return ret
+
+def main():
+    global binary
+
+    # Save name of binary
+    binary = sys.argv[0]
+
+    # Check arguments
+    if len(sys.argv) == 1:
+        configFile = "config"
+
+    elif len(sys.argv) == 2:
+        configFile = sys.argv[1]
+
+    else:
+        help()
+        sys.exit(1)
+
+
+    # Open file for reading
+    config = open(configFile, 'r')
+
+    # Start parsing
+    ret = parse(config)
+
+    # Close file
+    config.close();
+    sys.exit(ret)
+
+if __name__ == "__main__":
+    main()

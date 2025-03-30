@@ -4,6 +4,11 @@
 #include <cstdint.h>
 #include <kernel/device_tree/node.h>
 
+/**
+ * @file kernel/device_tree/node_iterator.h
+ * @brief Iterator for nodes within device tree
+ */
+
 namespace DeviceTree {
 
 	/**
