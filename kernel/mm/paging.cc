@@ -1,3 +1,4 @@
+#include "hw/register/par.h"
 #include <kernel/cpu.h>
 #include <kernel/math.h>
 #include <kernel/error.h>
@@ -364,4 +365,70 @@ int Paging::protect(void* vaddr, priv_lvl_t priv, prot_t prot, mem_attr_t attr) 
 
 	lock.unlock();
 	return err;
+}
+
+
+bool Paging::isWritableUser(void* vaddr) {
+	/* Check Write Operation for EL0 */
+	asm("at S1E0W, %0" :: "r"(vaddr));
+
+	/* Check result */
+	hw::reg::PAR par;
+	if (!par.isValid())
+		return false;
+
+	return true;
+}
+
+bool Paging::isWritableKernel(void* vaddr) {
+	/* Check Write Operation for EL1 */
+	asm("at S1E1W, %0" :: "r"(vaddr));
+
+	/* Check result */
+	hw::reg::PAR par;
+	if (!par.isValid())
+		return false;
+
+	return true;
+}
+
+bool Paging::isReadableUser(void* vaddr) {
+	/* Check Read Operation for EL0 */
+	asm("at S1E0R, %0" :: "r"(vaddr));
+
+	/* Check result */
+	hw::reg::PAR par;
+	if (!par.isValid())
+		return false;
+
+	return true;
+}
+
+bool Paging::isReadableKernel(void* vaddr) {
+	/* Check Read Operation for EL1 */
+	asm("at S1E1R, %0" :: "r"(vaddr));
+
+	/* Check result */
+	hw::reg::PAR par;
+	if (!par.isValid())
+		return false;
+
+	return true;
+}
+
+void* Paging::getFrame(void* vaddr) {
+	/* Perform Read Operation for EL1*/
+	asm("at S1E1R, %0" :: "r"(vaddr));
+
+	/* Check result */
+	hw::reg::PAR par;
+	if (!par.isValid())
+		return makeError<void*>(-EINVAL);
+
+	/* Get Page ofset */
+	auto offset = reinterpret_cast<uintptr_t>(vaddr) % PAGESIZE;
+
+	/* Return physical address */
+	auto parValid = par.getValid();
+	return reinterpret_cast<void*>((parValid.pa * PAGESIZE) | offset);
 }
