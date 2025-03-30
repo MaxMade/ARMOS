@@ -4,22 +4,34 @@ SECTIONS
 {
 	. = 0x80000;
 
+	. = ALIGN(4096);
+	__TEXT_START = .;
 	.text : {
 		KEEP(*(.boot));
 		*(.text*)
 	}
+	__TEXT_END = .;
 
-	.rodata ALIGN(16) : {
+	. = ALIGN(4096);
+	__RODATA_START = .;
+	.rodata ALIGN(4K) : {
 		*(.rodata*)
 	}
+	__RODATA_END = .;
 
-	.data ALIGN(16) : {
+	. = ALIGN(4096);
+	__DATA_START = .;
+	.data ALIGN(4K) : {
 		*(.data*)
 	}
+	__DATA_END = .;
 
+	. = ALIGN(4096);
+	__BSS_START = .;
 	.bss (NOLOAD) : {
 		*(.bss*)
 	}
+	__BSS_END = .;
 
 	.init_array :
 	{
