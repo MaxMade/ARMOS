@@ -1,3 +1,4 @@
+#include "kernel/debug/panic.h"
 #include <ostream.h>
 #include <driver/cpu.h>
 #include <driver/drivers.h>
@@ -129,6 +130,13 @@ int kernelMain(void *fdt) {
 	if (isError(driver::ipi.init(ipiConfig)))
 		return -1;
 	cout << "IPI: Setup finished\n\r";
+
+	/* Prepare panic */
+	if (debug::panic::init() != 0) {
+		cout << "PANIC: Unable to initialize\n\r";
+		return -1;
+	}
+	cout << "PANIC: Setup finished\n\r";
 
 	CPU::enableInterrupts();
 	while (1);

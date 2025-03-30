@@ -82,7 +82,7 @@ namespace driver {
 
 			static const size_t numHandlers = 4;
 
-			lib::pair<size_t, lib::function<int()>> handlers[numHandlers];
+			lib::pair<IPI_MSG, lib::function<int()>> handlers[numHandlers];
 
 		public:
 			/**
@@ -102,20 +102,20 @@ namespace driver {
 			int init(const config& conf);
 
 			/**
-			 * @fn int sendIPI(size_t cpuID, size_t msg)
+			 * @fn int sendIPI(size_t cpuID, IPI_MSG msg)
 			 * @brief Send IPI to cpu
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int sendIPI(size_t cpuID, size_t msg);
+			int sendIPI(size_t cpuID, IPI_MSG msg);
 
 			/**
-			 * @fn int registerHandler(size_t msg, lib::function<int()> handler)
+			 * @fn int registerHandler(IPI_MSG msg, lib::function<int()> handler)
 			 * @brief Register Handler for specific value
 			 */
-			int registerHandler(size_t msg, lib::function<int()> handler);
+			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
 
 			/**
 			 * @fn lib::pair<void*, size_t> getConfigSpace() const

@@ -2,6 +2,7 @@
 #define _INC_DRIVER_GENERIC_IPI_H_
 
 #include <cstddef.h>
+#include <cstdint.h>
 #include <functional.h>
 #include <driver/config.h>
 #include <driver/generic_driver.h>
@@ -20,6 +21,14 @@ namespace driver {
 	class generic_ipi : public generic_driver {
 		public:
 			/**
+			 * @enum IPI_MSG
+			 * @brief IPI Message
+			 */
+			enum class IPI_MSG : uint32_t {
+				PANIC, /**< Panic Broadcast */
+			};
+
+			/**
 			 * @fn int init(const config& conf)
 			 * @brief Intialize IPI driver
 			 * @return
@@ -30,20 +39,20 @@ namespace driver {
 			int init(const config& conf);
 
 			/**
-			 * @fn int sendIPI(size_t cpuID, size_t msg)
+			 * @fn int sendIPI(size_t cpuID, IPI_MSG msg)
 			 * @brief Send IPI to cpu
 			 * @return
 			 *
 			 *	-  0 - Success
 			 *	- <0 - Failure (-errno)
 			 */
-			int sendIPI(size_t cpuID, size_t msg);
+			int sendIPI(size_t cpuID, IPI_MSG msg);
 
 			/**
-			 * @fn int registerHandler(size_t msg, lib::function<int()> handler)
+			 * @fn int registerHandler(IPI_MSG msg, lib::function<int()> handler)
 			 * @brief Register Handler for specific value
 			 */
-			int registerHandler(size_t msg, lib::function<int()> handler);
+			int registerHandler(IPI_MSG msg, lib::function<int()> handler);
 
 			/**
 			 * @fn lib::pair<void*, size_t> getConfigSpace() const

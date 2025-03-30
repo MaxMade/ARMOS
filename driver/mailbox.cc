@@ -49,7 +49,7 @@ int mailbox::init(const config& conf) {
 			if (!handlers[i].second.isValid())
 				continue;
 
-			if (handlers[i].first != msg)
+			if (handlers[i].first != static_cast<IPI_MSG>(msg))
 				continue;
 
 			auto ret = handlers[i].second();
@@ -73,34 +73,34 @@ int mailbox::init(const config& conf) {
 }
 
 
-int mailbox::sendIPI(size_t cpuID, size_t msg) {
+int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	(void) cpuID;
 	(void) msg;
 
 	if (cpuID == 0) {
-		writeRegister<MAILBOX_WRITE_CORE_0>(msg);
+		writeRegister<MAILBOX_WRITE_CORE_0>(static_cast<uint32_t>(msg));
 		return 0;
 	}
 
 	if (cpuID == 1) {
-		writeRegister<MAILBOX_WRITE_CORE_1>(msg);
+		writeRegister<MAILBOX_WRITE_CORE_1>(static_cast<uint32_t>(msg));
 		return 0;
 	}
 
 	if (cpuID == 2) {
-		writeRegister<MAILBOX_WRITE_CORE_2>(msg);
+		writeRegister<MAILBOX_WRITE_CORE_2>(static_cast<uint32_t>(msg));
 		return 0;
 	}
 
 	if (cpuID == 3) {
-		writeRegister<MAILBOX_WRITE_CORE_3>(msg);
+		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
 		return 0;
 	}
 
 	return -EINVAL;
 }
 
-int mailbox::registerHandler(size_t msg, lib::function<int()> handler) {
+int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
 	for (size_t i = 0; i < numHandlers; i++) {
 		/* Find valid entry */
 		if (!handlers[i].second.isValid()) {
