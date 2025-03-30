@@ -2,11 +2,11 @@
 #define _INC_DRIVER_CPU_H_
 
 #include <cstddef.h>
+#include <kernel/config.h>
 
 /**
  * @file driver/cpu.h
  * @brief Used CPU
- * @warning Heterogenous/NUMA system are currently not supported
  */
 namespace driver {
 
@@ -17,43 +17,105 @@ namespace driver {
 	class CPU {
 		private:
 			/**
-			 * @var numCores
-			 * @brief Number of cores
-			 */
-			size_t numCores = 0;
-
-			/**
 			 * @var nameLen
-			 * @brief (Arbitrary) Lenght of CPU name
+			 * @brief Max name length
 			 */
 			static const size_t nameLen = 80;
 
 			/**
 			 * @var name
-			 * @brief String representation of CPU name
+			 * @brief Symbolic name of CPU
 			 */
-			char name[nameLen] = {0};
+			char name[nameLen];
+
+			/**
+			 * @var spintable
+			 * @brief Pointer to spintable entry
+			 */
+			void* spintable;
 
 		public:
+			CPU() = default;
+
 			/**
-			 * @fn void init(const char* name, size_t cores)
-			 * @brief Initialize CPU
+			 * @fn CPU(const char* name, void* spintable = nullptr)
+			 * @brief
 			 */
-			void init(const char* name, size_t cores);
+			CPU(const char* name, void* spintable = nullptr);
 
 			/**
 			 * @fn const char* getName() const
-			 * @brief Get CPU name
+			 * @brief
 			 */
 			const char* getName() const;
 
 			/**
-			 * @fn size_t getCoreCount() const
-			 * @brief Get number of supported CPUs
+			 * @fn void* getSpintable() const
+			 * @brief Get spintable entry
 			 */
-			size_t getCoreCount() const;
+			void* getSpintable() const;
 	};
 
-	extern CPU cpu;
+	/**
+	 * @class CPUs
+	 * @brief List of all used CPUs
+	 */
+	class CPUs {
+		private:
+			/**
+			 * @var idx
+			 * @brief Currently used index in cpus
+			 */
+			size_t idx;
+
+			/**
+			 * @var cpus
+			 * @brief List of CPUs
+			 */
+			CPU cpus[MAX_NUM_CPUS];
+
+		public:
+			/**
+			 * @typedef iterator
+			 * @brief Used iterator
+			 */
+			using iterator = const CPU*;
+
+			/**
+			 * @fn CPUs
+			 * @brief Constructor
+			 */
+			CPUs();
+
+			/**
+			 * @fn int registerCPU(CPU cpu)
+			 * @brief Register new CPU
+			 */
+			int registerCPU(CPU cpu);
+
+			/**
+			 * @fn size_t numCPUs() const
+			 * @brief Get total number of CPUs
+			 */
+			size_t numCPUs() const;
+
+			/**
+			 * @fn iterator begin() const
+			 * @brief Iterator for CPUs
+			 */
+			iterator begin() const;
+
+			/**
+			 * @fn iterator end() const
+			 * @brief Iterator for CPUs
+			 */
+			iterator end() const;
+	};
+
+	/**
+	 * @var cpus
+	 * @brief Global CPU list
+	 */
+	extern CPUs cpus;
 };
 #endif /* ifndef _INC_DRIVER_CPU_H_ */

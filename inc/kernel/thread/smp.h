@@ -33,6 +33,7 @@ namespace thread {
 			/**
 			 * @fn int start()
 			 * @brief Start all applications processors
+			 * @todo Ensure first CPU of cpus is boot CPU
 			 * @return
 			 *
 			 *	-  0 - Success

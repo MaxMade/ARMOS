@@ -24,7 +24,7 @@ SMP::SMP() {
 
 int SMP::start() {
 	/* Get number of CPUs */
-	auto numCPUS = driver::cpu.getCoreCount();
+	auto numCPUS = driver::cpus.numCPUs();
 	char* stacks = reinterpret_cast<char*>(lib::malloc(numCPUS * STACKSIZE));
 	if (stacks == nullptr)
 		return -ENOMEM;
@@ -40,33 +40,28 @@ int SMP::start() {
 	/* Address of counter */
 	volatile size_t* counter = &apps;
 
-	/* According to qemu/hw/arm/raspi.c:
-	 * Spintable entires for the Paspberry Pi 3B
-	 */
-	uint64_t* spin_table[] = {
-		reinterpret_cast<uint64_t*>(0xd8),
-		reinterpret_cast<uint64_t*>(0xe0),
-		reinterpret_cast<uint64_t*>(0xe8),
-		reinterpret_cast<uint64_t*>(0xf0)
-	};
-
 	/* Save startup address */
 	uint64_t startAddr = reinterpret_cast<uint64_t>(&_start);
 
-	for (size_t i = 1; i < numCPUS; i++) {
+	/* TODO: Ensure cpus.begin() is actual boot CPU */
+	size_t idx = 1;
+	for (auto cpu = (driver::cpus.begin() + 1); cpu != driver::cpus.end(); ++cpu) {
 		/* Prepare trampoline */
-		*stack = reinterpret_cast<uint64_t>(&stacks[i * STACKSIZE - STACKALIGN]);
-		*id = i;
+		*stack = reinterpret_cast<uint64_t>(&stacks[idx * STACKSIZE - STACKALIGN]);
+		*id = idx;
 
 		/* Prepare start address for application processors */
-		util::mmioWrite(spin_table[i], startAddr);
+		util::mmioWrite(reinterpret_cast<uint64_t*>(cpu->getSpintable()), startAddr);
 		CPU::dataBarrier();
 
 		/* Wake up CPUs */
 		CPU::wakeup();
 
 		/* Wait till update via registerCPU */
-		while(*counter != i);
+		while(*counter != idx);
+
+		/* Update active CPU idx */
+		idx++;
 	}
 
 	return 0;

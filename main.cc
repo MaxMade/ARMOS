@@ -23,7 +23,7 @@ namespace driver {
 	Console console;
 	Intc intc;
 	Timer timer;
-	CPU cpu;
+	CPUs cpus;
 	IPI ipi;
 }
 
@@ -107,27 +107,28 @@ int kernelMain(void *fdt) {
 	cout << "Timer: Setup finished\n\r";
 
 	/* Prepare CPU information */
-	const char* cpuName = nullptr;
-	size_t cpuNumber = 0;
 	for (auto node : dtp) {
 		if (!node.isValid())
 			continue;
 
 		if (strncmp("cpu@", node.getName(), 4) == 0) {
-			if (cpuName == nullptr) {
-				auto comp = node.findStringlistProperty("compatible");
-				if (comp.first != nullptr)
-					cpuName = comp.first;
+			const char* cpuName = nullptr;
+			void* spintable = nullptr;
+
+			auto comp = node.findStringlistProperty("compatible");
+			if (comp.first != nullptr)
+				cpuName = comp.first;
+
+			auto relAddr = node.findLongProperty("cpu-release-addr");
+			if (comp.first != nullptr)
+				spintable = reinterpret_cast<void*>(relAddr.first);
+
+			if (cpuName && spintable) {
+				driver::cpus.registerCPU(driver::CPU(cpuName, spintable));
 			}
-			cpuNumber++;
 		}
 	}
-	if (cpuNumber == 0) {
-		cout << "CPU: Information gathering failed!\n\r";
-		return -1;
-	}
-	driver::cpu.init(cpuName, cpuNumber);
-	cout << "CPU: Setup finished\n\r";
+	cout << "CPUs: Setup finished\n\r";
 
 	/* Prepare IPI driver */
 	auto ipiConfig = dtp.findConfig(driver::ipi);

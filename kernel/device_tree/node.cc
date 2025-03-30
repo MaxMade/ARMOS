@@ -175,6 +175,19 @@ lib::pair<uint32_t, uint32_t> Node::findIntegerProperty(const char* name) const 
 	return lib::pair(util::bigEndianToHost(*reinterpret_cast<uint32_t*>(data.first)), 4);
 }
 
+lib::pair<uint32_t, uint32_t> Node::findLongProperty(const char* name) const {
+	auto prop = findProperty(name);
+	if (!prop.isValid())
+		return lib::pair(0, 0);
+
+	/* Sanity check */
+	auto data = prop.getData();
+	if (data.second != 8)
+		return lib::pair(0, 0);
+
+	return lib::pair(util::bigEndianToHost(*reinterpret_cast<uint64_t*>(data.first)), 8);
+}
+
 lib::pair<RegisterIterator, RegisterIterator> Node::findRegisterProperty(const char* name) const {
 	/* Get property with matching name */
 	auto prop = findProperty(name);

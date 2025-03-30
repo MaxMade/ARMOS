@@ -122,7 +122,7 @@ namespace DeviceTree {
 			lib::pair<const char*, uint32_t> findStringlistProperty(const char* name) const;
 
 			/**
-			 * @fn Property findProperty(const char* name) const
+			 * @fn lib::pair<uint32_t, uint32_t> findIntegerProperty(const char* name) const
 			 * @brief Find property by name and evaluate as integer
 			 * @return
 			 *
@@ -130,6 +130,16 @@ namespace DeviceTree {
 			 *	<0, 0> - Failure
 			 */
 			lib::pair<uint32_t, uint32_t> findIntegerProperty(const char* name) const;
+
+			/**
+			 * @fn lib::pair<uint64_t, uint32_t> findLongProperty(const char* name) const
+			 * @brief Find property by name and evaluate as long
+			 * @return
+			 *
+			 *	<Integer, 8> - Success
+			 *	<0, 0> - Failure
+			 */
+			lib::pair<uint32_t, uint32_t> findLongProperty(const char* name) const;
 
 			/**
 			 * @fn lib::pair<RegisterIterator, RegisterIterator> findRegisterProperty(const char* name) const
