@@ -4,3 +4,5 @@ boot/system
 boot/symbol_map
 boot/kernel8.img
 doc/build
+serial0.log
+serial1.log
