@@ -66,9 +66,10 @@
  * - ELR_EL1: 8
  * - SPSR_EL1:8
  * - TPIDR_EL0: 8
- * - Total: 280
+ * - Aligment: 8
+ * - Total: 288
  */
-.set EXCEPTION_FRAME_SIZE, 280
+.set EXCEPTION_FRAME_SIZE, 288
 
 /**
  * @fn exception_handler
@@ -107,9 +108,9 @@
 	mrs x11, SPSR_EL1
 	stp x10, x11, [sp, 16 * 16]
 
-	// Save TPIDR_EL0
+	// Save TPIDR_EL0 + Alignment
 	mrs x10, TPIDR_EL0
-	str x10, [sp, 16 * 17]
+	stp x10, x11, [sp, 16 * 17]
 
 	// Pass pointer to register file to fn
 	mov x0, sp
@@ -119,7 +120,7 @@
 restore_\name:
 
 	// Restore TPIDR_EL0
-	ldr x10, [sp, 16 * 17]
+	ldp x10, x11, [sp, 16 * 17]
 	msr TPIDR_El0, x10
 
 	// Restore ELR_EL1 and SPSR_EL1

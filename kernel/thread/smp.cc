@@ -12,7 +12,6 @@
 using namespace thread;
 
 #define STACKSIZE (2 * 1024 * 1024)
-#define STACKALIGN 16
 
 extern uintptr_t _start;
 extern uintptr_t __CPU_ID;
@@ -30,8 +29,7 @@ int SMP::start() {
 		return -ENOMEM;
 
 	/* Roundup to stack alignment */
-	stacks = reinterpret_cast<char*>(math::roundDown(reinterpret_cast<uintptr_t>(stacks), STACKALIGN));
-
+	stacks = reinterpret_cast<char*>(math::roundDown(reinterpret_cast<uintptr_t>(stacks), CPU::getStackAlignment()));
 
 	/* Trampoline values */
 	uint64_t* id = reinterpret_cast<uint64_t*>(&__CPU_ID);
@@ -47,7 +45,7 @@ int SMP::start() {
 	size_t idx = 1;
 	for (auto cpu = (driver::cpus.begin() + 1); cpu != driver::cpus.end(); ++cpu) {
 		/* Prepare trampoline */
-		*stack = reinterpret_cast<uint64_t>(&stacks[idx * STACKSIZE - STACKALIGN]);
+		*stack = reinterpret_cast<uint64_t>(&stacks[idx * STACKSIZE - CPU::getStackAlignment()]);
 		*id = idx;
 
 		/* Prepare start address for application processors */
