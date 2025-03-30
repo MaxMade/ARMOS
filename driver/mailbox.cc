@@ -35,27 +35,34 @@ int mailbox::sendIPI(size_t cpuID, IPI_MSG msg) {
 	(void) cpuID;
 	(void) msg;
 
+	lock.lock();
+
+	/* Save massage count (will be incremented by progolue) */
+	auto savedMsgCount = msgCounter.load();
+
+	int ret = 0;
 	if (cpuID == 0) {
 		writeRegister<MAILBOX_WRITE_CORE_0>(static_cast<uint32_t>(msg));
-		return 0;
-	}
 
-	if (cpuID == 1) {
+	} else if (cpuID == 1) {
 		writeRegister<MAILBOX_WRITE_CORE_1>(static_cast<uint32_t>(msg));
-		return 0;
-	}
 
-	if (cpuID == 2) {
+	} if (cpuID == 2) {
 		writeRegister<MAILBOX_WRITE_CORE_2>(static_cast<uint32_t>(msg));
-		return 0;
-	}
 
-	if (cpuID == 3) {
+	} if (cpuID == 3) {
 		writeRegister<MAILBOX_WRITE_CORE_3>(static_cast<uint32_t>(msg));
-		return 0;
+
+	} else {
+		ret = -EINVAL;
 	}
 
-	return -EINVAL;
+	/* Wait for update */
+	while(savedMsgCount == msgCounter.load());
+
+	lock.unlock();
+
+	return ret;;
 }
 
 int mailbox::registerHandler(IPI_MSG msg, lib::function<int()> handler) {
@@ -116,6 +123,9 @@ int mailbox::prologue() {
 		writeRegister<MAILBOX_READ_CORE_3>(msg);
 	}
 
+	/* Signal update */
+	msgCounter.fetch_add(1);
+
 	/* Buffer message for epilogue */
 	messages[cpuID].fetch_or(msg);
 	return 1;
@@ -128,8 +138,12 @@ int mailbox::epilogue() {
 
 	uint32_t savedMsg = 0;
 	savedMsg = messages[cpuID].exchange(savedMsg);
+
 	for (size_t i = 0; i < numHandlers; i++) {
-		if (!handlers[i].second.isValid())
+		lock.lock();
+		auto isValid = handlers[i].second.isValid();
+		lock.unlock();
+		if (!isValid)
 			continue;
 
 		if ((static_cast<uint32_t>(handlers[i].first) & savedMsg) == 0)

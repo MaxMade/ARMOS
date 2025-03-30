@@ -70,3 +70,7 @@ int SMP::start() {
 void SMP::registerCPU() {
 	apps++;
 }
+
+size_t SMP::getRegisteredCPUS() const {
+	return apps;
+}

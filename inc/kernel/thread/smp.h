@@ -46,7 +46,15 @@ namespace thread {
 			 * @brief Register current CPU as application CPU
 			 */
 			void registerCPU();
+
+			/**
+			 * @fn size_t getRegisteredCPUS() const
+			 * @brief Get number of registered CPUs
+			 */
+			size_t getRegisteredCPUS() const;
 	};
+
+	extern SMP smp;
 } /* namespace thread */
 
 #endif /* ifndef _INC_KERNEL_THREAD_SMP_H_ */
