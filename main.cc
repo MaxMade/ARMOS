@@ -59,9 +59,6 @@ thread::Context mainThread;
 
 extern "C" int main();
 
-/* User stack for main application */
-static char userStack[STACK_SIZE] __attribute__((aligned(PAGESIZE),section("app.bss")));
-
 int kernelMain(void *fdt) {
 	/* Disable all interrupts */
 	CPU::disableInterrupts();
@@ -201,9 +198,23 @@ int kernelMain(void *fdt) {
 	cout << "CPU " << CPU::getProcessorID() << ": Finished initialization" << lib::endl;
 
 	/* Prepare Main Thread */
+	auto userStack = reinterpret_cast<char*>(lib::memalign(PAGESIZE, STACK_SIZE));
+	if (userStack == nullptr)
+		debug::panic::generate("Thread: Unable to allocate user stack for main thread");
+	for (size_t i = 0; i < STACK_SIZE / PAGESIZE; i++) {
+		auto ret = paging.protect(&userStack[i * PAGESIZE], mm::Paging::USER_MAPPING, mm::Paging::WRITABLE, mm::Paging::NORMAL_ATTR);
+		if (isError(ret)) {
+			lib::free(userStack);
+			debug::panic::generate("Thread: Unable to change permission of user stack for main thread");
+		}
+		CPU::invalidatePage(&userStack[i * PAGESIZE]);
+	}
+
 	char* kernelStack = new char[STACK_SIZE];
-	if (kernelStack == nullptr)
+	if (kernelStack == nullptr) {
+		lib::free(userStack);
 		debug::panic::generate("Thread: Unable to allocate kernel stack for main thread");
+	}
 	mainThread.init(0, kernelStack, userStack, false, (void*) main);
 	cout << "Thread: Setup of main thread finished" << lib::endl;
 
