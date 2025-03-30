@@ -29,10 +29,10 @@ void* TTAllocator::earlyAlloc() {
 }
 
 int TTAllocator::earlyFree(void *page) {
-	if (reinterpret_cast<uintptr_t>(page) < reinterpret_cast<uintptr_t>(page))
+	if (reinterpret_cast<uintptr_t>(page) < reinterpret_cast<uintptr_t>(pages))
 		return -EINVAL;
 
-	if (reinterpret_cast<uintptr_t>(page) >= reinterpret_cast<uintptr_t>(page) + SIZE)
+	if (reinterpret_cast<uintptr_t>(page) >= reinterpret_cast<uintptr_t>(pages) + SIZE)
 		return -EINVAL;
 
 	if (reinterpret_cast<uintptr_t>(page) % PAGESIZE != 0)
