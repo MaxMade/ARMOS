@@ -9,16 +9,10 @@ using namespace thread;
 
 Scheduler::Scheduler() {}
 
-int Scheduler::create(void* (*start_routine)(void*), void* arg) {
-	/* Allocate user stack */
-	auto userStack = reinterpret_cast<char*>(lib::memalign(PAGESIZE, STACK_SIZE));
-	if (userStack == nullptr)
-		return -ENOMEM;
-
+int Scheduler::create(void* (*start_routine)(void*), void* arg, void* user_stack) {
 	/* Allocate kernel stack */
 	auto kernelStack = new char[STACK_SIZE];
 	if (kernelStack == nullptr) {
-		lib::free(userStack);
 		return -ENOMEM;
 	}
 
@@ -40,12 +34,16 @@ int Scheduler::create(void* (*start_routine)(void*), void* arg) {
 
 
 	/* Allocate new Context */
-	auto context = new Context(id, kernelStack, userStack, false, (void*) start_routine, arg);
+	auto context = new Context();
 	if (context == nullptr) {
-		lib::free(userStack);
 		lib::free(kernelStack);
 		lock.unlock();
 		return -ENOMEM;
+	}
+	if (int err = context->init(id, false, (void*) start_routine, arg, user_stack); isError(err)) {
+		delete context;
+		lock.unlock();
+		return err;
 	}
 
 	/* Create new smart ptr */
@@ -71,16 +69,8 @@ int Scheduler::create(void* (*start_routine)(void*), void* arg) {
 		return ret;
 	}
 
-	/* Update protection of user stack */
-	mm::Paging paging;
-	for (size_t i = 0; i < STACK_SIZE / PAGESIZE; i++) {
-		auto ret = paging.protect(&userStack[i * PAGESIZE], mm::Paging::USER_MAPPING, mm::Paging::WRITABLE, mm::Paging::NORMAL_ATTR);
-		assert(!isError(ret));
-		CPU::invalidatePage(&userStack[i * PAGESIZE]);
-	}
-
 	lock.unlock();
-	return 0;
+	return id;
 }
 
 lib::shared_ptr<Context> Scheduler::getActive() {

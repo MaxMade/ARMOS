@@ -92,27 +92,25 @@ namespace thread {
 			 */
 			Context();
 
-			/**
-			 * @fn Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg)
-			 * @brief Constructor
-			 */
-			Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
-
 			Context(const Context& other) = delete;
 
 			Context(Context&& other) = delete;
 
 			/**
 			 * @fn ~Context()
-			 * @brief Delete Context und free user/kernel stack (while updating protection)
+			 * @brief Delete Context und delete kernel stack
 			 */
 			~Context();
 
 			/**
-			 * @fn Context(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
-			 * @brief Initialize (invalid) context
+			 * @fn int init(size_t id, bool kernel, void* startAddr, void* arg, void* userStack)
+			 * @brief Initialize context
+			 * @return
+			 *
+			 *	-  0 - Success
+			 *	- <0 - Failure (-errno)
 			 */
-			void init(size_t id, void* kernelStack, void* userStack, bool kernel, void* startAddr, void* arg);
+			int init(size_t id, bool kernel, void* startAddr, void* arg, void* userStack);
 
 			/**
 			 * @fn size_t getID() const
